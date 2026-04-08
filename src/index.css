@@ -1,0 +1,528 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─────────────────────────────────────────────
+   CSS CUSTOM PROPERTIES — PASTEL DO CARIOCA
+───────────────────────────────────────────── */
+:root {
+  --carioca-dark:         #1a0000;
+  --carioca-mid:          #3d0000;
+  --carioca-red:          #6b0000;
+  --carioca-bright:       #CC0000;
+  --carioca-gold:         #F5C800;
+  --carioca-white:        #FFFFFF;
+  --carioca-glass:        rgba(255,255,255,0.07);
+  --carioca-glass-border: rgba(255,255,255,0.12);
+}
+
+/* ─────────────────────────────────────────────
+   RESET & BASE
+───────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(135deg, #1a0000 0%, #3d0000 40%, #6b0000 100%);
+  background-attachment: fixed;
+  color: #fff;
+  font-family: 'Nunito', sans-serif;
+  min-height: 100vh;
+}
+
+/* ─────────────────────────────────────────────
+   GLASSMORPHISM
+───────────────────────────────────────────── */
+.glass-card {
+  background: rgba(10,0,0,0.55);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,0.14);
+  box-shadow:
+    0 8px 32px rgba(0,0,0,0.5),
+    inset 0 1px 0 rgba(255,255,255,0.12),
+    inset 0 -1px 0 rgba(0,0,0,0.25);
+}
+
+.glass-dark {
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.6);
+}
+
+/* ─────────────────────────────────────────────
+   BOTÕES SKEUOMÓRFICOS
+───────────────────────────────────────────── */
+.btn-brand {
+  background: linear-gradient(145deg, #E00000, #A00000);
+  box-shadow: 3px 3px 8px rgba(0,0,0,0.5), -1px -1px 3px rgba(255,100,100,0.2), inset 0 1px 0 rgba(255,150,150,0.25);
+  border: 1px solid #7a0000;
+  color: #fff;
+  cursor: pointer;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+  transition: all 0.12s ease;
+  user-select: none;
+}
+
+.btn-brand:hover {
+  background: linear-gradient(145deg, #f00000, #b50000);
+  box-shadow: 4px 4px 10px rgba(0,0,0,0.55), -1px -1px 4px rgba(255,100,100,0.25);
+}
+
+.btn-brand:active {
+  box-shadow: inset 3px 3px 8px rgba(0,0,0,0.4), inset -1px -1px 4px rgba(255,100,100,0.1);
+  transform: translateY(1px);
+}
+
+.btn-brand:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-gold {
+  background: linear-gradient(145deg, #F5C800, #c9a200);
+  box-shadow: 3px 3px 8px rgba(0,0,0,0.45), -1px -1px 3px rgba(255,220,50,0.3), inset 0 1px 0 rgba(255,245,150,0.3);
+  border: 1px solid #a88000;
+  color: #1a0000;
+  cursor: pointer;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 900;
+  text-shadow: 0 1px 1px rgba(255,255,255,0.2);
+  transition: all 0.12s ease;
+  user-select: none;
+}
+
+.btn-gold:hover {
+  background: linear-gradient(145deg, #ffe033, #d4ae00);
+  box-shadow: 4px 4px 10px rgba(0,0,0,0.5), -1px -1px 3px rgba(255,230,80,0.35);
+}
+
+.btn-gold:active {
+  box-shadow: inset 3px 3px 8px rgba(0,0,0,0.35), inset -1px -1px 4px rgba(255,220,50,0.15);
+  transform: translateY(1px);
+}
+
+.btn-glass {
+  background: rgba(255,255,255,0.1);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: #fff;
+  cursor: pointer;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  transition: all 0.12s ease;
+}
+
+.btn-glass:hover {
+  background: rgba(255,255,255,0.18);
+}
+
+.btn-glass:active {
+  background: rgba(255,255,255,0.08);
+  transform: translateY(1px);
+}
+
+/* ─────────────────────────────────────────────
+   INPUT GLASSMÓRFICO
+───────────────────────────────────────────── */
+.input-glass {
+  background: rgba(255,255,255,0.07);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.18);
+  color: #fff;
+  font-family: 'Nunito', sans-serif;
+  outline: none;
+  transition: all 0.15s ease;
+}
+
+.input-glass:focus {
+  border-color: rgba(245,200,0,0.6);
+  box-shadow: 0 0 0 2px rgba(245,200,0,0.15);
+  background: rgba(255,255,255,0.1);
+}
+
+.input-glass::placeholder {
+  color: rgba(255,255,255,0.4);
+}
+
+/* ─────────────────────────────────────────────
+   TABS
+───────────────────────────────────────────── */
+.tab-carioca-active {
+  background: rgba(245,200,0,0.15);
+  border-bottom: 3px solid #F5C800;
+  color: #F5C800;
+  font-weight: 800;
+}
+
+.tab-carioca-inactive {
+  background: transparent;
+  border-bottom: 3px solid transparent;
+  color: rgba(255,255,255,0.5);
+}
+
+.tab-carioca-inactive:hover {
+  color: rgba(255,255,255,0.8);
+  background: rgba(255,255,255,0.05);
+}
+
+/* ─────────────────────────────────────────────
+   ANIMAÇÕES
+───────────────────────────────────────────── */
+@keyframes slideInRight {
+  from { transform: translateX(100%); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+
+@keyframes slideInUp {
+  from { transform: translateY(30px) scale(0.97); opacity: 0; }
+  to   { transform: translateY(0)    scale(1);    opacity: 1; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes pulseGold {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(245,200,0,0.5); }
+  50%       { box-shadow: 0 0 0 10px rgba(245,200,0,0); }
+}
+
+@keyframes badgePulse {
+  0%   { transform: scale(1);    box-shadow: 0 0 0 0 rgba(204,0,0,0.7); }
+  40%  { transform: scale(1.25); box-shadow: 0 0 0 6px rgba(204,0,0,0); }
+  100% { transform: scale(1);    box-shadow: 0 0 0 0 rgba(204,0,0,0); }
+}
+
+.badge-pulse {
+  animation: badgePulse 1.4s ease-out infinite;
+}
+
+@keyframes pulseBorder {
+  0%, 100% { border-color: #F5C800; box-shadow: 0 0 0 0 rgba(245,200,0,0.4); }
+  50%       { border-color: #ffe033; box-shadow: 0 0 12px rgba(245,200,0,0.3); }
+}
+
+.animate-slide-right { animation: slideInRight 0.3s ease; }
+.animate-slide-up    { animation: slideInUp 0.28s ease; }
+.animate-fade-in     { animation: fadeIn 0.2s ease; }
+.animate-pulse-gold  { animation: pulseGold 2s infinite; }
+.animate-pulse-border { animation: pulseBorder 1.8s infinite; }
+
+/* ─────────────────────────────────────────────
+   LAYOUT RESPONSIVO — APP-SHELL MOBILE-FIRST
+───────────────────────────────────────────── */
+
+/* Shell: ocupa exatamente a viewport no mobile */
+.app-shell {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Camada de conteúdo acima do watermark */
+.app-inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Área central (scroll + sidebar) */
+.app-body {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+}
+
+/* Área de scroll principal */
+.app-scroll {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  background: rgba(0,0,0,0.18);
+}
+
+/* Bottom nav — visível só no mobile */
+.bottom-nav {
+  display: flex;
+  background: rgba(5,0,0,0.96);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255,255,255,0.09);
+  flex-shrink: 0;
+  /* safe area iOS */
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.bottom-nav-btn {
+  flex: 1;
+  padding: 0.7rem 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  color: rgba(255,255,255,0.42);
+  font-size: 0.68rem;
+  font-weight: 700;
+  font-family: 'Nunito', sans-serif;
+  transition: color 0.15s ease;
+  touch-action: manipulation;
+}
+
+.bottom-nav-btn.bottom-nav-active {
+  color: #F5C800;
+}
+
+/* Sidebar — oculta no mobile */
+.sidebar-desktop { display: none; }
+
+/* ─── DESKTOP (≥1024px) ─── */
+@media (min-width: 1024px) {
+  /* Restaura scroll normal de página */
+  .app-shell {
+    height: auto;
+    min-height: 100dvh;
+    overflow: visible;
+  }
+
+  .app-inner {
+    overflow: visible;
+  }
+
+  .app-body {
+    overflow: visible;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1.5rem 1rem;
+    gap: 1.5rem;
+    align-items: start;
+  }
+
+  .app-scroll {
+    overflow-y: visible;
+  }
+
+  .bottom-nav {
+    display: none;
+  }
+
+  .sidebar-desktop {
+    display: block;
+    width: 340px;
+    flex-shrink: 0;
+  }
+}
+
+/* ─────────────────────────────────────────────
+   CHECKBOX PERSONALIZADO
+───────────────────────────────────────────── */
+.check-glass {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-radius: 5px;
+  background: rgba(255,255,255,0.05);
+  cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.check-glass:checked {
+  background: linear-gradient(145deg, #E00000, #A00000);
+  border-color: #E00000;
+}
+
+.check-glass:checked::after {
+  content: '✓';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.check-glass:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* ─────────────────────────────────────────────
+   SCROLLBAR
+───────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.25); }
+
+/* ─────────────────────────────────────────────
+   CARD PASTEL — BASE (mobile)
+───────────────────────────────────────────── */
+.card-pastel-item {
+  display: flex;
+  align-items: center;
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  gap: 0.875rem;
+  background: rgba(8,0,0,0.50);
+}
+.cp-right {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.cp-img-inner {
+  width: 82px; height: 82px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.6rem; position: relative;
+  transition: border-color 0.2s ease;
+  overflow: hidden;
+}
+.cp-text { flex: 1; min-width: 0; }
+.cp-nome { color: #fff; font-weight: 800; font-size: 0.95rem; margin: 0; line-height: 1.25; }
+.cp-sub  { color: rgba(255,255,255,0.48); font-size: 0.78rem; margin: 3px 0 6px; line-height: 1.4; }
+.cp-preco { color: #F5C800; font-weight: 900; font-size: 1rem; margin: 0; }
+.cp-btn  { padding: 0.38rem 0.85rem; border-radius: 10px; font-size: 0.78rem; white-space: nowrap; }
+
+/* Grids — mobile: no-op */
+.pasteis-grid { display: block; }
+.bebidas-grid { display: block; }
+
+/* ─────────────────────────────────────────────
+   DESKTOP ≥ 1024px
+───────────────────────────────────────────── */
+@media (min-width: 1024px) {
+
+  /* ── max-width wider ── */
+  .app-body { max-width: 1360px !important; }
+
+  /* ── Sidebar wider + taller scroll ── */
+  .sidebar-desktop { width: 370px; }
+  .sidebar-items-scroll { max-height: 520px !important; }
+
+  /* ── Header ── */
+  .app-header { padding: 1rem 2rem !important; }
+  .header-logo { height: 58px !important; }
+  .header-brand-name { font-size: 1.45rem !important; letter-spacing: 2px !important; }
+  .header-slogan { font-size: 0.74rem !important; }
+
+  /* ── Pastéis grid: 2 columns ── */
+  .pasteis-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.875rem;
+    padding: 0.875rem 1rem;
+  }
+
+  /* Card → vertical card */
+  .card-pastel-item {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    padding: 0 !important;
+    gap: 0 !important;
+    border-bottom: none !important;
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.13) !important;
+    background: rgba(10,0,0,0.52);
+    overflow: hidden;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+  .card-pastel-item:hover {
+    background: rgba(20,0,0,0.65);
+    border-color: rgba(255,255,255,0.2) !important;
+  }
+
+  /* Image section: top of card */
+  .cp-right {
+    order: -1;
+    flex-direction: column !important;
+    align-items: center !important;
+    padding: 1.5rem 1rem 1rem;
+    background: rgba(0,0,0,0.28);
+    border-bottom: 1px solid rgba(255,255,255,0.09);
+  }
+  .cp-img-inner {
+    width: 96px !important;
+    height: 96px !important;
+    font-size: 3.8rem !important;
+    border-radius: 14px !important;
+    background: rgba(255,255,255,0.06) !important;
+  }
+  .cp-btn {
+    margin-top: 0.625rem;
+    padding: 0.45rem 1.5rem !important;
+    font-size: 0.83rem !important;
+  }
+
+  /* Text section: center, padded */
+  .cp-text {
+    flex: unset !important;
+    min-width: unset !important;
+    text-align: center;
+    padding: 0.75rem 1.25rem 1rem;
+  }
+  .cp-nome { font-size: 1rem !important; }
+  .cp-sub  { font-size: 0.8rem !important; }
+  .cp-preco { font-size: 1.05rem !important; }
+
+  /* ── Bebidas grid: 2 columns ── */
+  .bebidas-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    padding: 0.875rem 1rem;
+  }
+
+  .beb-item {
+    border-bottom: none !important;
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.13) !important;
+    background: rgba(10,0,0,0.52);
+    overflow: hidden;
+    transition: background 0.15s ease;
+  }
+  .beb-item:hover { background: rgba(20,0,0,0.65); }
+}
+
+/* ─────────────────────────────────────────────
+   IMPRESSÃO 80mm
+───────────────────────────────────────────── */
+@media print {
+  body * { visibility: hidden !important; }
+  #print-area, #print-area * { visibility: visible !important; }
+  #print-area {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 80mm !important;
+    font-family: 'Courier New', monospace !important;
+    font-size: 11px !important;
+    color: #000 !important;
+    background: #fff !important;
+    padding: 6px !important;
+  }
+}

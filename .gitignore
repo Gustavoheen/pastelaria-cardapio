@@ -1,0 +1,14 @@
+node_modules
+dist
+.env
+.env.local
+.env.vercel
+.env.vercel.*
+.vercel
+.env*.local
+
+# Certificados e chaves privadas
+certs/private-key.pem
+certs/*.pem
+public/digital-certificate.pem
+supabase/.temp/
