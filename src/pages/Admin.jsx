@@ -88,6 +88,12 @@ function fmtMoeda(v) {
   return `R$ ${Number(v || 0).toFixed(2).replace('.', ',')}`
 }
 
+// Soma de preços sem erros de ponto flutuante (usa centavos inteiros)
+function somarCart(cart) {
+  const centavos = cart.reduce((s, i) => s + Math.round(Number(i.preco || 0) * 100) * Number(i.qtd || 1), 0)
+  return centavos / 100
+}
+
 function ehHoje(iso) {
   if (!iso) return false
   return new Date(iso).toISOString().slice(0, 10) === new Date().toISOString().slice(0, 10)
@@ -383,7 +389,7 @@ function PaginaDashboard({ pedidos, onVerPedidos, onExcluir, onSalvarPedido, car
 
   async function salvarEdicao(vendaId) {
     setSalvando(true)
-    const novoTotal = editItens.reduce((s, it) => s + (it.preco || 0) * (it.qtd || 1), 0)
+    const novoTotal = somarCart(editItens)
     const itensLimpos = editItens.map(({ _key, ...rest }) => rest)
     await onSalvarPedido(vendaId, {
       itens: itensLimpos,
@@ -5070,7 +5076,7 @@ function ModalSaboresBalcao({ tipo, onFechar, onAdicionar }) {
   )
 }
 
-function PaginaBalcao({ onPedidoCriado }) {
+function PaginaBalcao({ onPedidoCriado, onCaderneta }) {
   const [cart, setCart] = useState([])
   const [tipoModal, setTipoModal] = useState(null)
   const [modo, setModo] = useState('levar')
@@ -5114,7 +5120,7 @@ function PaginaBalcao({ onPedidoCriado }) {
     }).catch(() => {})
   }, [])
 
-  const subtotal = Math.round(cart.reduce((s, i) => s + (i.preco || 0) * (i.qtd || 1), 0) * 100) / 100
+  const subtotal = somarCart(cart)
   const valorRec = parseFloat(String(valorRecebido).replace(',', '.')) || 0
   const troco = pagamento === 'dinheiro' && valorRec > subtotal ? Math.round((valorRec - subtotal) * 100) / 100 : 0
   const trocoNegativo = pagamento === 'dinheiro' && valorRec > 0 && valorRec < subtotal
@@ -5308,6 +5314,7 @@ function PaginaBalcao({ onPedidoCriado }) {
           setSaldoClienteCaderneta(0)
           setPagamento('dinheiro')
           onPedidoCriado?.()
+          onCaderneta?.()
           setTimeout(() => setSucesso(null), 4000)
         } else {
           const err = await res.json().catch(() => ({}))
@@ -6118,7 +6125,7 @@ function PaginaBalcao({ onPedidoCriado }) {
                       const matches = clientesCaderneta.filter(c =>
                         c.nome?.toLowerCase().includes(q) || (c.cpf || '').includes(buscaClienteCaderneta.replace(/\D/g, ''))
                       ).slice(0, 6)
-                      if (matches.length === 0) return null
+                      const nomeNovo = buscaClienteCaderneta.trim()
                       return (
                         <div style={{
                           position: 'absolute', left: 0, right: 0, top: '100%', zIndex: 50,
@@ -6126,31 +6133,53 @@ function PaginaBalcao({ onPedidoCriado }) {
                           borderRadius: '10px', overflow: 'hidden', marginTop: '4px',
                           boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
                         }}>
-                          {matches.map(c => {
-                            return (
-                              <button
-                                key={c.id}
-                                onClick={async () => {
-                                  // Buscar saldo atual
-                                  const r = await fetch(`/api/caderneta?cliente_id=${c.id}`).then(r => r.json()).catch(() => [])
-                                  const saldo = Array.isArray(r) ? r.filter(e => !e.pago).reduce((s, e) => s + Number(e.valor), 0) : 0
-                                  setClienteSelecionadoCaderneta(c)
-                                  setSaldoClienteCaderneta(saldo)
-                                  setBuscaClienteCaderneta('')
-                                }}
-                                style={{
-                                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                                  width: '100%', padding: '0.625rem 0.875rem', background: 'none', border: 'none',
-                                  borderBottom: `1px solid ${C.cardBorder}`, cursor: 'pointer', textAlign: 'left',
-                                }}
-                              >
-                                <div>
-                                  <div style={{ color: C.text, fontWeight: 700, fontSize: '0.85rem' }}>{c.nome}</div>
-                                  <div style={{ color: C.muted, fontSize: '0.7rem' }}>{c.cpf ? `CPF ${c.cpf}` : c.telefone}</div>
-                                </div>
-                              </button>
-                            )
-                          })}
+                          {matches.map(c => (
+                            <button
+                              key={c.id}
+                              onClick={async () => {
+                                const r = await fetch(`/api/caderneta?cliente_id=${c.id}`).then(r => r.json()).catch(() => [])
+                                const saldo = Array.isArray(r) ? r.filter(e => !e.pago).reduce((s, e) => s + Number(e.valor), 0) : 0
+                                setClienteSelecionadoCaderneta(c)
+                                setSaldoClienteCaderneta(saldo)
+                                setBuscaClienteCaderneta('')
+                              }}
+                              style={{
+                                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                                width: '100%', padding: '0.625rem 0.875rem', background: 'none', border: 'none',
+                                borderBottom: `1px solid ${C.cardBorder}`, cursor: 'pointer', textAlign: 'left',
+                              }}
+                            >
+                              <div>
+                                <div style={{ color: C.text, fontWeight: 700, fontSize: '0.85rem' }}>{c.nome}</div>
+                                <div style={{ color: C.muted, fontSize: '0.7rem' }}>{c.cpf ? `CPF ${c.cpf}` : c.telefone}</div>
+                              </div>
+                            </button>
+                          ))}
+                          {/* Criar novo cliente */}
+                          <button
+                            onClick={async () => {
+                              const res = await fetch('/api/clientes', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ nome: nomeNovo, manual: true }),
+                              })
+                              const novo = await res.json()
+                              if (res.ok || res.status === 201) {
+                                setClientesCaderneta(prev => [novo, ...prev])
+                                setClienteSelecionadoCaderneta(novo)
+                                setSaldoClienteCaderneta(0)
+                                setBuscaClienteCaderneta('')
+                              }
+                            }}
+                            style={{
+                              display: 'block', width: '100%', padding: '0.625rem 0.875rem',
+                              background: 'rgba(179,92,0,0.15)', border: 'none',
+                              cursor: 'pointer', textAlign: 'left',
+                            }}
+                          >
+                            <div style={{ color: '#f5a623', fontWeight: 700, fontSize: '0.85rem' }}>+ Criar "{nomeNovo}"</div>
+                            <div style={{ color: 'rgba(245,166,35,0.6)', fontSize: '0.7rem' }}>Novo cliente na caderneta</div>
+                          </button>
                         </div>
                       )
                     })()}
@@ -6410,6 +6439,7 @@ export default function Admin() {
 
   // Navegacao
   const [paginaAtiva, setPaginaAtiva] = useState('pedidos')
+  const [cadernetaKey, setCadernetaKey] = useState(0)
   const [sidebarAberta, setSidebarAberta] = useState(() => window.innerWidth >= 768)
   const [mobileOverlay, setMobileOverlay] = useState(false)
 
@@ -7025,7 +7055,7 @@ export default function Admin() {
             />
           )}
           {paginaAtiva === 'balcao' && (
-            <PaginaBalcao onPedidoCriado={() => carregarPedidos(true)} />
+            <PaginaBalcao onPedidoCriado={() => carregarPedidos(true)} onCaderneta={() => setCadernetaKey(k => k + 1)} />
           )}
           {paginaAtiva === 'mesas' && (
             <PaginaMesas pedidos={pedidos} onAtualizar={() => carregarPedidos(true)} />
@@ -7036,7 +7066,7 @@ export default function Admin() {
           )}
           {paginaAtiva === 'estoque' && <PaginaEstoque />}
           {paginaAtiva === 'clientes' && <PaginaClientes />}
-          {paginaAtiva === 'caderneta' && <PaginaCaderneta />}
+          {paginaAtiva === 'caderneta' && <PaginaCaderneta key={cadernetaKey} />}
           {paginaAtiva === 'relatorios' && <PaginaRelatorios pedidosTodos={pedidos} />}
           {paginaAtiva === 'whatsapp' && <PaginaWhatsApp />}
           {paginaAtiva === 'config' && (

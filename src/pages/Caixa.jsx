@@ -52,6 +52,10 @@ function tocarBeep() {
 
 // ── Helpers ───────────────────────────────────────────────────────
 function fmtMoeda(v) { return `R$ ${Number(v || 0).toFixed(2).replace('.', ',')}` }
+function somarCart(cart) {
+  const centavos = cart.reduce((s, i) => s + Math.round(Number(i.preco || 0) * 100) * Number(i.qtd || 1), 0)
+  return centavos / 100
+}
 function fmtHora(iso) {
   if (!iso) return ''
   return new Date(iso).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
@@ -445,7 +449,7 @@ function SheetSabores({ tipo, onFechar, onAdicionar }) {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // SHEET DO CARRINHO (slide-up mobile)
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function SheetCarrinho({ aberto, onFechar, cart, onRemover, subtotal, onConfirmar, enviando, modo, mesaAdicionando, clientesCaderneta }) {
+function SheetCarrinho({ aberto, onFechar, cart, onRemover, subtotal, onConfirmar, enviando, modo, mesaAdicionando, clientesCaderneta, onNovoCliente }) {
   const [nome, setNome] = useState('')
   const [pagamento, setPagamento] = useState('dinheiro')
   const [valorRecebido, setValorRecebido] = useState('')
@@ -618,7 +622,7 @@ function SheetCarrinho({ aberto, onFechar, cart, onRemover, subtotal, onConfirma
                   const matches = (clientesCaderneta || []).filter(c =>
                     c.nome?.toLowerCase().includes(q) || (c.cpf || '').includes(buscaCaderneta.replace(/\D/g, ''))
                   ).slice(0, 5)
-                  if (matches.length === 0) return null
+                  const nomeNovo = buscaCaderneta.trim()
                   return (
                     <div style={{
                       position: 'absolute', left: 0, right: 0, top: '100%', zIndex: 50,
@@ -646,6 +650,31 @@ function SheetCarrinho({ aberto, onFechar, cart, onRemover, subtotal, onConfirma
                           <div style={{ color: C.muted, fontSize: '0.7rem' }}>{c.telefone}</div>
                         </button>
                       ))}
+                      {/* Opção de criar novo cliente */}
+                      <button
+                        onClick={async () => {
+                          const res = await fetch('/api/clientes', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ nome: nomeNovo, manual: true }),
+                          })
+                          const novo = await res.json()
+                          if (res.ok || res.status === 201) {
+                            onNovoCliente?.(novo)
+                            setClienteCaderneta(novo)
+                            setSaldoCaderneta(0)
+                            setBuscaCaderneta('')
+                          }
+                        }}
+                        style={{
+                          display: 'block', width: '100%', padding: '0.625rem 0.875rem',
+                          background: 'rgba(179,92,0,0.15)', border: 'none',
+                          cursor: 'pointer', textAlign: 'left',
+                        }}
+                      >
+                        <div style={{ color: '#f5a623', fontWeight: 700, fontSize: '0.85rem' }}>+ Criar "{nomeNovo}"</div>
+                        <div style={{ color: 'rgba(245,166,35,0.6)', fontSize: '0.7rem' }}>Novo cliente na caderneta</div>
+                      </button>
                     </div>
                   )
                 })()}
@@ -749,7 +778,7 @@ function AbaBalcao({ onPedidoCriado, modo, setModo, mesaAdicionando, onCancelarM
   const [avNome, setAvNome] = useState('')
   const [avPreco, setAvPreco] = useState('')
 
-  const subtotal = Math.round(cart.reduce((s, i) => s + (i.preco || 0) * (i.qtd || 1), 0) * 100) / 100
+  const subtotal = somarCart(cart)
   const totalItens = cart.reduce((s, i) => s + i.qtd, 0)
 
   function addPastel(item) { setCart(prev => [...prev, item]) }
@@ -827,7 +856,7 @@ function AbaBalcao({ onPedidoCriado, modo, setModo, mesaAdicionando, onCancelarM
       // ── CADERNETA (fiado) ──
       if (pagamento === 'caderneta' && clienteCaderneta) {
         const descricao = cart.map(i => `${i.qtd}x ${i.nome}`).join(', ')
-        const subtotalAtual = Math.round(cart.reduce((s, i) => s + (i.preco || 0) * (i.qtd || 1), 0) * 100) / 100
+        const subtotalAtual = somarCart(cart)
         const cadRes = await fetch('/api/caderneta', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -886,7 +915,7 @@ function AbaBalcao({ onPedidoCriado, modo, setModo, mesaAdicionando, onCancelarM
           sabores: i.sabores || [], adicionais: i.adicionais || [], observacao: i.observacao || '',
         }))
         const todosItens = [...itensExistentes, ...novosItens]
-        const novoTotal = todosItens.reduce((s, i) => s + (i.preco || 0) * (i.qtd || 1), 0)
+        const novoTotal = somarCart(todosItens)
 
         const res = await fetch('/api/pedido', {
           method: 'PATCH',
@@ -1338,6 +1367,7 @@ function AbaBalcao({ onPedidoCriado, modo, setModo, mesaAdicionando, onCancelarM
         modo={modo}
         mesaAdicionando={mesaAdicionando}
         clientesCaderneta={clientesCaderneta}
+        onNovoCliente={novo => setClientesCaderneta(prev => [novo, ...prev])}
       />
     </div>
   )
