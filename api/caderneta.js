@@ -18,28 +18,32 @@ module.exports = async function handler(req, res) {
 
     let query = supabase
       .from('caderneta')
-      .select(`
-        *,
-        customers!caderneta_cliente_id_fkey (
-          nome,
-          cpf,
-          telefone
-        )
-      `)
+      .select('*')
       .order('created_at', { ascending: false })
       .limit(200)
 
     if (cliente_id) query = query.eq('cliente_id', cliente_id)
 
-    const { data, error } = await query
+    const { data: entradas, error } = await query
     if (error) return res.status(500).json({ error: error.message })
 
-    // Achata os campos do cliente para manter interface plana
-    const resultado = (data || []).map(({ customers: cliente, ...entrada }) => ({
+    if (!entradas || entradas.length === 0) return res.status(200).json([])
+
+    // Busca nomes dos clientes em lote
+    const ids = [...new Set(entradas.map(e => e.cliente_id).filter(Boolean))]
+    const { data: clientes } = await supabase
+      .from('customers')
+      .select('id, nome, cpf, telefone')
+      .in('id', ids)
+
+    const clienteMap = {}
+    ;(clientes || []).forEach(c => { clienteMap[c.id] = c })
+
+    const resultado = entradas.map(entrada => ({
       ...entrada,
-      nome: cliente?.nome ?? null,
-      cpf: cliente?.cpf ?? null,
-      telefone: cliente?.telefone ?? null,
+      nome: clienteMap[entrada.cliente_id]?.nome ?? null,
+      cpf: clienteMap[entrada.cliente_id]?.cpf ?? null,
+      telefone: clienteMap[entrada.cliente_id]?.telefone ?? null,
     }))
 
     return res.status(200).json(resultado)
