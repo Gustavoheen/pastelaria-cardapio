@@ -40,16 +40,19 @@ module.exports = async function handler(req, res) {
   if (req.method === 'POST') {
     const { telefone, nome, endereco, cpf, manual } = req.body
     const tel = String(telefone || '').replace(/\D/g, '')
-    if (!tel || !nome) return res.status(400).json({ error: 'telefone e nome obrigatórios.' })
+    if (!nome) return res.status(400).json({ error: 'nome é obrigatório.' })
+    if (!manual && !tel) return res.status(400).json({ error: 'telefone é obrigatório.' })
+    // Criação manual sem telefone: gera placeholder único
+    const telFinal = tel || ('x' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5))
 
     const cpfNormalizado = cpf ? String(cpf).trim() || null : null
 
-    // busca existente
-    const { data: existente } = await supabase
+    // busca existente (só busca por telefone real, não por placeholder manual)
+    const { data: existente } = tel ? await supabase
       .from('customers')
       .select('*')
       .eq('telefone', tel)
-      .maybeSingle()
+      .maybeSingle() : { data: null }
 
     if (existente) {
       const updates = {
@@ -90,7 +93,7 @@ module.exports = async function handler(req, res) {
 
     // novo cliente
     const novo = {
-      telefone: tel,
+      telefone: telFinal,
       nome: nome.trim(),
       total_pedidos: manual ? 0 : 1,
       enderecos: endereco && endereco.rua ? [endereco] : [],

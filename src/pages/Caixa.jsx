@@ -445,14 +445,18 @@ function SheetSabores({ tipo, onFechar, onAdicionar }) {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // SHEET DO CARRINHO (slide-up mobile)
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function SheetCarrinho({ aberto, onFechar, cart, onRemover, subtotal, onConfirmar, enviando, modo, mesaAdicionando }) {
+function SheetCarrinho({ aberto, onFechar, cart, onRemover, subtotal, onConfirmar, enviando, modo, mesaAdicionando, clientesCaderneta }) {
   const [nome, setNome] = useState('')
   const [pagamento, setPagamento] = useState('dinheiro')
   const [valorRecebido, setValorRecebido] = useState('')
+  const [buscaCaderneta, setBuscaCaderneta] = useState('')
+  const [clienteCaderneta, setClienteCaderneta] = useState(null)
+  const [saldoCaderneta, setSaldoCaderneta] = useState(0)
 
   const valorRec = parseFloat(String(valorRecebido).replace(',', '.')) || 0
   const troco = pagamento === 'dinheiro' && valorRec > subtotal ? Math.round((valorRec - subtotal) * 100) / 100 : 0
   const trocoNeg = pagamento === 'dinheiro' && valorRec > 0 && valorRec < subtotal
+  const podeConfirmar = pagamento !== 'caderneta' || !!clienteCaderneta
 
   if (!aberto) return null
 
@@ -559,19 +563,96 @@ function SheetCarrinho({ aberto, onFechar, cart, onRemover, subtotal, onConfirma
           <label style={{ display: 'block', color: C.muted, fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '6px' }}>
             Pagamento
           </label>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '6px' }}>
-            {['dinheiro', 'pix', 'debito', 'credito'].map(p => (
-              <button key={p} onClick={() => { setPagamento(p); setValorRecebido('') }} style={{
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr', gap: '6px' }}>
+            {['dinheiro', 'pix', 'debito', 'credito', 'caderneta'].map(p => (
+              <button key={p} onClick={() => { setPagamento(p); setValorRecebido(''); if (p !== 'caderneta') { setClienteCaderneta(null); setBuscaCaderneta('') } }} style={{
                 padding: '0.6rem 0', borderRadius: '10px', cursor: 'pointer',
-                fontSize: '0.72rem', fontWeight: 700, border: 'none',
-                background: pagamento === p ? `linear-gradient(145deg, ${C.red}, ${C.redDark})` : 'rgba(255,255,255,0.07)',
+                fontSize: '0.65rem', fontWeight: 700, border: 'none',
+                background: pagamento === p
+                  ? p === 'caderneta' ? 'linear-gradient(145deg, #b35c00, #7a3f00)' : `linear-gradient(145deg, ${C.red}, ${C.redDark})`
+                  : 'rgba(255,255,255,0.07)',
                 color: pagamento === p ? '#fff' : C.muted, textTransform: 'capitalize',
               }}>
-                {p === 'dinheiro' ? 'Dinheiro' : p === 'debito' ? 'Débito' : p === 'credito' ? 'Crédito' : 'PIX'}
+                {p === 'dinheiro' ? 'Dinheiro' : p === 'debito' ? 'Débito' : p === 'credito' ? 'Crédito' : p === 'caderneta' ? '📒 Anotar' : 'PIX'}
               </button>
             ))}
           </div>
         </div>
+
+        {/* Seleção de cliente para caderneta */}
+        {pagamento === 'caderneta' && (
+          <div style={{ marginBottom: '0.75rem' }}>
+            <label style={{ display: 'block', color: C.muted, fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '4px' }}>
+              Cliente da caderneta *
+            </label>
+            {clienteCaderneta ? (
+              <div style={{
+                padding: '0.625rem 0.875rem', borderRadius: '10px',
+                background: 'rgba(179,92,0,0.15)', border: '1px solid rgba(179,92,0,0.4)',
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              }}>
+                <div>
+                  <div style={{ color: C.text, fontWeight: 700, fontSize: '0.88rem' }}>{clienteCaderneta.nome}</div>
+                  <div style={{ color: C.muted, fontSize: '0.72rem' }}>Em aberto: {fmtMoeda(saldoCaderneta)}</div>
+                </div>
+                <button
+                  onClick={() => { setClienteCaderneta(null); setBuscaCaderneta(''); setSaldoCaderneta(0) }}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: C.muted, fontSize: '0.85rem' }}
+                >✕</button>
+              </div>
+            ) : (
+              <div style={{ position: 'relative' }}>
+                <input
+                  type="text"
+                  value={buscaCaderneta}
+                  onChange={e => setBuscaCaderneta(e.target.value)}
+                  placeholder="Buscar cliente por nome..."
+                  style={{
+                    width: '100%', padding: '0.7rem 0.875rem', borderRadius: '12px', fontSize: '0.88rem',
+                    background: 'rgba(255,255,255,0.07)', border: `1px solid ${C.border}`,
+                    color: C.text, outline: 'none', boxSizing: 'border-box',
+                  }}
+                />
+                {buscaCaderneta.trim().length >= 2 && (() => {
+                  const q = buscaCaderneta.trim().toLowerCase()
+                  const matches = (clientesCaderneta || []).filter(c =>
+                    c.nome?.toLowerCase().includes(q) || (c.cpf || '').includes(buscaCaderneta.replace(/\D/g, ''))
+                  ).slice(0, 5)
+                  if (matches.length === 0) return null
+                  return (
+                    <div style={{
+                      position: 'absolute', left: 0, right: 0, top: '100%', zIndex: 50,
+                      background: 'rgba(30,8,8,0.98)', border: `1px solid ${C.border}`,
+                      borderRadius: '10px', overflow: 'hidden', marginTop: '4px',
+                      boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
+                    }}>
+                      {matches.map(c => (
+                        <button
+                          key={c.id}
+                          onClick={async () => {
+                            const r = await fetch(`/api/caderneta?cliente_id=${c.id}`).then(r => r.json()).catch(() => [])
+                            const saldo = Array.isArray(r) ? r.filter(e => !e.pago).reduce((s, e) => s + Number(e.valor), 0) : 0
+                            setClienteCaderneta(c)
+                            setSaldoCaderneta(saldo)
+                            setBuscaCaderneta('')
+                          }}
+                          style={{
+                            display: 'block', width: '100%', padding: '0.625rem 0.875rem',
+                            background: 'none', border: 'none', borderBottom: `1px solid ${C.border}`,
+                            cursor: 'pointer', textAlign: 'left',
+                          }}
+                        >
+                          <div style={{ color: C.text, fontWeight: 700, fontSize: '0.85rem' }}>{c.nome}</div>
+                          <div style={{ color: C.muted, fontSize: '0.7rem' }}>{c.telefone}</div>
+                        </button>
+                      ))}
+                    </div>
+                  )
+                })()}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Troco */}
         {pagamento === 'dinheiro' && (
@@ -615,17 +696,17 @@ function SheetCarrinho({ aberto, onFechar, cart, onRemover, subtotal, onConfirma
 
         {/* Confirmar */}
         <button
-          onClick={() => mesaAdicionando ? onConfirmar({}) : onConfirmar({ nome, pagamento, troco: troco > 0 ? troco : null })}
-          disabled={enviando || trocoNeg}
+          onClick={() => mesaAdicionando ? onConfirmar({}) : onConfirmar({ nome, pagamento, troco: troco > 0 ? troco : null, clienteCaderneta })}
+          disabled={enviando || trocoNeg || !podeConfirmar}
           style={{
             width: '100%', padding: '1rem', borderRadius: '14px',
-            cursor: enviando || trocoNeg ? 'not-allowed' : 'pointer',
+            cursor: enviando || trocoNeg || !podeConfirmar ? 'not-allowed' : 'pointer',
             fontSize: '1rem', fontWeight: 800, border: 'none',
-            background: trocoNeg || enviando
+            background: trocoNeg || enviando || !podeConfirmar
               ? 'rgba(255,255,255,0.08)'
               : `linear-gradient(145deg, ${C.gold}, #d4a800)`,
-            color: trocoNeg || enviando ? C.muted : '#1a1000',
-            boxShadow: !trocoNeg && !enviando ? '0 6px 20px rgba(245,200,0,0.3)' : 'none',
+            color: trocoNeg || enviando || !podeConfirmar ? C.muted : '#1a1000',
+            boxShadow: !trocoNeg && !enviando && podeConfirmar ? '0 6px 20px rgba(245,200,0,0.3)' : 'none',
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
           }}
         >
@@ -739,10 +820,64 @@ function AbaBalcao({ onPedidoCriado, modo, setModo, mesaAdicionando, onCancelarM
     setAvPreco('')
   }
 
-  async function confirmarVenda({ nome, pagamento, troco }) {
+  async function confirmarVenda({ nome, pagamento, troco, clienteCaderneta }) {
     setEnviando(true)
     const isLocal = modo === 'local'
     try {
+      // ── CADERNETA (fiado) ──
+      if (pagamento === 'caderneta' && clienteCaderneta) {
+        const descricao = cart.map(i => `${i.qtd}x ${i.nome}`).join(', ')
+        const subtotalAtual = Math.round(cart.reduce((s, i) => s + (i.preco || 0) * (i.qtd || 1), 0) * 100) / 100
+        const cadRes = await fetch('/api/caderneta', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            cliente_id: clienteCaderneta.id,
+            descricao,
+            itens: cart.map(i => ({ nome: i.nome, qtd: i.qtd, preco: i.preco })),
+            valor: subtotalAtual,
+            data: new Date().toLocaleDateString('pt-BR'),
+          }),
+        })
+        if (cadRes.ok) {
+          // Registrar no fluxo de caixa
+          try {
+            const pedidoRes = await fetch('/api/pedido', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                nome: clienteCaderneta.nome,
+                telefone: '00000000000',
+                pagamento: 'caderneta',
+                itens: cart.map(i => ({ tipoId: i.tipoId || 'diverso', nome: i.nome, preco: i.preco, qtd: i.qtd, sabores: i.sabores || [], adicionais: i.adicionais || [], observacao: i.observacao || '' })),
+                subtotal: subtotalAtual,
+                total: subtotalAtual,
+                origem: 'balcao',
+                observacao: `📒 FIADO — ${clienteCaderneta.nome}`,
+                tipo_entrega: 'levar',
+              }),
+            })
+            if (pedidoRes.ok) {
+              const pedido = await pedidoRes.json()
+              await fetch('/api/pedido', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: pedido.id, status: 'entregue' }),
+              })
+            }
+          } catch (_) {}
+          setSucesso({ numero: clienteCaderneta.nome, modo: 'caderneta' })
+          setCart([])
+          setCartAberto(false)
+          onPedidoCriado?.()
+          setTimeout(() => setSucesso(null), 5000)
+        } else {
+          alert('Erro ao anotar na caderneta')
+        }
+        setEnviando(false)
+        return
+      }
+
       // ── ADICIONANDO ITENS A MESA EXISTENTE ──
       if (mesaAdicionando) {
         const itensExistentes = parseItens(mesaAdicionando.itens)
@@ -861,21 +996,21 @@ function AbaBalcao({ onPedidoCriado, modo, setModo, mesaAdicionando, onCancelarM
       {/* Sucesso */}
       {sucesso && (
         <div style={{
-          background: sucesso.modo === 'adicionado' ? 'rgba(0,200,80,0.15)' : (sucesso.modo === 'local' ? 'rgba(0,120,255,0.15)' : 'rgba(0,200,80,0.15)'),
-          border: `1px solid ${sucesso.modo === 'local' ? 'rgba(0,120,255,0.4)' : 'rgba(0,200,80,0.4)'}`,
+          background: sucesso.modo === 'caderneta' ? 'rgba(179,92,0,0.15)' : sucesso.modo === 'adicionado' ? 'rgba(0,200,80,0.15)' : (sucesso.modo === 'local' ? 'rgba(0,120,255,0.15)' : 'rgba(0,200,80,0.15)'),
+          border: `1px solid ${sucesso.modo === 'caderneta' ? 'rgba(179,92,0,0.5)' : sucesso.modo === 'local' ? 'rgba(0,120,255,0.4)' : 'rgba(0,200,80,0.4)'}`,
           borderRadius: '12px', padding: '0.75rem 1rem',
           display: 'flex', alignItems: 'center', gap: '8px',
         }}>
           {sucesso.modo === 'local'
             ? <UtensilsCrossed size={16} color="#4da6ff" />
-            : <Check size={16} color={C.success} />
+            : <Check size={16} color={sucesso.modo === 'caderneta' ? '#f5a623' : C.success} />
           }
           <div>
-            <div style={{ color: sucesso.modo === 'local' ? '#4da6ff' : C.success, fontWeight: 800, fontSize: '0.88rem' }}>
-              {sucesso.modo === 'adicionado' ? 'Itens adicionados!' : (sucesso.modo === 'local' ? 'Conta aberta!' : 'Venda registrada!')}
+            <div style={{ color: sucesso.modo === 'caderneta' ? '#f5a623' : sucesso.modo === 'local' ? '#4da6ff' : C.success, fontWeight: 800, fontSize: '0.88rem' }}>
+              {sucesso.modo === 'caderneta' ? '📒 Anotado na caderneta!' : sucesso.modo === 'adicionado' ? 'Itens adicionados!' : (sucesso.modo === 'local' ? 'Conta aberta!' : 'Venda registrada!')}
             </div>
-            <div style={{ color: sucesso.modo === 'local' ? 'rgba(77,166,255,0.7)' : 'rgba(0,200,80,0.7)', fontSize: '0.72rem' }}>
-              Pedido #{sucesso.numero} {sucesso.modo === 'local' ? '- Aba "Mesas" para gerenciar' : (sucesso.modo === 'adicionado' ? '- Itens adicionados à mesa' : '')}
+            <div style={{ color: sucesso.modo === 'caderneta' ? 'rgba(245,166,35,0.7)' : sucesso.modo === 'local' ? 'rgba(77,166,255,0.7)' : 'rgba(0,200,80,0.7)', fontSize: '0.72rem' }}>
+              {sucesso.modo === 'caderneta' ? `Cliente: ${sucesso.numero}` : `Pedido #${sucesso.numero} ${sucesso.modo === 'local' ? '- Aba "Mesas" para gerenciar' : (sucesso.modo === 'adicionado' ? '- Itens adicionados à mesa' : '')}`}
             </div>
           </div>
         </div>
@@ -990,22 +1125,22 @@ function AbaBalcao({ onPedidoCriado, modo, setModo, mesaAdicionando, onCancelarM
                 </div>
                 {qtd === 0 ? (
                   <button onClick={() => addDoce(doce)} style={{
-                    width: '36px', height: '36px', borderRadius: '10px', cursor: 'pointer',
+                    width: '48px', height: '48px', borderRadius: '12px', cursor: 'pointer',
                     background: `linear-gradient(145deg, ${C.red}, ${C.redDark})`, border: 'none',
-                    color: '#fff', fontSize: '1.2rem', fontWeight: 900,
+                    color: '#fff', fontSize: '1.5rem', fontWeight: 900,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                   }}>+</button>
                 ) : (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                     <button onClick={() => remDoce(doce.id)} style={{
-                      width: '36px', height: '36px', background: 'rgba(200,0,0,0.2)', border: 'none',
-                      borderRadius: '9px', cursor: 'pointer', color: '#ff7777', fontSize: '1.1rem', fontWeight: 900,
+                      width: '48px', height: '48px', background: 'rgba(200,0,0,0.2)', border: 'none',
+                      borderRadius: '11px', cursor: 'pointer', color: '#ff7777', fontSize: '1.4rem', fontWeight: 900,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                     }}>−</button>
-                    <span style={{ minWidth: '28px', textAlign: 'center', color: '#fff', fontWeight: 900, fontSize: '1rem' }}>{qtd}</span>
+                    <span style={{ minWidth: '32px', textAlign: 'center', color: '#fff', fontWeight: 900, fontSize: '1.1rem' }}>{qtd}</span>
                     <button onClick={() => addDoce(doce)} style={{
-                      width: '36px', height: '36px', background: 'rgba(0,200,80,0.15)', border: 'none',
-                      borderRadius: '9px', cursor: 'pointer', color: '#6aff9e', fontSize: '1.1rem', fontWeight: 900,
+                      width: '48px', height: '48px', background: 'rgba(0,200,80,0.15)', border: 'none',
+                      borderRadius: '11px', cursor: 'pointer', color: '#6aff9e', fontSize: '1.4rem', fontWeight: 900,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                     }}>+</button>
                   </div>
@@ -1049,18 +1184,18 @@ function AbaBalcao({ onPedidoCriado, modo, setModo, mesaAdicionando, onCancelarM
                           {qtd > 0 && (
                             <>
                               <button onClick={() => remBebidaSabor(beb.id, sabor)} style={{
-                                width: '20px', height: '20px', background: 'rgba(200,0,0,0.3)', border: 'none',
-                                borderRadius: '5px', cursor: 'pointer', color: '#ff7777', fontSize: '0.8rem', fontWeight: 900,
+                                width: '32px', height: '32px', background: 'rgba(200,0,0,0.3)', border: 'none',
+                                borderRadius: '7px', cursor: 'pointer', color: '#ff7777', fontSize: '1rem', fontWeight: 900,
                                 display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
                               }}>−</button>
-                              <span style={{ color: '#fff', fontWeight: 900, fontSize: '0.78rem', minWidth: '14px', textAlign: 'center' }}>{qtd}</span>
+                              <span style={{ color: '#fff', fontWeight: 900, fontSize: '0.85rem', minWidth: '18px', textAlign: 'center' }}>{qtd}</span>
                             </>
                           )}
                           <button onClick={() => addBebidaSabor(beb, sabor)} style={{
-                            width: '20px', height: '20px',
+                            width: '32px', height: '32px',
                             background: qtd > 0 ? 'rgba(0,200,80,0.2)' : `linear-gradient(145deg, ${C.red}, ${C.redDark})`,
-                            border: 'none', borderRadius: '5px', cursor: 'pointer',
-                            color: qtd > 0 ? '#6aff9e' : '#fff', fontSize: '0.8rem', fontWeight: 900,
+                            border: 'none', borderRadius: '7px', cursor: 'pointer',
+                            color: qtd > 0 ? '#6aff9e' : '#fff', fontSize: '1rem', fontWeight: 900,
                             display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
                           }}>+</button>
                         </div>
@@ -1087,22 +1222,22 @@ function AbaBalcao({ onPedidoCriado, modo, setModo, mesaAdicionando, onCancelarM
                 </div>
                 {qtd === 0 ? (
                   <button onClick={() => addBebida(beb)} style={{
-                    width: '36px', height: '36px', borderRadius: '10px', cursor: 'pointer',
+                    width: '48px', height: '48px', borderRadius: '12px', cursor: 'pointer',
                     background: `linear-gradient(145deg, ${C.red}, ${C.redDark})`, border: 'none',
-                    color: '#fff', fontSize: '1.2rem', fontWeight: 900,
+                    color: '#fff', fontSize: '1.5rem', fontWeight: 900,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                   }}>+</button>
                 ) : (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                     <button onClick={() => remBebida(beb.id)} style={{
-                      width: '36px', height: '36px', background: 'rgba(200,0,0,0.2)', border: 'none',
-                      borderRadius: '9px', cursor: 'pointer', color: '#ff7777', fontSize: '1.1rem', fontWeight: 900,
+                      width: '48px', height: '48px', background: 'rgba(200,0,0,0.2)', border: 'none',
+                      borderRadius: '11px', cursor: 'pointer', color: '#ff7777', fontSize: '1.4rem', fontWeight: 900,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                     }}>−</button>
-                    <span style={{ minWidth: '28px', textAlign: 'center', color: '#fff', fontWeight: 900, fontSize: '1rem' }}>{qtd}</span>
+                    <span style={{ minWidth: '32px', textAlign: 'center', color: '#fff', fontWeight: 900, fontSize: '1.1rem' }}>{qtd}</span>
                     <button onClick={() => addBebida(beb)} style={{
-                      width: '36px', height: '36px', background: 'rgba(0,200,80,0.15)', border: 'none',
-                      borderRadius: '9px', cursor: 'pointer', color: '#6aff9e', fontSize: '1.1rem', fontWeight: 900,
+                      width: '48px', height: '48px', background: 'rgba(0,200,80,0.15)', border: 'none',
+                      borderRadius: '11px', cursor: 'pointer', color: '#6aff9e', fontSize: '1.4rem', fontWeight: 900,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                     }}>+</button>
                   </div>
@@ -1202,6 +1337,7 @@ function AbaBalcao({ onPedidoCriado, modo, setModo, mesaAdicionando, onCancelarM
         enviando={enviando}
         modo={modo}
         mesaAdicionando={mesaAdicionando}
+        clientesCaderneta={clientesCaderneta}
       />
     </div>
   )
@@ -1541,6 +1677,14 @@ export default function Caixa() {
   const [mesaAdicionando, setMesaAdicionando] = useState(null) // pedido da mesa para adicionar itens
 
   const pedidosRef = useRef([])
+  const [clientesCaderneta, setClientesCaderneta] = useState([])
+
+  useEffect(() => {
+    if (!logado) return
+    fetch('/api/clientes').then(r => r.json()).then(data => {
+      if (Array.isArray(data)) setClientesCaderneta(data)
+    }).catch(() => {})
+  }, [logado])
 
   const carregarPedidos = useCallback(async (silencioso = false) => {
     if (!silencioso) setCarregando(true)

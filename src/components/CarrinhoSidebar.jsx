@@ -40,25 +40,25 @@ function ItemCarrinho({ item, onAdicionar, onRemover }) {
           <button
             onClick={() => onRemover(item.chave)}
             style={{
-              width: '28px', height: '28px', background: 'none', border: 'none',
-              cursor: 'pointer', color: '#FF7777', fontSize: '1rem', fontWeight: 900,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              width: '44px', height: '44px', background: 'none', border: 'none',
+              cursor: 'pointer', color: '#FF7777', fontSize: '1.3rem', fontWeight: 900,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', touchAction: 'manipulation',
             }}
           >
             −
           </button>
           <span style={{
-            minWidth: '22px', textAlign: 'center',
-            color: '#fff', fontWeight: 900, fontSize: '0.9rem',
+            minWidth: '28px', textAlign: 'center',
+            color: '#fff', fontWeight: 900, fontSize: '1rem',
           }}>
             {item.qtd}
           </span>
           <button
             onClick={() => onAdicionar({ ...item })}
             style={{
-              width: '28px', height: '28px', background: 'none', border: 'none',
-              cursor: 'pointer', color: '#fff', fontSize: '1rem', fontWeight: 900,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              width: '44px', height: '44px', background: 'none', border: 'none',
+              cursor: 'pointer', color: '#fff', fontSize: '1.3rem', fontWeight: 900,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', touchAction: 'manipulation',
             }}
           >
             +

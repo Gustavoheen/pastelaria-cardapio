@@ -44,18 +44,18 @@ function ItemCarrinho({ item, onAdicionar, onRemover }) {
         display: 'flex', alignItems: 'center',
         background: 'rgba(255,255,255,0.08)',
         border: '1px solid rgba(255,255,255,0.14)',
-        borderRadius: '10px', overflow: 'hidden', flexShrink: 0,
+        borderRadius: '12px', overflow: 'hidden', flexShrink: 0,
       }}>
         <button
           onClick={() => onRemover(item.chave)}
-          style={{ width: '36px', height: '36px', background: 'none', border: 'none', cursor: 'pointer', color: '#FF7777', fontSize: '1.15rem', fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center', touchAction: 'manipulation' }}
+          style={{ width: '48px', height: '48px', background: 'none', border: 'none', cursor: 'pointer', color: '#FF7777', fontSize: '1.4rem', fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center', touchAction: 'manipulation' }}
         >−</button>
-        <span style={{ minWidth: '28px', textAlign: 'center', color: '#fff', fontWeight: 900, fontSize: '0.95rem' }}>
+        <span style={{ minWidth: '32px', textAlign: 'center', color: '#fff', fontWeight: 900, fontSize: '1.05rem' }}>
           {item.qtd}
         </span>
         <button
           onClick={() => onAdicionar({ ...item })}
-          style={{ width: '36px', height: '36px', background: 'none', border: 'none', cursor: 'pointer', color: '#fff', fontSize: '1.15rem', fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center', touchAction: 'manipulation' }}
+          style={{ width: '48px', height: '48px', background: 'none', border: 'none', cursor: 'pointer', color: '#fff', fontSize: '1.4rem', fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center', touchAction: 'manipulation' }}
         >+</button>
       </div>
     </div>

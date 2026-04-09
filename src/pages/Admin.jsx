@@ -451,7 +451,7 @@ function PaginaDashboard({ pedidos, onVerPedidos, onExcluir, onSalvarPedido, car
     porPag[k] = (porPag[k] || 0) + Number(p.total || 0)
   })
 
-  const FORMAS_PAG = ['pix', 'dinheiro', 'debito', 'credito']
+  const FORMAS_PAG = ['pix', 'dinheiro', 'debito', 'credito', 'caderneta']
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -5228,6 +5228,20 @@ function PaginaBalcao({ onPedidoCriado }) {
     })
   }
 
+  function removerDoCatalogo(id) {
+    setCart(prev => {
+      const chave = `div-${id}`
+      const item = prev.find(i => i.chave === chave)
+      if (!item) return prev
+      if (item.qtd > 1) return prev.map(i => i.chave === chave ? { ...i, qtd: i.qtd - 1 } : i)
+      return prev.filter(i => i.chave !== chave)
+    })
+  }
+
+  function qtdCatalogo(id) {
+    return cart.find(i => i.chave === `div-${id}`)?.qtd || 0
+  }
+
   async function confirmar() {
     if (cart.length === 0) return
     if (pagamento === 'dinheiro' && valorRec > 0 && valorRec < subtotal) return
@@ -5244,7 +5258,7 @@ function PaginaBalcao({ onPedidoCriado }) {
 
     setEnviando(true)
     try {
-      // Caderneta: lança direto na caderneta sem criar pedido
+      // Caderneta: lança na caderneta E registra no fluxo de caixa como fiado
       if (pagamento === 'caderneta') {
         const cliente = clienteSelecionadoCaderneta
         const descricao = cart.map(i => `${i.qtd}x ${i.nome}`).join(', ')
@@ -5260,6 +5274,32 @@ function PaginaBalcao({ onPedidoCriado }) {
           }),
         })
         if (res.ok) {
+          // Registrar no fluxo de caixa como venda fiado
+          try {
+            const pedidoRes = await fetch('/api/pedido', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                nome: cliente.nome,
+                telefone: '00000000000',
+                pagamento: 'caderneta',
+                itens: cart.map(i => ({ tipoId: i.tipoId || 'diverso', nome: i.nome, preco: i.preco, qtd: i.qtd, sabores: i.sabores || [], adicionais: i.adicionais || [], observacao: i.observacao || '' })),
+                subtotal,
+                total: subtotal,
+                origem: 'balcao',
+                observacao: `📒 FIADO — ${cliente.nome}`,
+                tipo_entrega: 'levar',
+              }),
+            })
+            if (pedidoRes.ok) {
+              const pedido = await pedidoRes.json()
+              await fetch('/api/pedido', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: pedido.id, status: 'entregue' }),
+              })
+            }
+          } catch (_) {}
           setSucesso(`Anotado na caderneta de ${cliente.nome}`)
           setCart([])
           setNomeCliente('')
@@ -5318,6 +5358,14 @@ function PaginaBalcao({ onPedidoCriado }) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ id: pedido.id, status: 'preparando' }),
           })
+        }
+        // Auto-criar cliente se nome foi informado
+        if (nomeCliente.trim()) {
+          fetch('/api/clientes', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ nome: nomeCliente.trim(), manual: true }),
+          }).catch(() => {})
         }
         setSucesso(pedido.numero)
         setCart([])
@@ -5446,41 +5494,75 @@ function PaginaBalcao({ onPedidoCriado }) {
               </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                 {resultados.map(p => {
+                  const isPastel = p._tipo === 'pastel'
+                  let qtd = 0
+                  if (p._tipo === 'doce') qtd = qtdDoce(p._obj.id)
+                  else if (p._tipo === 'bebida') qtd = qtdBebida(p._obj.id)
+                  else if (p._tipo === 'bebida-sabor') qtd = qtdBebidaSabor(p._obj.id, p._sabor)
+                  else if (p._tipo === 'diverso') qtd = qtdCatalogo(p._obj.id)
+
                   function handleAdd() {
                     if (p._tipo === 'pastel') { setTipoModal(p._obj); setBusca('') }
-                    else if (p._tipo === 'doce') { adicionarDoce(p._obj); setBusca('') }
-                    else if (p._tipo === 'bebida') { adicionarBebida(p._obj); setBusca('') }
-                    else if (p._tipo === 'bebida-sabor') { adicionarBebidaSabor(p._obj, p._sabor); setBusca('') }
-                    else if (p._tipo === 'diverso') { adicionarDoCatalogo(p._obj); setBusca('') }
+                    else if (p._tipo === 'doce') adicionarDoce(p._obj)
+                    else if (p._tipo === 'bebida') adicionarBebida(p._obj)
+                    else if (p._tipo === 'bebida-sabor') adicionarBebidaSabor(p._obj, p._sabor)
+                    else if (p._tipo === 'diverso') adicionarDoCatalogo(p._obj)
                   }
-                  const isPastel = p._tipo === 'pastel'
+                  function handleRem() {
+                    if (p._tipo === 'doce') removerDoce(p._obj.id)
+                    else if (p._tipo === 'bebida') removerBebida(p._obj.id)
+                    else if (p._tipo === 'bebida-sabor') removerBebidaSabor(p._obj.id, p._sabor)
+                    else if (p._tipo === 'diverso') removerDoCatalogo(p._obj.id)
+                  }
+
                   return (
                     <div key={p._tipo + p.id} style={{
                       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                       padding: '0.5rem 0.75rem', borderRadius: '10px', gap: '0.75rem',
-                      background: 'rgba(255,255,255,0.04)', border: `1px solid ${C.cardBorder}`,
+                      background: qtd > 0 ? 'rgba(229,57,53,0.08)' : 'rgba(255,255,255,0.04)',
+                      border: `1px solid ${qtd > 0 ? 'rgba(229,57,53,0.3)' : C.cardBorder}`,
                     }}>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ color: C.text, fontSize: '0.85rem', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.nome}</div>
                         {p.subtitulo && <div style={{ color: C.muted, fontSize: '0.68rem' }}>{p.subtitulo}</div>}
                         <div style={{ color: C.gold, fontSize: '0.78rem', fontWeight: 700 }}>{fmtMoeda(p.preco)}</div>
                       </div>
-                      <button
-                        onClick={handleAdd}
-                        style={{
-                          padding: isPastel ? '0.4rem 0.75rem' : '0 0',
-                          width: isPastel ? 'auto' : '30px',
-                          height: isPastel ? 'auto' : '30px',
-                          borderRadius: isPastel ? '8px' : '8px',
-                          background: `linear-gradient(145deg, ${C.red}, ${C.redDark})`,
-                          border: 'none', cursor: 'pointer', color: '#fff',
-                          fontSize: isPastel ? '0.75rem' : '1.1rem', fontWeight: 900,
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          whiteSpace: 'nowrap', flexShrink: 0,
-                        }}
-                      >
-                        {isPastel ? 'Personalizar' : '+'}
-                      </button>
+                      {isPastel ? (
+                        <button
+                          onClick={handleAdd}
+                          style={{
+                            padding: '0.4rem 0.75rem', borderRadius: '8px',
+                            background: `linear-gradient(145deg, ${C.red}, ${C.redDark})`,
+                            border: 'none', cursor: 'pointer', color: '#fff',
+                            fontSize: '0.75rem', fontWeight: 900,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            whiteSpace: 'nowrap', flexShrink: 0,
+                          }}
+                        >Personalizar</button>
+                      ) : qtd === 0 ? (
+                        <button
+                          onClick={handleAdd}
+                          style={{
+                            width: '44px', height: '44px', borderRadius: '10px',
+                            background: `linear-gradient(145deg, ${C.red}, ${C.redDark})`,
+                            border: 'none', cursor: 'pointer', color: '#fff',
+                            fontSize: '1.3rem', fontWeight: 900, flexShrink: 0,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          }}
+                        >+</button>
+                      ) : (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
+                          <button
+                            onClick={handleRem}
+                            style={{ width: '44px', height: '44px', background: 'rgba(200,0,0,0.2)', border: 'none', borderRadius: '10px', cursor: 'pointer', color: '#ff7777', fontSize: '1.3rem', fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                          >−</button>
+                          <span style={{ minWidth: '28px', textAlign: 'center', color: '#fff', fontWeight: 900, fontSize: '1rem' }}>{qtd}</span>
+                          <button
+                            onClick={handleAdd}
+                            style={{ width: '44px', height: '44px', background: 'rgba(0,200,80,0.15)', border: 'none', borderRadius: '10px', cursor: 'pointer', color: '#6aff9e', fontSize: '1.3rem', fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                          >+</button>
+                        </div>
+                      )}
                     </div>
                   )
                 })}
@@ -5557,15 +5639,15 @@ function PaginaBalcao({ onPedidoCriado }) {
                       }}
                     >+</button>
                   ) : (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                       <button
                         onClick={() => removerDoce(doce.id)}
-                        style={{ width: '28px', height: '28px', background: 'rgba(200,0,0,0.2)', border: 'none', borderRadius: '6px', cursor: 'pointer', color: '#ff7777', fontSize: '1rem', fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                        style={{ width: '40px', height: '40px', background: 'rgba(200,0,0,0.2)', border: 'none', borderRadius: '9px', cursor: 'pointer', color: '#ff7777', fontSize: '1.2rem', fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                       >−</button>
-                      <span style={{ minWidth: '24px', textAlign: 'center', color: '#fff', fontWeight: 900, fontSize: '0.9rem' }}>{qtd}</span>
+                      <span style={{ minWidth: '28px', textAlign: 'center', color: '#fff', fontWeight: 900, fontSize: '1rem' }}>{qtd}</span>
                       <button
                         onClick={() => adicionarDoce(doce)}
-                        style={{ width: '28px', height: '28px', background: 'rgba(0,200,80,0.15)', border: 'none', borderRadius: '6px', cursor: 'pointer', color: '#6aff9e', fontSize: '1rem', fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                        style={{ width: '40px', height: '40px', background: 'rgba(0,200,80,0.15)', border: 'none', borderRadius: '9px', cursor: 'pointer', color: '#6aff9e', fontSize: '1.2rem', fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                       >+</button>
                     </div>
                   )}
@@ -5613,18 +5695,18 @@ function PaginaBalcao({ onPedidoCriado }) {
                             {qtd > 0 && (
                               <>
                                 <button onClick={() => removerBebidaSabor(beb.id, sabor)} style={{
-                                  width: '22px', height: '22px', background: 'rgba(200,0,0,0.3)', border: 'none',
-                                  borderRadius: '5px', cursor: 'pointer', color: '#ff7777', fontSize: '0.85rem', fontWeight: 900,
+                                  width: '32px', height: '32px', background: 'rgba(200,0,0,0.3)', border: 'none',
+                                  borderRadius: '7px', cursor: 'pointer', color: '#ff7777', fontSize: '1rem', fontWeight: 900,
                                   display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
                                 }}>−</button>
-                                <span style={{ color: '#fff', fontWeight: 900, fontSize: '0.78rem', minWidth: '14px', textAlign: 'center' }}>{qtd}</span>
+                                <span style={{ color: '#fff', fontWeight: 900, fontSize: '0.85rem', minWidth: '18px', textAlign: 'center' }}>{qtd}</span>
                               </>
                             )}
                             <button onClick={() => adicionarBebidaSabor(beb, sabor)} style={{
-                              width: '22px', height: '22px',
+                              width: '32px', height: '32px',
                               background: qtd > 0 ? 'rgba(0,200,80,0.2)' : `linear-gradient(145deg, ${C.red}, ${C.redDark})`,
-                              border: 'none', borderRadius: '5px', cursor: 'pointer',
-                              color: qtd > 0 ? '#6aff9e' : '#fff', fontSize: '0.85rem', fontWeight: 900,
+                              border: 'none', borderRadius: '7px', cursor: 'pointer',
+                              color: qtd > 0 ? '#6aff9e' : '#fff', fontSize: '1rem', fontWeight: 900,
                               display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
                             }}>+</button>
                           </div>
@@ -5656,22 +5738,22 @@ function PaginaBalcao({ onPedidoCriado }) {
                     <button
                       onClick={() => adicionarBebida(beb)}
                       style={{
-                        width: '30px', height: '30px', borderRadius: '8px', cursor: 'pointer',
+                        width: '40px', height: '40px', borderRadius: '10px', cursor: 'pointer',
                         background: `linear-gradient(145deg, ${C.red}, ${C.redDark})`, border: 'none',
-                        color: '#fff', fontSize: '1.1rem', fontWeight: 900,
+                        color: '#fff', fontSize: '1.3rem', fontWeight: 900,
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                       }}
                     >+</button>
                   ) : (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                       <button
                         onClick={() => removerBebida(beb.id)}
-                        style={{ width: '28px', height: '28px', background: 'rgba(200,0,0,0.2)', border: 'none', borderRadius: '6px', cursor: 'pointer', color: '#ff7777', fontSize: '1rem', fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                        style={{ width: '40px', height: '40px', background: 'rgba(200,0,0,0.2)', border: 'none', borderRadius: '9px', cursor: 'pointer', color: '#ff7777', fontSize: '1.2rem', fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                       >−</button>
-                      <span style={{ minWidth: '24px', textAlign: 'center', color: '#fff', fontWeight: 900, fontSize: '0.9rem' }}>{qtd}</span>
+                      <span style={{ minWidth: '28px', textAlign: 'center', color: '#fff', fontWeight: 900, fontSize: '1rem' }}>{qtd}</span>
                       <button
                         onClick={() => adicionarBebida(beb)}
-                        style={{ width: '28px', height: '28px', background: 'rgba(0,200,80,0.15)', border: 'none', borderRadius: '6px', cursor: 'pointer', color: '#6aff9e', fontSize: '1rem', fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                        style={{ width: '40px', height: '40px', background: 'rgba(0,200,80,0.15)', border: 'none', borderRadius: '9px', cursor: 'pointer', color: '#6aff9e', fontSize: '1.2rem', fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                       >+</button>
                     </div>
                   )}
