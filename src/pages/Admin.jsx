@@ -1397,20 +1397,12 @@ function CardPedido({ pedido, expandido, onToggle, onStatus, onImprimir, onExclu
               </button>
             )}
             {pedido.status === 'pronto' && (
-              <button onClick={() => {
-                if (window.confirm(`Finalizar pedido #${pedido.numero}?\n\nO pedido sairá da lista e irá para o histórico do dia.`)) {
-                  onStatus(pedido.id, 'entregue')
-                }
-              }} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '0.7rem 1.125rem', borderRadius: '10px', cursor: 'pointer', fontSize: '1rem', fontWeight: 700, background: `linear-gradient(145deg, ${C.success}, #00b060)`, border: 'none', color: '#fff', boxShadow: `0 4px 12px rgba(0,200,80,0.35)` }}>
+              <button onClick={() => onFinalizar(pedido)} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '0.7rem 1.125rem', borderRadius: '10px', cursor: 'pointer', fontSize: '1rem', fontWeight: 700, background: `linear-gradient(145deg, ${C.success}, #00b060)`, border: 'none', color: '#fff', boxShadow: `0 4px 12px rgba(0,200,80,0.35)` }}>
                 <Check size={16} /> Finalizar Pedido
               </button>
             )}
             {pedido.origem === 'balcao' && pedido.status !== 'pronto' && (
-              <button onClick={() => {
-                if (window.confirm(`Finalizar venda balcão #${pedido.numero}?\n\nA venda irá para o histórico do dia.`)) {
-                  onStatus(pedido.id, 'entregue')
-                }
-              }} style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '0.625rem 1rem', borderRadius: '10px', cursor: 'pointer', fontSize: '0.92rem', fontWeight: 700, background: 'linear-gradient(145deg, #F5C800, #e6b400)', border: 'none', color: '#1a1000' }}>
+              <button onClick={() => onFinalizar(pedido)} style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '0.625rem 1rem', borderRadius: '10px', cursor: 'pointer', fontSize: '0.92rem', fontWeight: 700, background: 'linear-gradient(145deg, #F5C800, #e6b400)', border: 'none', color: '#1a1000' }}>
                 <Check size={14} /> Finalizar Venda
               </button>
             )}
@@ -1449,7 +1441,7 @@ function CardPedido({ pedido, expandido, onToggle, onStatus, onImprimir, onExclu
   )
 }
 
-function PaginaPedidos({ pedidos, novosIds, onStatus, onImprimir, onExcluir, onAtualizar, onCarregarData }) {
+function PaginaPedidos({ pedidos, novosIds, onStatus, onImprimir, onExcluir, onAtualizar, onCarregarData, onFinalizar }) {
   const [filtro, setFiltro] = useState('todos')
   const [expandidoId, setExpandidoId] = useState(null)
   const [periodo, setPeriodo] = useState('hoje')
@@ -5203,6 +5195,8 @@ function PaginaBalcao({ onPedidoCriado, onCaderneta, mesaAdicionando, onCancelar
   const [clienteSelecionadoCaderneta, setClienteSelecionadoCaderneta] = useState(null) // { id, nome, limite_credito }
   const [saldoClienteCaderneta, setSaldoClienteCaderneta] = useState(0)
 
+  const [cardapioStateBalcao, setCardapioStateBalcao] = useState(null)
+
   useEffect(() => {
     fetch('/api/catalogo').then(r => r.json()).then(data => {
       if (Array.isArray(data)) setCatalogo(data)
@@ -5216,7 +5210,17 @@ function PaginaBalcao({ onPedidoCriado, onCaderneta, mesaAdicionando, onCancelar
     fetch('/api/clientes').then(r => r.json()).then(data => {
       if (Array.isArray(data)) setClientesCaderneta(data)
     }).catch(() => {})
+    fetch('/api/cardapio-state').then(r => r.json()).then(cfg => {
+      if (cfg && typeof cfg === 'object') setCardapioStateBalcao(cfg)
+    }).catch(() => {})
   }, [])
+
+  // Precos e desativados do admin
+  const precosAdm = cardapioStateBalcao?.precos || {}
+  const desativadosAdm = cardapioStateBalcao?.desativados || []
+  const tiposPastelAdm = TIPOS_PASTEL.filter(t => !desativadosAdm.includes(t.id)).map(t => ({ ...t, preco: precosAdm[t.id] ?? t.preco }))
+  const pasteisDocesAdm = PASTEIS_DOCES.filter(d => !desativadosAdm.includes(d.id)).map(d => ({ ...d, preco: precosAdm[d.id] ?? d.preco }))
+  const bebidasAdm = (categorias[0]?.itens || []).filter(b => !desativadosAdm.includes(b.id)).map(b => ({ ...b, preco: precosAdm[b.id] ?? b.preco }))
 
   const subtotal = somarCart(cart)
   const valorRec = parseFloat(String(valorRecebido).replace(',', '.')) || 0
@@ -5599,9 +5603,9 @@ function PaginaBalcao({ onPedidoCriado, onCaderneta, mesaAdicionando, onCancelar
           const q = busca.trim().toLowerCase()
 
           const todosProdutos = [
-            ...TIPOS_PASTEL.map(t => ({ _tipo: 'pastel', id: t.id, nome: t.nome, subtitulo: t.subtitulo, preco: t.preco, _obj: t })),
-            ...PASTEIS_DOCES.map(d => ({ _tipo: 'doce', id: d.id, nome: d.nome, preco: d.preco, _obj: d })),
-            ...categorias[0].itens.flatMap(b =>
+            ...tiposPastelAdm.map(t => ({ _tipo: 'pastel', id: t.id, nome: t.nome, subtitulo: t.subtitulo, preco: t.preco, _obj: t })),
+            ...pasteisDocesAdm.map(d => ({ _tipo: 'doce', id: d.id, nome: d.nome, preco: d.preco, _obj: d })),
+            ...bebidasAdm.flatMap(b =>
               b.sabores?.length > 0
                 ? b.sabores.map(s => ({ _tipo: 'bebida-sabor', id: `${b.id}-${s}`, nome: `${b.nome} ${s}`, preco: b.preco, _obj: b, _sabor: s }))
                 : [{ _tipo: 'bebida', id: b.id, nome: b.nome, subtitulo: b.subtitulo, preco: b.preco, _obj: b }]
@@ -5712,7 +5716,7 @@ function PaginaBalcao({ onPedidoCriado, onCaderneta, mesaAdicionando, onCancelar
             🥟 Pastéis
           </h3>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '0.75rem' }}>
-            {TIPOS_PASTEL.map(tipo => (
+            {tiposPastelAdm.map(tipo => (
               <button
                 key={tipo.id}
                 onClick={() => setTipoModal(tipo)}
@@ -5744,7 +5748,7 @@ function PaginaBalcao({ onPedidoCriado, onCaderneta, mesaAdicionando, onCancelar
             🍫 Pastéis Doces
           </h3>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '0.5rem' }}>
-            {PASTEIS_DOCES.map(doce => {
+            {pasteisDocesAdm.map(doce => {
               const qtd = qtdDoce(doce.id)
               return (
                 <div
@@ -5795,7 +5799,7 @@ function PaginaBalcao({ onPedidoCriado, onCaderneta, mesaAdicionando, onCancelar
             🥤 Bebidas
           </h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            {categorias[0].itens.map(beb => {
+            {bebidasAdm.map(beb => {
               const saboresEfetivos = bebidaSaboresMapBalcao[beb.id] ?? beb.sabores ?? []
               const temSabores = saboresEfetivos.length > 0
 
@@ -6580,6 +6584,169 @@ function PaginaMesas({ pedidos, onAtualizar, onAdicionarItens }) {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// MODAL CHECKOUT (pagamento + desconto)
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function ModalCheckout({ pedido, onFechar, onConfirmar, enviando, senhaAdmin }) {
+  const [pagamento, setPagamento] = useState(pedido?.pagamento === 'pendente' ? 'dinheiro' : (pedido?.pagamento || 'dinheiro'))
+  const [valorRecebido, setValorRecebido] = useState('')
+  const [descontoTipo, setDescontoTipo] = useState('nenhum')
+  const [descontoValor, setDescontoValor] = useState('')
+  const [descontoObs, setDescontoObs] = useState('')
+  const [senhaInput, setSenhaInput] = useState('')
+  const [descontoAutorizado, setDescontoAutorizado] = useState(false)
+  const [erroSenha, setErroSenha] = useState('')
+
+  if (!pedido) return null
+
+  const total = Number(pedido.total || 0)
+  const itens = typeof pedido.itens === 'string' ? JSON.parse(pedido.itens || '[]') : (pedido.itens || [])
+
+  function resetDesconto() {
+    setDescontoTipo('nenhum'); setDescontoValor(''); setDescontoObs('')
+    setSenhaInput(''); setDescontoAutorizado(false); setErroSenha('')
+  }
+  function validarSenha() {
+    if (senhaInput === (senhaAdmin || '1234')) { setDescontoAutorizado(true); setErroSenha('') }
+    else { setErroSenha('Senha incorreta'); setTimeout(() => setErroSenha(''), 2500) }
+  }
+
+  const descontoCalc = (() => {
+    if (!descontoAutorizado) return 0
+    if (descontoTipo === 'valor') return Math.min(parseFloat(String(descontoValor).replace(',','.')) || 0, total)
+    if (descontoTipo === 'porcentagem') {
+      const pct = parseFloat(String(descontoValor).replace(',','.')) || 0
+      return Math.round(total * Math.min(pct, 100) / 100 * 100) / 100
+    }
+    return 0
+  })()
+  const totalFinal = Math.max(0, Math.round((total - descontoCalc) * 100) / 100)
+  const descontoPct = descontoTipo === 'porcentagem' ? (parseFloat(String(descontoValor).replace(',','.')) || 0) : null
+  const valorRec = parseFloat(String(valorRecebido).replace(',','.')) || 0
+  const troco = pagamento === 'dinheiro' && valorRec > totalFinal ? Math.round((valorRec - totalFinal) * 100) / 100 : 0
+  const trocoNeg = pagamento === 'dinheiro' && valorRec > 0 && valorRec < totalFinal
+
+  const inputSt = { width: '100%', padding: '0.6rem 0.875rem', borderRadius: '10px', fontSize: '0.88rem',
+    background: 'rgba(255,255,255,0.06)', border: `1px solid ${C.cardBorder}`, color: C.text, outline: 'none', boxSizing: 'border-box' }
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={onFechar}>
+      <div onClick={e => e.stopPropagation()} style={{
+        width: '95%', maxWidth: '440px', maxHeight: '90vh', overflowY: 'auto',
+        background: C.bg, borderRadius: '20px', border: `1px solid ${C.cardBorder}`, padding: '1.5rem',
+      }}>
+        {/* Titulo */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+          <span style={{ color: C.text, fontWeight: 800, fontSize: '1.05rem' }}>Finalizar #{pedido.numero}</span>
+          <button onClick={onFechar} style={{ background: 'none', border: 'none', cursor: 'pointer', color: C.muted }}><X size={22} /></button>
+        </div>
+
+        {/* Itens */}
+        <div style={{ padding: '0.75rem', borderRadius: '12px', background: 'rgba(255,255,255,0.04)', border: `1px solid ${C.cardBorder}`, marginBottom: '1rem' }}>
+          <div style={{ color: C.text, fontWeight: 700, fontSize: '0.88rem', marginBottom: '4px' }}>{pedido.nome}</div>
+          {itens.map((it, i) => (
+            <div key={i} style={{ color: C.muted, fontSize: '0.78rem', lineHeight: 1.5 }}>
+              {it.qtd || 1}x {it.nome} — <span style={{ color: C.gold }}>{fmtMoeda((it.preco || 0) * (it.qtd || 1))}</span>
+            </div>
+          ))}
+          <div style={{ borderTop: `1px solid ${C.cardBorder}`, marginTop: '8px', paddingTop: '8px', display: 'flex', justifyContent: 'space-between' }}>
+            <span style={{ color: C.muted, fontWeight: 600 }}>Total</span>
+            <span style={{ color: C.gold, fontWeight: 800, fontSize: '1.1rem' }}>{fmtMoeda(total)}</span>
+          </div>
+        </div>
+
+        {/* Desconto */}
+        <div style={{ marginBottom: '0.75rem' }}>
+          <label style={{ display: 'block', color: C.muted, fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '6px' }}>Desconto</label>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '6px', marginBottom: descontoTipo !== 'nenhum' ? '8px' : '0' }}>
+            {[['nenhum','Nenhum'],['valor','R$ Fixo'],['porcentagem','% Off']].map(([t, label]) => (
+              <button key={t} onClick={() => { resetDesconto(); setDescontoTipo(t) }} style={{
+                padding: '0.5rem 0', borderRadius: '10px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 700, border: 'none',
+                background: descontoTipo === t ? 'linear-gradient(145deg,#1a6b1a,#0d4a0d)' : 'rgba(255,255,255,0.07)',
+                color: descontoTipo === t ? '#fff' : C.muted,
+              }}>{label}</button>
+            ))}
+          </div>
+          {descontoTipo !== 'nenhum' && !descontoAutorizado && (
+            <div style={{ display: 'flex', gap: '6px', marginBottom: '6px' }}>
+              <input type="password" value={senhaInput} onChange={e => setSenhaInput(e.target.value)}
+                placeholder="Senha do admin" onKeyDown={e => e.key === 'Enter' && validarSenha()}
+                style={{ ...inputSt, flex: 1 }} />
+              <button onClick={validarSenha} style={{ padding: '0 1rem', borderRadius: '10px', cursor: 'pointer', background: 'linear-gradient(145deg,#1a6b1a,#0d4a0d)', border: 'none', color: '#fff', fontWeight: 700 }}>OK</button>
+            </div>
+          )}
+          {erroSenha && <p style={{ color: '#FF5252', fontSize: '0.72rem', margin: '0 0 6px', fontWeight: 700 }}>{erroSenha}</p>}
+          {descontoTipo !== 'nenhum' && descontoAutorizado && (<>
+            <input type="number" value={descontoValor} onChange={e => setDescontoValor(e.target.value)}
+              placeholder={descontoTipo === 'valor' ? 'Valor (R$)' : 'Porcentagem (%)'} min="0" step={descontoTipo === 'valor' ? '0.01' : '1'}
+              style={{ ...inputSt, marginBottom: '6px' }} />
+            <input type="text" value={descontoObs} onChange={e => setDescontoObs(e.target.value)}
+              placeholder="Motivo do desconto (obrigatorio)" style={{ ...inputSt, border: '1px solid rgba(0,200,0,0.3)' }} />
+          </>)}
+        </div>
+        {descontoCalc > 0 && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0.875rem', borderRadius: '10px', marginBottom: '0.75rem', background: 'rgba(0,180,0,0.1)', border: '1px solid rgba(0,200,0,0.25)' }}>
+            <span style={{ color: '#4ade80', fontSize: '0.85rem', fontWeight: 700 }}>{descontoTipo === 'porcentagem' ? `${descontoValor}%` : 'Desconto'}</span>
+            <span style={{ color: '#4ade80', fontWeight: 800 }}>- {fmtMoeda(descontoCalc)}</span>
+          </div>
+        )}
+
+        {/* Pagamento */}
+        <div style={{ marginBottom: '0.75rem' }}>
+          <label style={{ display: 'block', color: C.muted, fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '6px' }}>Pagamento</label>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '6px' }}>
+            {['dinheiro','pix','debito','credito'].map(p => (
+              <button key={p} onClick={() => { setPagamento(p); setValorRecebido('') }} style={{
+                padding: '0.55rem 0', borderRadius: '10px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 700, border: 'none',
+                background: pagamento === p ? `linear-gradient(145deg, ${C.red}, ${C.redDark})` : 'rgba(255,255,255,0.07)',
+                color: pagamento === p ? '#fff' : C.muted, textTransform: 'capitalize',
+              }}>{p === 'debito' ? 'Debito' : p === 'credito' ? 'Credito' : p === 'dinheiro' ? 'Dinheiro' : 'PIX'}</button>
+            ))}
+          </div>
+        </div>
+
+        {/* Troco */}
+        {pagamento === 'dinheiro' && (
+          <div style={{ marginBottom: '0.75rem' }}>
+            <label style={{ display: 'block', color: C.muted, fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '4px' }}>Valor recebido (R$)</label>
+            <input type="number" value={valorRecebido} onChange={e => setValorRecebido(e.target.value)} placeholder="0,00" min="0" step="0.01" style={inputSt} />
+            {valorRec > 0 && (
+              <div style={{ marginTop: '6px', padding: '0.5rem 0.875rem', borderRadius: '10px',
+                background: trocoNeg ? 'rgba(200,0,0,0.15)' : 'rgba(0,200,80,0.12)',
+                border: `1px solid ${trocoNeg ? 'rgba(200,0,0,0.35)' : 'rgba(0,200,80,0.3)'}`,
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              }}>
+                <span style={{ color: trocoNeg ? '#ff7777' : C.muted, fontSize: '0.85rem', fontWeight: 600 }}>{trocoNeg ? 'Insuficiente' : 'Troco'}</span>
+                {!trocoNeg && <span style={{ color: C.success, fontWeight: 800, fontSize: '1.2rem' }}>{fmtMoeda(troco)}</span>}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Confirmar */}
+        <button
+          onClick={() => onConfirmar({
+            pedidoId: pedido.id, pagamento,
+            troco: troco > 0 ? troco : null,
+            desconto: descontoCalc > 0 ? { tipo: descontoTipo, valor: descontoCalc, pct: descontoPct, obs: descontoObs } : null,
+          })}
+          disabled={enviando || trocoNeg || (descontoCalc > 0 && !descontoObs.trim())}
+          style={{
+            width: '100%', padding: '1rem', borderRadius: '14px',
+            cursor: enviando || trocoNeg ? 'not-allowed' : 'pointer',
+            fontSize: '1rem', fontWeight: 800, border: 'none',
+            background: trocoNeg || enviando ? 'rgba(255,255,255,0.08)' : `linear-gradient(145deg, ${C.success}, #009940)`,
+            color: trocoNeg || enviando ? C.muted : '#fff',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+          }}
+        >
+          {enviando ? 'Finalizando...' : `Finalizar — ${fmtMoeda(totalFinal)}`}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // ADMIN PRINCIPAL
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 export default function Admin() {
@@ -6600,6 +6767,8 @@ export default function Admin() {
   const [mesaAdicionando, setMesaAdicionando] = useState(null)
   const [sidebarAberta, setSidebarAberta] = useState(() => window.innerWidth >= 768)
   const [mobileOverlay, setMobileOverlay] = useState(false)
+  const [checkoutPedido, setCheckoutPedido] = useState(null)
+  const [fechandoCheckout, setFechandoCheckout] = useState(false)
 
   // UI
   const [autoprint, setAutoprint] = useState(() => localStorage.getItem('autoprint') === 'true')
@@ -6739,6 +6908,39 @@ export default function Admin() {
         body: JSON.stringify({ pedidoId: id, novoStatus }),
       }).catch(() => {})
     } catch (_) {}
+  }
+
+  async function fecharCheckout({ pedidoId, pagamento, troco, desconto }) {
+    setFechandoCheckout(true)
+    try {
+      const conta = pedidos.find(p => p.id === pedidoId)
+      const totalOriginal = Number(conta?.total || 0)
+      const descontoValorReal = desconto?.valor || 0
+      const totalFinal = Math.max(0, Math.round((totalOriginal - descontoValorReal) * 100) / 100)
+      const patchBody = { id: pedidoId, status: 'entregue', force_status: true, pagamento }
+      if (troco) patchBody.troco = troco
+      if (descontoValorReal > 0) {
+        patchBody.total = totalFinal
+        patchBody.subtotal = totalOriginal
+        const obsAtual = conta?.observacao || ''
+        const descontoInfo = `\uD83C\uDF81 DESCONTO: R$ ${descontoValorReal.toFixed(2).replace('.', ',')}${desconto.obs ? ` \u2014 ${desconto.obs}` : ''}`
+        patchBody.observacao = obsAtual ? `${obsAtual}\n${descontoInfo}` : descontoInfo
+        patchBody.desconto_tipo = desconto.tipo
+        patchBody.desconto_valor = descontoValorReal
+        patchBody.desconto_pct = desconto.pct || null
+        patchBody.desconto_obs = desconto.obs || ''
+      }
+      await fetch('/api/pedido', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(patchBody),
+      })
+      setCheckoutPedido(null)
+      setToast('Venda finalizada com sucesso!')
+      setTimeout(() => setToast(null), 4000)
+      carregarPedidos(true)
+    } catch (_) {}
+    setFechandoCheckout(false)
   }
 
   async function excluirPedido(id, skipConfirm) {
@@ -7215,6 +7417,7 @@ export default function Admin() {
               onExcluir={excluirPedido}
               onAtualizar={() => carregarPedidos()}
               onCarregarData={(data) => carregarPedidos(false, data)}
+              onFinalizar={p => setCheckoutPedido(p)}
             />
           )}
           {paginaAtiva === 'balcao' && (
@@ -7248,6 +7451,17 @@ export default function Admin() {
           )}
         </main>
       </div>
+
+      {/* Modal Checkout — Finalizar Pedido com pagamento + desconto */}
+      {checkoutPedido && (
+        <ModalCheckout
+          pedido={checkoutPedido}
+          onFechar={() => setCheckoutPedido(null)}
+          onConfirmar={fecharCheckout}
+          enviando={fechandoCheckout}
+          senhaAdmin={configLoja?.senha_desconto}
+        />
+      )}
 
       {/* Estilos globais injetados */}
       <style>{`
