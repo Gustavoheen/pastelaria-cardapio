@@ -46,6 +46,7 @@ module.exports = async function handler(req, res) {
       'especial_ativo', 'especial_nome', 'especial_descricao', 'especial_preco',
       'pix_chave', 'pix_tipo', 'pix_nome', 'endereco_loja', 'combos',
       'dias_funcionamento', 'taxa_entrega', 'entrega_ativa', 'bot_ativo',
+      'senha_desconto',
     ]
     campos.forEach(c => { if (body[c] !== undefined) payload[c] = body[c] })
 

@@ -94,6 +94,44 @@ module.exports = async function handler(req, res) {
     if (typeof body !== 'object') return res.status(400).json({ error: 'Body inválido.' })
     if (body.honeypot && body.honeypot !== '') return res.status(200).json({ numero: 'BOT', id: null })
 
+    // ── Verificar se loja está aberta (apenas pedidos externos) ──
+    if (body.origem !== 'balcao') {
+      try {
+        const { data: state } = await supabase
+          .from('store_state').select('status,horario_abertura,horario_fechamento,dias_funcionamento')
+          .eq('id', 1).maybeSingle()
+
+        if (state) {
+          let lojaAberta = false
+
+          if (state.status === 'aberta') {
+            lojaAberta = true
+          } else if (state.status === 'fechada') {
+            lojaAberta = false
+          } else {
+            // 'auto' — verifica horário e dia da semana (UTC-3)
+            const agora = new Date()
+            const offsetMs = -3 * 60 * 60 * 1000
+            const local = new Date(agora.getTime() + offsetMs)
+            const hh = local.getUTCHours()
+            const mm = local.getUTCMinutes()
+            const horaAtual = `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}`
+            const abre = state.horario_abertura || '00:00'
+            const fecha = state.horario_fechamento || '23:59'
+            const dentroHorario = horaAtual >= abre && horaAtual <= fecha
+            const diasFuncionamento = Array.isArray(state.dias_funcionamento) ? state.dias_funcionamento : []
+            const diaHoje = local.getUTCDay() // 0=dom … 6=sab
+            const diaNaLista = diasFuncionamento.length === 0 || diasFuncionamento.includes(diaHoje)
+            lojaAberta = dentroHorario && diaNaLista
+          }
+
+          if (!lojaAberta) {
+            return res.status(503).json({ error: 'A loja está fechada no momento. Tente novamente durante o horário de funcionamento.' })
+          }
+        }
+      } catch (_) { /* se falhar, deixa o pedido passar */ }
+    }
+
     const { nome, telefone, pagamento, itens, subtotal, total } = body
 
     if (!nome || !telefone || !pagamento || !Array.isArray(itens) || itens.length === 0) {
@@ -127,6 +165,12 @@ module.exports = async function handler(req, res) {
       endereco: tipoEntrega === 'entrega' && body.endereco ? body.endereco : null,
     }
     if (body.origem) insertData.origem = body.origem
+    if (body.desconto_tipo) {
+      insertData.desconto_tipo = body.desconto_tipo
+      insertData.desconto_valor = Number(body.desconto_valor) || 0
+      insertData.desconto_pct = body.desconto_pct ? Number(body.desconto_pct) : null
+      insertData.desconto_obs = body.desconto_obs || null
+    }
 
     const { data: pedido, error } = await supabase
       .from('orders')
@@ -147,6 +191,20 @@ module.exports = async function handler(req, res) {
     if (status) {
       const VALIDOS = ['recebido', 'preparando', 'pronto', 'entregue']
       if (!VALIDOS.includes(status)) return res.status(400).json({ error: 'Status inválido.' })
+
+      // Proteger pedidos do balcão: não pular direto para entregue/preparando após criação
+      // O frontend antigo (cacheado) faz PATCH para entregue logo após POST — ignorar isso
+      if ((status === 'entregue' || status === 'preparando') && !req.body.force_status) {
+        const { data: pedidoAtual } = await supabase.from('orders').select('status,origem,created_at').eq('id', id).single()
+        if (pedidoAtual?.origem === 'balcao' && pedidoAtual?.status === 'recebido') {
+          const idadeMs = Date.now() - new Date(pedidoAtual.created_at).getTime()
+          if (idadeMs < 10000) {
+            // Pedido acabou de ser criado — manter como recebido (ignorar auto-close do frontend cacheado)
+            return res.status(200).json(pedidoAtual)
+          }
+        }
+      }
+
       updates.status = status
     }
     if (itens !== undefined) updates.itens = typeof itens === 'string' ? itens : JSON.stringify(itens)
@@ -155,6 +213,12 @@ module.exports = async function handler(req, res) {
     if (pagamento !== undefined) updates.pagamento = pagamento
     if (nome !== undefined) updates.nome = nome
     if (observacao !== undefined) updates.observacao = observacao
+    if (req.body.desconto_tipo !== undefined) {
+      updates.desconto_tipo = req.body.desconto_tipo
+      updates.desconto_valor = Number(req.body.desconto_valor) || 0
+      updates.desconto_pct = req.body.desconto_pct ? Number(req.body.desconto_pct) : null
+      updates.desconto_obs = req.body.desconto_obs || null
+    }
 
     const { data: pedido, error } = await supabase
       .from('orders')

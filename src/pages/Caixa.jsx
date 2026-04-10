@@ -449,7 +449,7 @@ function SheetSabores({ tipo, onFechar, onAdicionar }) {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // SHEET DO CARRINHO (slide-up mobile)
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function SheetCarrinho({ aberto, onFechar, cart, onRemover, subtotal, onConfirmar, enviando, modo, mesaAdicionando, clientesCaderneta, onNovoCliente }) {
+function SheetCarrinho({ aberto, onFechar, cart, onRemover, subtotal, onConfirmar, enviando, modo, mesaAdicionando, clientesCaderneta, onNovoCliente, senhaAdmin }) {
   const [nome, setNome] = useState('')
   const [pagamento, setPagamento] = useState('dinheiro')
   const [valorRecebido, setValorRecebido] = useState('')
@@ -460,8 +460,26 @@ function SheetCarrinho({ aberto, onFechar, cart, onRemover, subtotal, onConfirma
   const [descontoValor, setDescontoValor] = useState('')
   const [descontoItem, setDescontoItem] = useState(null)
   const [descontoObs, setDescontoObs] = useState('')
+  const [senhaDesconto, setSenhaDesconto] = useState('')
+  const [descontoAutorizado, setDescontoAutorizado] = useState(false)
+  const [erroSenha, setErroSenha] = useState('')
+
+  function resetDesconto() {
+    setDescontoTipo('nenhum'); setDescontoValor(''); setDescontoItem(null)
+    setDescontoObs(''); setSenhaDesconto(''); setDescontoAutorizado(false); setErroSenha('')
+  }
+
+  function validarSenhaDesconto() {
+    const senhaCorreta = senhaAdmin || '1234'
+    if (senhaDesconto === senhaCorreta) {
+      setDescontoAutorizado(true); setErroSenha('')
+    } else {
+      setErroSenha('Senha incorreta'); setTimeout(() => setErroSenha(''), 2500)
+    }
+  }
 
   const descontoCalculado = (() => {
+    if (!descontoAutorizado) return 0
     if (descontoTipo === 'valor') {
       const v = parseFloat(String(descontoValor).replace(',', '.')) || 0
       return Math.min(v, subtotal)
@@ -477,6 +495,7 @@ function SheetCarrinho({ aberto, onFechar, cart, onRemover, subtotal, onConfirma
     return 0
   })()
   const totalComDesconto = Math.max(0, Math.round((subtotal - descontoCalculado) * 100) / 100)
+  const descontoPct = descontoTipo === 'porcentagem' ? (parseFloat(String(descontoValor).replace(',', '.')) || 0) : null
 
   const valorRec = parseFloat(String(valorRecebido).replace(',', '.')) || 0
   const troco = pagamento === 'dinheiro' && valorRec > totalComDesconto ? Math.round((valorRec - totalComDesconto) * 100) / 100 : 0
@@ -571,11 +590,11 @@ function SheetCarrinho({ aberto, onFechar, cart, onRemover, subtotal, onConfirma
           <label style={{ display: 'block', color: C.muted, fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '6px' }}>
             Desconto / Cortesia
           </label>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '6px', marginBottom: descontoTipo !== 'nenhum' ? '8px' : '0' }}>
-            {[['nenhum','Nenhum'],['valor','R$ Fixo'],['porcentagem','% Off'],['item','🎁 Item']].map(([t, label]) => (
-              <button key={t} onClick={() => { setDescontoTipo(t); setDescontoValor(''); setDescontoItem(null); setDescontoObs('') }} style={{
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '6px', marginBottom: descontoTipo !== 'nenhum' ? '8px' : '0' }}>
+            {[['nenhum','Nenhum'],['valor','R$ Fixo'],['porcentagem','% Off']].map(([t, label]) => (
+              <button key={t} onClick={() => resetDesconto() || setDescontoTipo(t)} style={{
                 padding: '0.5rem 0', borderRadius: '10px', cursor: 'pointer',
-                fontSize: '0.65rem', fontWeight: 700, border: 'none',
+                fontSize: '0.72rem', fontWeight: 700, border: 'none',
                 background: descontoTipo === t ? 'linear-gradient(145deg,#1a6b1a,#0d4a0d)' : 'rgba(255,255,255,0.07)',
                 color: descontoTipo === t ? '#fff' : C.muted,
               }}>
@@ -583,44 +602,49 @@ function SheetCarrinho({ aberto, onFechar, cart, onRemover, subtotal, onConfirma
               </button>
             ))}
           </div>
-          {descontoTipo === 'valor' && (
-            <input type="number" value={descontoValor} onChange={e => setDescontoValor(e.target.value)}
-              placeholder="Valor a descontar (R$)" min="0" step="0.01"
-              style={{ width: '100%', padding: '0.625rem 0.875rem', borderRadius: '10px', fontSize: '0.85rem',
-                background: 'rgba(255,255,255,0.07)', border: `1px solid ${C.border}`,
-                color: C.text, outline: 'none', boxSizing: 'border-box', marginBottom: descontoCalculado > 0 ? '6px' : '0' }} />
-          )}
-          {descontoTipo === 'porcentagem' && (
-            <input type="number" value={descontoValor} onChange={e => setDescontoValor(e.target.value)}
-              placeholder="Porcentagem (%)" min="0" max="100" step="1"
-              style={{ width: '100%', padding: '0.625rem 0.875rem', borderRadius: '10px', fontSize: '0.85rem',
-                background: 'rgba(255,255,255,0.07)', border: `1px solid ${C.border}`,
-                color: C.text, outline: 'none', boxSizing: 'border-box', marginBottom: descontoCalculado > 0 ? '6px' : '0' }} />
-          )}
-          {descontoTipo === 'item' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: descontoCalculado > 0 ? '6px' : '0' }}>
-              {cart.map(item => (
-                <button key={item.chave} onClick={() => setDescontoItem(descontoItem === item.chave ? null : item.chave)} style={{
-                  padding: '0.5rem 0.75rem', borderRadius: '10px', cursor: 'pointer',
-                  background: descontoItem === item.chave ? 'rgba(0,150,0,0.22)' : 'rgba(255,255,255,0.05)',
-                  border: `1px solid ${descontoItem === item.chave ? 'rgba(0,200,0,0.4)' : C.border}`,
-                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                }}>
-                  <span style={{ color: C.text, fontSize: '0.82rem', fontWeight: 600 }}>
-                    {descontoItem === item.chave ? '✓ ' : ''}{item.qtd > 1 ? `${item.qtd}x ` : ''}{item.nome}
-                  </span>
-                  <span style={{ color: C.gold, fontSize: '0.82rem', fontWeight: 700 }}>{fmtMoeda(item.preco * item.qtd)}</span>
-                </button>
-              ))}
+
+          {/* Senha do admin para autorizar */}
+          {descontoTipo !== 'nenhum' && !descontoAutorizado && (
+            <div style={{ marginBottom: '8px' }}>
+              <div style={{ display: 'flex', gap: '6px' }}>
+                <input type="password" value={senhaDesconto} onChange={e => setSenhaDesconto(e.target.value)}
+                  placeholder="Senha do administrador"
+                  onKeyDown={e => e.key === 'Enter' && validarSenhaDesconto()}
+                  style={{ flex: 1, padding: '0.625rem 0.875rem', borderRadius: '10px', fontSize: '0.85rem',
+                    background: 'rgba(255,255,255,0.07)', border: `1px solid ${erroSenha ? 'rgba(255,82,82,0.5)' : C.border}`,
+                    color: C.text, outline: 'none', boxSizing: 'border-box' }} />
+                <button onClick={validarSenhaDesconto} style={{
+                  padding: '0 1rem', borderRadius: '10px', cursor: 'pointer',
+                  background: 'linear-gradient(145deg,#1a6b1a,#0d4a0d)', border: 'none',
+                  color: '#fff', fontWeight: 700, fontSize: '0.82rem',
+                }}>OK</button>
+              </div>
+              {erroSenha && <p style={{ color: '#FF5252', fontSize: '0.72rem', margin: '4px 0 0', fontWeight: 700 }}>{erroSenha}</p>}
             </div>
           )}
-          {descontoTipo !== 'nenhum' && descontoCalculado > 0 && (
+
+          {/* Campos de desconto — só após senha */}
+          {descontoTipo !== 'nenhum' && descontoAutorizado && (<>
+            {descontoTipo === 'valor' && (
+              <input type="number" value={descontoValor} onChange={e => setDescontoValor(e.target.value)}
+                placeholder="Valor a descontar (R$)" min="0" step="0.01"
+                style={{ width: '100%', padding: '0.625rem 0.875rem', borderRadius: '10px', fontSize: '0.85rem',
+                  background: 'rgba(255,255,255,0.07)', border: `1px solid ${C.border}`,
+                  color: C.text, outline: 'none', boxSizing: 'border-box', marginBottom: '6px' }} />
+            )}
+            {descontoTipo === 'porcentagem' && (
+              <input type="number" value={descontoValor} onChange={e => setDescontoValor(e.target.value)}
+                placeholder="Porcentagem (%)" min="0" max="100" step="1"
+                style={{ width: '100%', padding: '0.625rem 0.875rem', borderRadius: '10px', fontSize: '0.85rem',
+                  background: 'rgba(255,255,255,0.07)', border: `1px solid ${C.border}`,
+                  color: C.text, outline: 'none', boxSizing: 'border-box', marginBottom: '6px' }} />
+            )}
             <input type="text" value={descontoObs} onChange={e => setDescontoObs(e.target.value)}
-              placeholder="Motivo da cortesia (ex: fidelidade, brinde, erro...)"
+              placeholder="Motivo do desconto (obrigatorio)"
               style={{ width: '100%', padding: '0.625rem 0.875rem', borderRadius: '10px', fontSize: '0.82rem',
                 background: 'rgba(255,255,255,0.07)', border: `1px solid rgba(0,200,0,0.3)`,
                 color: C.text, outline: 'none', boxSizing: 'border-box' }} />
-          )}
+          </>)}
         </div>
 
         {/* Resumo do desconto */}
@@ -631,10 +655,10 @@ function SheetCarrinho({ aberto, onFechar, cart, onRemover, subtotal, onConfirma
             background: 'rgba(0,180,0,0.1)', border: '1px solid rgba(0,200,0,0.25)',
           }}>
             <span style={{ color: '#4ade80', fontSize: '0.82rem', fontWeight: 700 }}>
-              {descontoTipo === 'porcentagem' ? `${descontoValor}% de desconto` : descontoTipo === 'item' ? '🎁 Item de cortesia' : '🎁 Desconto aplicado'}
+              {descontoTipo === 'porcentagem' ? `${descontoValor}% de desconto` : 'Desconto aplicado'}
             </span>
             <span style={{ color: '#4ade80', fontWeight: 800, fontSize: '0.9rem' }}>
-              − {fmtMoeda(descontoCalculado)}
+              - {fmtMoeda(descontoCalculado)}
             </span>
           </div>
         )}
@@ -824,9 +848,9 @@ function SheetCarrinho({ aberto, onFechar, cart, onRemover, subtotal, onConfirma
             nome, pagamento,
             troco: troco > 0 ? troco : null,
             clienteCaderneta,
-            desconto: descontoCalculado > 0 ? { tipo: descontoTipo, valor: descontoCalculado, obs: descontoObs } : null,
+            desconto: descontoCalculado > 0 ? { tipo: descontoTipo, valor: descontoCalculado, pct: descontoPct, obs: descontoObs } : null,
           })}
-          disabled={enviando || trocoNeg || !podeConfirmar}
+          disabled={enviando || trocoNeg || !podeConfirmar || (descontoCalculado > 0 && !descontoObs.trim())}
           style={{
             width: '100%', padding: '1rem', borderRadius: '14px',
             cursor: enviando || trocoNeg || !podeConfirmar ? 'not-allowed' : 'pointer',
@@ -864,6 +888,7 @@ function AbaBalcao({ onPedidoCriado, modo, setModo, mesaAdicionando, onCancelarM
   const [enviando, setEnviando] = useState(false)
   const [sucesso, setSucesso] = useState(null)
   const [bebidaSaboresMap, setBebidaSaboresMap] = useState({})
+  const [cardapioState, setCardapioState] = useState(null)
 
   useEffect(() => {
     fetch('/api/bebidas-sabores').then(r => r.json()).then(rows => {
@@ -872,7 +897,24 @@ function AbaBalcao({ onPedidoCriado, modo, setModo, mesaAdicionando, onCancelarM
       rows.forEach(r => { map[r.bebida_id] = r.sabores })
       setBebidaSaboresMap(map)
     }).catch(() => {})
+    // Buscar preços e itens desativados do admin
+    fetch('/api/cardapio-state').then(r => r.json()).then(cfg => {
+      if (cfg && typeof cfg === 'object') setCardapioState(cfg)
+    }).catch(() => {})
   }, [])
+
+  // Aplicar preços do admin sobre os dados estáticos
+  const precos = cardapioState?.precos || {}
+  const desativados = cardapioState?.desativados || []
+  const tiposPastelAtivos = TIPOS_PASTEL
+    .filter(t => !desativados.includes(t.id))
+    .map(t => ({ ...t, preco: precos[t.id] ?? t.preco }))
+  const pasteisDocesAtivos = PASTEIS_DOCES
+    .filter(d => !desativados.includes(d.id))
+    .map(d => ({ ...d, preco: precos[d.id] ?? d.preco }))
+  const bebidasAtivas = (categorias[0]?.itens || [])
+    .filter(b => !desativados.includes(b.id))
+    .map(b => ({ ...b, preco: precos[b.id] ?? b.preco }))
 
   // Item avulso
   const [avNome, setAvNome] = useState('')
@@ -1059,6 +1101,13 @@ function AbaBalcao({ onPedidoCriado, modo, setModo, mesaAdicionando, onCancelarM
         observacao: obsPrefix + descontoSufixo,
         tipo_entrega: isLocal ? 'local' : 'levar',
       }
+      // Campos dedicados de desconto
+      if (desconto?.valor > 0) {
+        body.desconto_tipo = desconto.tipo
+        body.desconto_valor = desconto.valor
+        body.desconto_pct = desconto.pct || null
+        body.desconto_obs = desconto.obs || ''
+      }
       const res = await fetch('/api/pedido', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1066,21 +1115,7 @@ function AbaBalcao({ onPedidoCriado, modo, setModo, mesaAdicionando, onCancelarM
       })
       if (res.ok) {
         const pedido = await res.json()
-        // For "levar" mark as entregue immediately
-        if (!isLocal) {
-          await fetch('/api/pedido', {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id: pedido.id, status: 'entregue' }),
-          })
-        } else {
-          // For "local" mark as preparando (open order)
-          await fetch('/api/pedido', {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id: pedido.id, status: 'preparando' }),
-          })
-        }
+        console.log("PEDIDO_V3_SEM_PATCH", pedido.numero)
         setSucesso({ numero: pedido.numero, modo: isLocal ? 'local' : 'levar' })
         setCart([])
         setCartAberto(false)
@@ -1213,7 +1248,7 @@ function AbaBalcao({ onPedidoCriado, modo, setModo, mesaAdicionando, onCancelarM
       {/* Pastéis */}
       {secao === 'pasteis' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
-          {TIPOS_PASTEL.map(tipo => (
+          {tiposPastelAtivos.map(tipo => (
             <button key={tipo.id} onClick={() => setTipoSabores(tipo)} style={{
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
               padding: '0.875rem 1rem', borderRadius: '14px', cursor: 'pointer', textAlign: 'left',
@@ -1245,7 +1280,7 @@ function AbaBalcao({ onPedidoCriado, modo, setModo, mesaAdicionando, onCancelarM
       {/* Pastéis Doces */}
       {secao === 'doces' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-          {PASTEIS_DOCES.map(doce => {
+          {pasteisDocesAtivos.map(doce => {
             const qtd = qtdDoce(doce.id)
             return (
               <div key={doce.id} style={{
@@ -1289,7 +1324,7 @@ function AbaBalcao({ onPedidoCriado, modo, setModo, mesaAdicionando, onCancelarM
       {/* Bebidas */}
       {secao === 'bebidas' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-          {categorias[0].itens.map(beb => {
+          {bebidasAtivas.map(beb => {
             const saboresEfetivos = bebidaSaboresMap[beb.id] ?? beb.sabores ?? []
             // Bebidas com sabores
             if (saboresEfetivos.length > 0) {
@@ -1474,6 +1509,7 @@ function AbaBalcao({ onPedidoCriado, modo, setModo, mesaAdicionando, onCancelarM
         mesaAdicionando={mesaAdicionando}
         clientesCaderneta={clientesCaderneta}
         onNovoCliente={novo => setClientesCaderneta(prev => [novo, ...prev])}
+        senhaAdmin={cardapioState?.senha_desconto}
       />
     </div>
   )
@@ -1638,13 +1674,29 @@ function AbaMesas({ pedidos, onAtualizar, carregando, onAdicionarItens, onFechar
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // SHEET FECHAR CONTA (para mesas abertas)
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function SheetFecharConta({ pedido, onFechar, onConfirmar, enviando }) {
+function SheetFecharConta({ pedido, onFechar, onConfirmar, enviando, senhaAdmin }) {
   const [pagamento, setPagamento] = useState(pedido?.pagamento || 'dinheiro')
   const [valorRecebido, setValorRecebido] = useState('')
   const [descontoTipo, setDescontoTipo] = useState('nenhum')
   const [descontoValor, setDescontoValor] = useState('')
-  const [descontoItem, setDescontoItem] = useState(null)
   const [descontoObs, setDescontoObs] = useState('')
+  const [senhaDesconto, setSenhaDesconto] = useState('')
+  const [descontoAutorizado, setDescontoAutorizado] = useState(false)
+  const [erroSenha, setErroSenha] = useState('')
+
+  function resetDesconto() {
+    setDescontoTipo('nenhum'); setDescontoValor(''); setDescontoObs('')
+    setSenhaDesconto(''); setDescontoAutorizado(false); setErroSenha('')
+  }
+
+  function validarSenhaDesconto() {
+    const senhaCorreta = senhaAdmin || '1234'
+    if (senhaDesconto === senhaCorreta) {
+      setDescontoAutorizado(true); setErroSenha('')
+    } else {
+      setErroSenha('Senha incorreta'); setTimeout(() => setErroSenha(''), 2500)
+    }
+  }
 
   if (!pedido) return null
 
@@ -1652,6 +1704,7 @@ function SheetFecharConta({ pedido, onFechar, onConfirmar, enviando }) {
   const itens = parseItens(pedido.itens)
 
   const descontoCalculado = (() => {
+    if (!descontoAutorizado) return 0
     if (descontoTipo === 'valor') {
       const v = parseFloat(String(descontoValor).replace(',', '.')) || 0
       return Math.min(v, total)
@@ -1660,13 +1713,10 @@ function SheetFecharConta({ pedido, onFechar, onConfirmar, enviando }) {
       const pct = parseFloat(String(descontoValor).replace(',', '.')) || 0
       return Math.round(total * Math.min(pct, 100) / 100 * 100) / 100
     }
-    if (descontoTipo === 'item' && descontoItem) {
-      const item = itens.find(i => i.nome === descontoItem)
-      return item ? Math.round(Number(item.preco || 0) * Number(item.qtd || 1) * 100) / 100 : 0
-    }
     return 0
   })()
   const totalComDesconto = Math.max(0, Math.round((total - descontoCalculado) * 100) / 100)
+  const descontoPct = descontoTipo === 'porcentagem' ? (parseFloat(String(descontoValor).replace(',', '.')) || 0) : null
 
   const valorRec = parseFloat(String(valorRecebido).replace(',', '.')) || 0
   const troco = pagamento === 'dinheiro' && valorRec > totalComDesconto ? Math.round((valorRec - totalComDesconto) * 100) / 100 : 0
@@ -1736,11 +1786,11 @@ function SheetFecharConta({ pedido, onFechar, onConfirmar, enviando }) {
           <label style={{ display: 'block', color: C.muted, fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '6px' }}>
             Desconto / Cortesia
           </label>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '6px', marginBottom: descontoTipo !== 'nenhum' ? '8px' : '0' }}>
-            {[['nenhum','Nenhum'],['valor','R$ Fixo'],['porcentagem','% Off'],['item','🎁 Item']].map(([t, label]) => (
-              <button key={t} onClick={() => { setDescontoTipo(t); setDescontoValor(''); setDescontoItem(null); setDescontoObs('') }} style={{
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '6px', marginBottom: descontoTipo !== 'nenhum' ? '8px' : '0' }}>
+            {[['nenhum','Nenhum'],['valor','R$ Fixo'],['porcentagem','% Off']].map(([t, label]) => (
+              <button key={t} onClick={() => resetDesconto() || setDescontoTipo(t)} style={{
                 padding: '0.5rem 0', borderRadius: '10px', cursor: 'pointer',
-                fontSize: '0.65rem', fontWeight: 700, border: 'none',
+                fontSize: '0.72rem', fontWeight: 700, border: 'none',
                 background: descontoTipo === t ? 'linear-gradient(145deg,#1a6b1a,#0d4a0d)' : 'rgba(255,255,255,0.07)',
                 color: descontoTipo === t ? '#fff' : C.muted,
               }}>
@@ -1748,49 +1798,49 @@ function SheetFecharConta({ pedido, onFechar, onConfirmar, enviando }) {
               </button>
             ))}
           </div>
-          {descontoTipo === 'valor' && (
-            <input type="number" value={descontoValor} onChange={e => setDescontoValor(e.target.value)}
-              placeholder="Valor a descontar (R$)" min="0" step="0.01"
-              style={{ width: '100%', padding: '0.625rem 0.875rem', borderRadius: '10px', fontSize: '0.85rem',
-                background: 'rgba(255,255,255,0.07)', border: `1px solid ${C.border}`,
-                color: C.text, outline: 'none', boxSizing: 'border-box', marginBottom: descontoCalculado > 0 ? '6px' : '0' }} />
-          )}
-          {descontoTipo === 'porcentagem' && (
-            <input type="number" value={descontoValor} onChange={e => setDescontoValor(e.target.value)}
-              placeholder="Porcentagem (%)" min="0" max="100" step="1"
-              style={{ width: '100%', padding: '0.625rem 0.875rem', borderRadius: '10px', fontSize: '0.85rem',
-                background: 'rgba(255,255,255,0.07)', border: `1px solid ${C.border}`,
-                color: C.text, outline: 'none', boxSizing: 'border-box', marginBottom: descontoCalculado > 0 ? '6px' : '0' }} />
-          )}
-          {descontoTipo === 'item' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: descontoCalculado > 0 ? '6px' : '0' }}>
-              {itens.map((item, idx) => {
-                const chave = `${item.nome}-${idx}`
-                return (
-                  <button key={chave} onClick={() => setDescontoItem(descontoItem === item.nome ? null : item.nome)} style={{
-                    padding: '0.5rem 0.75rem', borderRadius: '10px', cursor: 'pointer',
-                    background: descontoItem === item.nome ? 'rgba(0,150,0,0.22)' : 'rgba(255,255,255,0.05)',
-                    border: `1px solid ${descontoItem === item.nome ? 'rgba(0,200,0,0.4)' : C.border}`,
-                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                  }}>
-                    <span style={{ color: C.text, fontSize: '0.82rem', fontWeight: 600 }}>
-                      {descontoItem === item.nome ? '✓ ' : ''}{item.qtd > 1 ? `${item.qtd}x ` : ''}{item.nome}
-                    </span>
-                    <span style={{ color: C.gold, fontSize: '0.82rem', fontWeight: 700 }}>
-                      {fmtMoeda(Number(item.preco || 0) * Number(item.qtd || 1))}
-                    </span>
-                  </button>
-                )
-              })}
+
+          {/* Senha do admin para autorizar */}
+          {descontoTipo !== 'nenhum' && !descontoAutorizado && (
+            <div style={{ marginBottom: '8px' }}>
+              <div style={{ display: 'flex', gap: '6px' }}>
+                <input type="password" value={senhaDesconto} onChange={e => setSenhaDesconto(e.target.value)}
+                  placeholder="Senha do administrador"
+                  onKeyDown={e => e.key === 'Enter' && validarSenhaDesconto()}
+                  style={{ flex: 1, padding: '0.625rem 0.875rem', borderRadius: '10px', fontSize: '0.85rem',
+                    background: 'rgba(255,255,255,0.07)', border: `1px solid ${erroSenha ? 'rgba(255,82,82,0.5)' : C.border}`,
+                    color: C.text, outline: 'none', boxSizing: 'border-box' }} />
+                <button onClick={validarSenhaDesconto} style={{
+                  padding: '0 1rem', borderRadius: '10px', cursor: 'pointer',
+                  background: 'linear-gradient(145deg,#1a6b1a,#0d4a0d)', border: 'none',
+                  color: '#fff', fontWeight: 700, fontSize: '0.82rem',
+                }}>OK</button>
+              </div>
+              {erroSenha && <p style={{ color: '#FF5252', fontSize: '0.72rem', margin: '4px 0 0', fontWeight: 700 }}>{erroSenha}</p>}
             </div>
           )}
-          {descontoTipo !== 'nenhum' && descontoCalculado > 0 && (
+
+          {/* Campos de desconto — so apos senha */}
+          {descontoTipo !== 'nenhum' && descontoAutorizado && (<>
+            {descontoTipo === 'valor' && (
+              <input type="number" value={descontoValor} onChange={e => setDescontoValor(e.target.value)}
+                placeholder="Valor a descontar (R$)" min="0" step="0.01"
+                style={{ width: '100%', padding: '0.625rem 0.875rem', borderRadius: '10px', fontSize: '0.85rem',
+                  background: 'rgba(255,255,255,0.07)', border: `1px solid ${C.border}`,
+                  color: C.text, outline: 'none', boxSizing: 'border-box', marginBottom: '6px' }} />
+            )}
+            {descontoTipo === 'porcentagem' && (
+              <input type="number" value={descontoValor} onChange={e => setDescontoValor(e.target.value)}
+                placeholder="Porcentagem (%)" min="0" max="100" step="1"
+                style={{ width: '100%', padding: '0.625rem 0.875rem', borderRadius: '10px', fontSize: '0.85rem',
+                  background: 'rgba(255,255,255,0.07)', border: `1px solid ${C.border}`,
+                  color: C.text, outline: 'none', boxSizing: 'border-box', marginBottom: '6px' }} />
+            )}
             <input type="text" value={descontoObs} onChange={e => setDescontoObs(e.target.value)}
-              placeholder="Motivo da cortesia (ex: fidelidade, brinde, erro...)"
+              placeholder="Motivo do desconto (obrigatorio)"
               style={{ width: '100%', padding: '0.625rem 0.875rem', borderRadius: '10px', fontSize: '0.82rem',
                 background: 'rgba(255,255,255,0.07)', border: `1px solid rgba(0,200,0,0.3)`,
                 color: C.text, outline: 'none', boxSizing: 'border-box' }} />
-          )}
+          </>)}
         </div>
 
         {/* Resumo do desconto */}
@@ -1801,10 +1851,10 @@ function SheetFecharConta({ pedido, onFechar, onConfirmar, enviando }) {
             background: 'rgba(0,180,0,0.1)', border: '1px solid rgba(0,200,0,0.25)',
           }}>
             <span style={{ color: '#4ade80', fontSize: '0.82rem', fontWeight: 700 }}>
-              {descontoTipo === 'porcentagem' ? `${descontoValor}% de desconto` : descontoTipo === 'item' ? '🎁 Item de cortesia' : '🎁 Desconto aplicado'}
+              {descontoTipo === 'porcentagem' ? `${descontoValor}% de desconto` : 'Desconto aplicado'}
             </span>
             <span style={{ color: '#4ade80', fontWeight: 800, fontSize: '0.9rem' }}>
-              − {fmtMoeda(descontoCalculado)}
+              - {fmtMoeda(descontoCalculado)}
             </span>
           </div>
         )}
@@ -1872,9 +1922,9 @@ function SheetFecharConta({ pedido, onFechar, onConfirmar, enviando }) {
           onClick={() => onConfirmar({
             pedidoId: pedido.id, pagamento,
             troco: troco > 0 ? troco : null,
-            desconto: descontoCalculado > 0 ? { tipo: descontoTipo, valor: descontoCalculado, obs: descontoObs } : null,
+            desconto: descontoCalculado > 0 ? { tipo: descontoTipo, valor: descontoCalculado, pct: descontoPct, obs: descontoObs } : null,
           })}
-          disabled={enviando || trocoNeg}
+          disabled={enviando || trocoNeg || (descontoCalculado > 0 && !descontoObs.trim())}
           style={{
             width: '100%', padding: '1rem', borderRadius: '14px',
             cursor: enviando || trocoNeg ? 'not-allowed' : 'pointer',
@@ -1984,6 +2034,10 @@ export default function Caixa() {
         const obsAtual = conta?.observacao || ''
         const descontoInfo = `\uD83C\uDF81 DESCONTO: R$ ${descontoValorReal.toFixed(2).replace('.', ',')}${desconto.obs ? ` — ${desconto.obs}` : ''}`
         patchBody.observacao = obsAtual ? `${obsAtual}\n${descontoInfo}` : descontoInfo
+        patchBody.desconto_tipo = desconto.tipo
+        patchBody.desconto_valor = descontoValorReal
+        patchBody.desconto_pct = desconto.pct || null
+        patchBody.desconto_obs = desconto.obs || ''
       }
       await fetch('/api/pedido', {
         method: 'PATCH',
@@ -2160,6 +2214,7 @@ export default function Caixa() {
           onFechar={() => setContaSheet(null)}
           onConfirmar={fecharConta}
           enviando={fechandoConta}
+          senhaAdmin={cardapioState?.senha_desconto}
         />
       )}
 

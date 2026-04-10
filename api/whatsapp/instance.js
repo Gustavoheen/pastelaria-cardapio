@@ -9,15 +9,19 @@ const EVO_URL = () => (process.env.EVOLUTION_API_URL || '').replace(/\/$/, '')
 const EVO_KEY = () => process.env.EVOLUTION_API_KEY || ''
 const EVO_INST = () => (process.env.EVOLUTION_INSTANCE || 'carioca').trim()
 
-function evoFetch(path, options = {}, timeoutMs = 6000) {
+function evoFetch(path, options = {}, timeoutMs = 8000) {
   const url = `${EVO_URL()}${path}`
-  if (!EVO_URL()) return Promise.resolve({})
+  if (!EVO_URL()) return Promise.resolve({ _nourl: true })
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), timeoutMs)
   return fetch(url, { ...options, headers: { apikey: EVO_KEY(), ...options.headers }, signal: controller.signal })
-    .then(r => r.json().catch(() => ({})))
-    .catch(() => ({}))
+    .then(r => r.json().catch(() => ({ _parse_error: true })))
+    .catch(() => ({ _fetch_error: true }))
     .finally(() => clearTimeout(timer))
+}
+
+function evoError(r) {
+  return !r || r._nourl || r._fetch_error || r._parse_error
 }
 
 async function evoGet(path) {
@@ -55,8 +59,26 @@ module.exports = async function handler(req, res) {
 
       const statusRes = await evoGet(`/instance/connectionState/${instance}`)
 
-      // Se instância não existe ou houve erro
-      if (!statusRes || statusRes?.error || statusRes?.status === 404 || statusRes?.status === 400 || statusRes?.statusCode === 404 || statusRes?.statusCode === 400) {
+      // Falha de rede / timeout / sem URL configurada → instância não existe
+      if (evoError(statusRes)) {
+        return res.status(200).json({ connected: false, exists: false, instance, error: 'Evolution API indisponível' })
+      }
+
+      // Instância não existe no servidor (404/400) → auto-criar se ?qr=1
+      if (statusRes?.error || statusRes?.status === 404 || statusRes?.status === 400 || statusRes?.statusCode === 404 || statusRes?.statusCode === 400) {
+        if (req.query.qr === '1') {
+          // Auto-criar instância e retornar QR
+          const createRes = await evoPost('/instance/create', {
+            instanceName: instance,
+            integration: 'WHATSAPP-BAILEYS',
+            qrcode: true,
+          })
+          const qr = createRes?.qrcode?.base64 || createRes?.base64 || null
+          return res.status(200).json({
+            connected: false, exists: true, state: 'close', instance,
+            qrcode: qr,
+          })
+        }
         return res.status(200).json({ connected: false, exists: false, instance })
       }
 
@@ -66,8 +88,27 @@ module.exports = async function handler(req, res) {
       // QR só é buscado quando ?qr=1 (evita spam de chamadas no polling)
       let qrcode = null
       if (!connected && req.query.qr === '1') {
-        const qrRes = await evoGet(`/instance/connect/${instance}`)
-        qrcode = qrRes?.base64 || qrRes?.qrcode?.base64 || qrRes?.code || null
+        let qrRes = await evoGet(`/instance/connect/${instance}`)
+
+        // Se connect falhou ou não retornou QR, tentar restart + connect
+        const firstQr = qrRes?.base64 || qrRes?.qrcode?.base64 || qrRes?.qrCode?.base64
+          || qrRes?.data?.qrcode?.base64 || qrRes?.data?.base64 || null
+        if (!firstQr || evoError(qrRes)) {
+          // Restart: desconecta e reconecta para limpar estado preso
+          await evoDel(`/instance/logout/${instance}`).catch(() => {})
+          await new Promise(r => setTimeout(r, 1500))
+          qrRes = await evoGet(`/instance/connect/${instance}`)
+        }
+
+        if (!evoError(qrRes)) {
+          const raw = qrRes?.base64
+            || qrRes?.qrcode?.base64
+            || qrRes?.qrCode?.base64
+            || qrRes?.data?.qrcode?.base64
+            || qrRes?.data?.base64
+            || null
+          qrcode = typeof raw === 'string' && raw.length > 10 ? raw : null
+        }
       }
 
       return res.status(200).json({

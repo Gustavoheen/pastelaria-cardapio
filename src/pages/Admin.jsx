@@ -9,7 +9,7 @@ import {
   ChevronLeft, ChevronRight, Plus, Minus, Pencil, Trash2, Check,
   Wifi, WifiOff, Bell, RefreshCw, Store, ShoppingCart, Banknote, Calendar, Users,
   MessageCircle, Send, QrCode, UserCheck, Power, Bot, Search,
-  BookOpen, UserPlus, CreditCard,
+  BookOpen, UserPlus, CreditCard, Percent, Tag,
 } from 'lucide-react'
 import { CONFIG } from '../config.js'
 import { imprimirPedidoQZ, listarImpressoras, buscarImpressora, getNomeImpressoraSalva, salvarNomeImpressora, verificarQZConectado, iniciarKeepAlive, pararKeepAlive } from '../utils/qzPrint.js'
@@ -283,6 +283,8 @@ function PaginaDashboard({ pedidos, onVerPedidos, onExcluir, onSalvarPedido, car
   const faturamentoHoje = pedidosHoje.reduce((s, p) => s + (Number(p.total) || 0), 0)
   const ticketMedio = pedidosHoje.length > 0 ? faturamentoHoje / pedidosHoje.length : 0
   const pendentes = pedidos.filter(p => p.status === 'recebido' || p.status === 'preparando').length
+  const descontosHoje = pedidosHoje.filter(p => Number(p.desconto_valor) > 0)
+  const totalDescontosHoje = descontosHoje.reduce((s, p) => s + (Number(p.desconto_valor) || 0), 0)
 
   // Filtro de data do fluxo de caixa
   const [periodoFluxo, setPeriodoFluxo] = useState('hoje')
@@ -908,6 +910,9 @@ function PaginaDashboard({ pedidos, onVerPedidos, onExcluir, onSalvarPedido, car
         <KpiCard icon={Package} label="Pedidos Hoje" valor={pedidosHoje.length} sub="total do dia" />
         <KpiCard icon={TrendingUp} label="Ticket Medio" valor={fmtMoeda(ticketMedio)} sub="por pedido" />
         <KpiCard icon={Clock} label="Pendentes" valor={pendentes} sub={pendentes > 0 ? 'aguardando' : 'tudo em dia'} corSub={pendentes > 0 ? C.danger : C.success} />
+        {totalDescontosHoje > 0 && (
+          <KpiCard icon={Tag} label="Descontos Hoje" valor={`- ${fmtMoeda(totalDescontosHoje)}`} sub={`${descontosHoje.length} desconto${descontosHoje.length !== 1 ? 's' : ''}`} corSub="#ff6b6b" />
+        )}
       </div>
 
       {/* Graficos linha 1 */}
@@ -1778,9 +1783,11 @@ function PaginaCardapio({ config, onSalvar }) {
     try {
       await onSalvar(form)
       setOk(true)
+      window.scrollTo({ top: 0, behavior: 'smooth' })
       setTimeout(() => setOk(false), 2500)
     } catch (e) {
       setErroSalvar(e.message || 'Erro ao salvar')
+      window.scrollTo({ top: 0, behavior: 'smooth' })
       setTimeout(() => setErroSalvar(''), 5000)
     }
     setSalvando(false)
@@ -2869,33 +2876,33 @@ function PaginaCaderneta() {
                   {/* Header cliente */}
                   <div
                     onClick={() => setExpandido(aberto ? null : c.id)}
-                    style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.875rem 1rem', cursor: 'pointer' }}
+                    style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '1rem 1.1rem', cursor: 'pointer' }}
                   >
                     <div style={{
-                      width: '36px', height: '36px', borderRadius: '50%', flexShrink: 0,
-                      background: 'linear-gradient(145deg, rgba(200,0,0,0.3), rgba(100,0,0,0.4))',
-                      border: '1px solid rgba(200,0,0,0.2)',
+                      width: '44px', height: '44px', borderRadius: '50%', flexShrink: 0,
+                      background: 'linear-gradient(145deg, rgba(200,0,0,0.35), rgba(100,0,0,0.5))',
+                      border: '1px solid rgba(200,0,0,0.25)',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      color: C.gold, fontWeight: 900, fontSize: '0.85rem',
+                      color: C.gold, fontWeight: 900, fontSize: '1.05rem',
                     }}>
                       {(c.nome || '?').charAt(0).toUpperCase()}
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ color: C.text, fontWeight: 700, fontSize: '0.88rem' }}>
+                      <div style={{ color: '#fff', fontWeight: 700, fontSize: '1rem' }}>
                         {c.nome}
-                        {vencidosCliente.length > 0 && <span style={{ marginLeft: 6, color: C.danger, fontSize: '0.72rem', fontWeight: 800 }}>⚠️ {vencidosCliente.length} vencido{vencidosCliente.length > 1 ? 's' : ''}</span>}
+                        {vencidosCliente.length > 0 && <span style={{ marginLeft: 6, color: '#ff8080', fontSize: '0.82rem', fontWeight: 800 }}>⚠️ {vencidosCliente.length} vencido{vencidosCliente.length > 1 ? 's' : ''}</span>}
                       </div>
-                      <div style={{ color: C.muted, fontSize: '0.72rem' }}>
+                      <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.82rem', marginTop: '2px' }}>
                         {(c.telefone || '').replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3')}
                         {c.cpf ? ` · CPF ${c.cpf}` : ''}
                       </div>
                     </div>
                     <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                      <div style={{ fontWeight: 800, fontSize: '0.9rem', color: saldo > 0 ? '#ff9944' : C.success }}>
+                      <div style={{ fontWeight: 800, fontSize: '1.05rem', color: saldo > 0 ? '#ff9944' : '#00e676' }}>
                         {fmtMoeda(saldo)}
                       </div>
                       {c.limite_credito && (
-                        <div style={{ fontSize: '0.68rem', color: limiteAtingido ? C.danger : C.muted }}>
+                        <div style={{ fontSize: '0.78rem', color: limiteAtingido ? '#ff8080' : 'rgba(255,255,255,0.5)' }}>
                           limite {fmtMoeda(c.limite_credito)}
                         </div>
                       )}
@@ -2914,11 +2921,11 @@ function PaginaCaderneta() {
                         <div style={{ display: 'flex', gap: '6px' }}>
                           <button
                             onClick={() => { setEditandoLimite(editandoLimite === c.id ? null : c.id); setLimiteInput(c.limite_credito ?? '') }}
-                            style={{ padding: '3px 8px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.68rem', fontWeight: 700, background: 'rgba(255,200,0,0.1)', border: '1px solid rgba(255,200,0,0.3)', color: C.gold }}
-                          ><CreditCard size={11} style={{ marginRight: 3 }} />Limite</button>
+                            style={{ padding: '7px 12px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 700, background: 'rgba(255,200,0,0.12)', border: '1px solid rgba(255,200,0,0.35)', color: C.gold, display: 'flex', alignItems: 'center', gap: '4px', touchAction: 'manipulation' }}
+                          ><CreditCard size={13} />Limite</button>
                           <button
                             onClick={() => setNovaEntradaCliente(novaEntradaCliente === c.id ? null : c.id)}
-                            style={{ padding: '3px 10px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.72rem', fontWeight: 700, background: 'rgba(0,200,80,0.12)', border: '1px solid rgba(0,200,80,0.3)', color: C.success }}
+                            style={{ padding: '7px 14px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.88rem', fontWeight: 700, background: 'rgba(0,200,80,0.14)', border: '1px solid rgba(0,200,80,0.35)', color: '#00e676', touchAction: 'manipulation' }}
                           >+ Lançar</button>
                         </div>
                       </div>
@@ -2955,11 +2962,11 @@ function PaginaCaderneta() {
                           {vencidosCliente.length > 0 && (
                             <>
                               <div style={{ color: C.danger, fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '2px' }}>⚠️ Vencidos</div>
-                              {vencidosCliente.map(e => <EntradaCadernetaRow key={e.id} e={e} hoje={hoje} C={C} inputSt={inputSt} editandoVencimento={editandoVencimento} vencimentoInput={vencimentoInput} setEditandoVencimento={setEditandoVencimento} setVencimentoInput={setVencimentoInput} marcarPago={marcarPago} removerEntrada={removerEntrada} salvarVencimento={salvarVencimento} />)}
+                              {vencidosCliente.map(e => <EntradaCadernetaRow key={e.id} e={e} hoje={hoje} C={C} inputSt={inputSt} editandoVencimento={editandoVencimento} vencimentoInput={vencimentoInput} setEditandoVencimento={setEditandoVencimento} setVencimentoInput={setVencimentoInput} marcarPago={marcarPago} removerEntrada={removerEntrada} salvarVencimento={salvarVencimento} abaterEntrada={abaterEntrada} />)}
                               {normaisCliente.length > 0 && <div style={{ borderTop: `1px solid ${C.cardBorder}`, margin: '4px 0' }} />}
                             </>
                           )}
-                          {normaisCliente.map(e => <EntradaCadernetaRow key={e.id} e={e} hoje={hoje} C={C} inputSt={inputSt} editandoVencimento={editandoVencimento} vencimentoInput={vencimentoInput} setEditandoVencimento={setEditandoVencimento} setVencimentoInput={setVencimentoInput} marcarPago={marcarPago} removerEntrada={removerEntrada} salvarVencimento={salvarVencimento} />)}
+                          {normaisCliente.map(e => <EntradaCadernetaRow key={e.id} e={e} hoje={hoje} C={C} inputSt={inputSt} editandoVencimento={editandoVencimento} vencimentoInput={vencimentoInput} setEditandoVencimento={setEditandoVencimento} setVencimentoInput={setVencimentoInput} marcarPago={marcarPago} removerEntrada={removerEntrada} salvarVencimento={salvarVencimento} abaterEntrada={abaterEntrada} />)}
                         </div>
                       )}
                     </div>
@@ -3086,54 +3093,59 @@ function EntradaCadernetaRow({ e, hoje, C, inputSt, editandoVencimento, vencimen
 
   return (
     <div style={{
-      display: 'flex', flexDirection: 'column', gap: '4px',
-      padding: '0.5rem 0.75rem', borderRadius: '8px',
+      display: 'flex', flexDirection: 'column', gap: '8px',
+      padding: '0.75rem 1rem', borderRadius: '10px',
       background: e.pago ? 'rgba(0,200,80,0.06)' : (vencido ? 'rgba(255,50,50,0.1)' : 'rgba(255,100,0,0.08)'),
       border: `1px solid ${e.pago ? 'rgba(0,200,80,0.2)' : (vencido ? 'rgba(255,50,50,0.35)' : 'rgba(255,100,0,0.25)')}`,
-      opacity: e.pago ? 0.7 : 1,
+      opacity: e.pago ? 0.75 : 1,
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ color: e.pago ? C.muted : C.text, fontSize: '0.8rem', fontWeight: 600, textDecoration: e.pago ? 'line-through' : 'none' }}>
+          <div style={{ color: e.pago ? 'rgba(255,255,255,0.5)' : '#fff', fontSize: '0.95rem', fontWeight: 700, textDecoration: e.pago ? 'line-through' : 'none', lineHeight: 1.3 }}>
             {e.descricao || 'Lançamento'}
           </div>
-          <div style={{ color: C.muted, fontSize: '0.68rem', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <div style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.82rem', display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '3px' }}>
             <span>{e.data || new Date(e.created_at).toLocaleDateString('pt-BR')}</span>
             {e.vencimento
-              ? <span style={{ color: vencido ? C.danger : C.muted }}>📅 vence {new Date(e.vencimento + 'T12:00:00').toLocaleDateString('pt-BR')}</span>
+              ? <span style={{ color: vencido ? '#ff8080' : 'rgba(255,255,255,0.55)' }}>📅 vence {new Date(e.vencimento + 'T12:00:00').toLocaleDateString('pt-BR')}</span>
               : !e.pago && (
                   <button onClick={() => { setEditandoVencimento(e.id); setVencimentoInput('') }}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: C.muted, fontSize: '0.66rem', padding: 0, textDecoration: 'underline' }}>+ vencimento</button>
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.7)', fontSize: '0.82rem', padding: 0, textDecoration: 'underline', touchAction: 'manipulation' }}>+ vencimento</button>
                 )
             }
           </div>
         </div>
-        <div style={{ color: e.pago ? C.muted : '#ff9944', fontWeight: 800, fontSize: '0.85rem', flexShrink: 0 }}>{fmtMoeda(e.valor)}</div>
-        {!e.pago && e.vencimento && (
-          <button onClick={() => { setEditandoVencimento(editandoVencimento === e.id ? null : e.id); setVencimentoInput(e.vencimento || '') }}
-            title="Editar vencimento"
-            style={{ width: '24px', height: '24px', borderRadius: '6px', cursor: 'pointer', flexShrink: 0, background: 'none', border: `1px solid ${C.cardBorder}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-          ><Calendar size={11} /></button>
-        )}
-        {/* Abater parcial */}
-        {!e.pago && (
-          <button onClick={() => { setModoAbate(v => !v); setAbateValor('') }} title="Abater pagamento parcial"
-            style={{ width: '28px', height: '28px', borderRadius: '6px', cursor: 'pointer', flexShrink: 0, background: modoAbate ? 'rgba(100,100,255,0.2)' : 'rgba(255,255,255,0.06)', border: `1px solid ${modoAbate ? 'rgba(100,100,255,0.5)' : C.cardBorder}`, color: modoAbate ? '#aaaaff' : C.muted, fontSize: '0.65rem', fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-          >$</button>
-        )}
-        {/* Quitar tudo */}
-        <button onClick={() => marcarPago(e.id, !e.pago)} title={e.pago ? 'Desfazer pagamento' : 'Quitar tudo'}
-          style={{ width: '28px', height: '28px', borderRadius: '6px', cursor: 'pointer', flexShrink: 0, background: e.pago ? 'rgba(255,255,255,0.08)' : 'rgba(0,200,80,0.15)', border: `1px solid ${e.pago ? 'rgba(255,255,255,0.12)' : 'rgba(0,200,80,0.4)'}`, color: e.pago ? C.muted : C.success, fontSize: '0.75rem', fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-        >{e.pago ? '↩' : '✓'}</button>
-        <button onClick={() => removerEntrada(e.id)} title="Remover"
-          style={{ width: '24px', height: '24px', borderRadius: '6px', cursor: 'pointer', flexShrink: 0, background: 'none', border: 'none', color: 'rgba(255,100,100,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-        >✕</button>
+        <div style={{ color: e.pago ? 'rgba(255,255,255,0.4)' : '#ff9944', fontWeight: 800, fontSize: '1.05rem', flexShrink: 0, paddingTop: '2px' }}>{fmtMoeda(e.valor)}</div>
+
+        {/* Botões de ação */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
+          {!e.pago && e.vencimento && (
+            <button onClick={() => { setEditandoVencimento(editandoVencimento === e.id ? null : e.id); setVencimentoInput(e.vencimento || '') }}
+              title="Editar vencimento"
+              style={{ width: '40px', height: '40px', borderRadius: '8px', cursor: 'pointer', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', touchAction: 'manipulation' }}
+            ><Calendar size={15} /></button>
+          )}
+          {/* Abater parcial */}
+          {!e.pago && (
+            <button onClick={() => { setModoAbate(v => !v); setAbateValor('') }} title="Abater pagamento parcial"
+              style={{ width: '40px', height: '40px', borderRadius: '8px', cursor: 'pointer', background: modoAbate ? 'rgba(100,100,255,0.25)' : 'rgba(255,255,255,0.1)', border: `1px solid ${modoAbate ? 'rgba(100,100,255,0.5)' : 'rgba(255,255,255,0.2)'}`, color: modoAbate ? '#aaaaff' : '#fff', fontSize: '1rem', fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center', touchAction: 'manipulation' }}
+            >$</button>
+          )}
+          {/* Quitar tudo */}
+          <button onClick={() => marcarPago(e.id, !e.pago)} title={e.pago ? 'Desfazer pagamento' : 'Quitar tudo'}
+            style={{ width: '40px', height: '40px', borderRadius: '8px', cursor: 'pointer', background: e.pago ? 'rgba(255,255,255,0.08)' : 'rgba(0,200,80,0.2)', border: `1px solid ${e.pago ? 'rgba(255,255,255,0.2)' : 'rgba(0,200,80,0.5)'}`, color: e.pago ? '#fff' : '#00e676', fontSize: '1.1rem', fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center', touchAction: 'manipulation' }}
+          >{e.pago ? '↩' : '✓'}</button>
+          {/* Remover */}
+          <button onClick={() => removerEntrada(e.id)} title="Remover"
+            style={{ width: '40px', height: '40px', borderRadius: '8px', cursor: 'pointer', background: 'rgba(255,80,80,0.1)', border: '1px solid rgba(255,80,80,0.3)', color: '#ff8080', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem', touchAction: 'manipulation' }}
+          >✕</button>
+        </div>
       </div>
 
       {/* Abatimento parcial */}
       {modoAbate && (
-        <div style={{ display: 'flex', gap: '6px', alignItems: 'center', paddingTop: '2px', background: 'rgba(100,100,255,0.06)', borderRadius: '8px', padding: '0.5rem 0.625rem' }}>
-          <span style={{ color: C.muted, fontSize: '0.72rem', whiteSpace: 'nowrap' }}>Pagou:</span>
+        <div style={{ display: 'flex', gap: '6px', alignItems: 'center', background: 'rgba(100,100,255,0.08)', borderRadius: '8px', padding: '0.6rem 0.75rem' }}>
+          <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>Pagou:</span>
           <input
             type="number" value={abateValor} onChange={ev => setAbateValor(ev.target.value)}
             placeholder={`máx ${fmtMoeda(e.valor)}`} min="0.01" step="0.01" max={e.valor}
@@ -3141,26 +3153,26 @@ function EntradaCadernetaRow({ e, hoje, C, inputSt, editandoVencimento, vencimen
             autoFocus
           />
           {parseFloat(abateValor) > 0 && parseFloat(abateValor) < Number(e.valor) && (
-            <span style={{ color: C.muted, fontSize: '0.7rem', whiteSpace: 'nowrap' }}>
+            <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.82rem', whiteSpace: 'nowrap' }}>
               resta {fmtMoeda(Number(e.valor) - parseFloat(abateValor))}
             </span>
           )}
           <button onClick={confirmarAbate}
             disabled={!(parseFloat(abateValor) > 0) || parseFloat(abateValor) > Number(e.valor)}
-            style={{ padding: '0.4rem 0.75rem', borderRadius: '8px', cursor: 'pointer', fontWeight: 700, fontSize: '0.78rem', border: 'none', background: `linear-gradient(145deg, ${C.red}, ${C.redDark})`, color: '#fff', whiteSpace: 'nowrap' }}
+            style={{ padding: '0.5rem 0.875rem', borderRadius: '8px', cursor: 'pointer', fontWeight: 700, fontSize: '0.88rem', border: 'none', background: `linear-gradient(145deg, ${C.red}, ${C.redDark})`, color: '#fff', whiteSpace: 'nowrap', touchAction: 'manipulation' }}
           >Abater</button>
           <button onClick={() => { setModoAbate(false); setAbateValor('') }}
-            style={{ padding: '0.4rem 0.5rem', borderRadius: '8px', cursor: 'pointer', background: 'none', border: `1px solid ${C.cardBorder}`, color: C.muted, fontSize: '0.8rem' }}
+            style={{ padding: '0.5rem 0.625rem', borderRadius: '8px', cursor: 'pointer', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', color: '#fff', fontSize: '0.9rem', touchAction: 'manipulation' }}
           >✕</button>
         </div>
       )}
 
       {/* Edição de vencimento */}
       {editandoVencimento === e.id && (
-        <div style={{ display: 'flex', gap: '6px', alignItems: 'center', paddingTop: '2px' }}>
+        <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
           <input type="date" value={vencimentoInput} onChange={ev => setVencimentoInput(ev.target.value)} style={{ ...inputSt, flex: 1, colorScheme: 'dark' }} />
-          <button onClick={() => salvarVencimento(e.id)} style={{ padding: '0.4rem 0.75rem', borderRadius: '8px', cursor: 'pointer', fontWeight: 700, fontSize: '0.78rem', border: 'none', background: `linear-gradient(145deg, ${C.red}, ${C.redDark})`, color: '#fff' }}>Salvar</button>
-          <button onClick={() => { setEditandoVencimento(null); setVencimentoInput('') }} style={{ padding: '0.4rem 0.5rem', borderRadius: '8px', cursor: 'pointer', background: 'none', border: `1px solid ${C.cardBorder}`, color: C.muted, fontSize: '0.8rem' }}>✕</button>
+          <button onClick={() => salvarVencimento(e.id)} style={{ padding: '0.5rem 0.875rem', borderRadius: '8px', cursor: 'pointer', fontWeight: 700, fontSize: '0.88rem', border: 'none', background: `linear-gradient(145deg, ${C.red}, ${C.redDark})`, color: '#fff', touchAction: 'manipulation' }}>Salvar</button>
+          <button onClick={() => { setEditandoVencimento(null); setVencimentoInput('') }} style={{ padding: '0.5rem 0.625rem', borderRadius: '8px', cursor: 'pointer', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', color: '#fff', fontSize: '0.9rem', touchAction: 'manipulation' }}>✕</button>
         </div>
       )}
     </div>
@@ -3787,6 +3799,10 @@ function PaginaRelatorios({ pedidosTodos }) {
   })
   const topProdutos = Object.entries(produtosCount).sort((a, b) => b[1] - a[1]).slice(0, 8)
 
+  // Metricas de desconto
+  const pedidosComDesconto = pedidos.filter(p => Number(p.desconto_valor) > 0)
+  const totalDescontos = pedidosComDesconto.reduce((s, p) => s + (Number(p.desconto_valor) || 0), 0)
+
   // Grafico linha por dia
   const diasMap = {}
   pedidos.forEach(p => {
@@ -3888,7 +3904,51 @@ function PaginaRelatorios({ pedidosTodos }) {
         <KpiCard icon={Package} label="Total de Pedidos" valor={pedidos.length} />
         <KpiCard icon={TrendingUp} label="Ticket Medio" valor={fmtMoeda(ticket)} />
         <KpiCard icon={BarChart2} label="Pagto Mais Usado" valor={pagMaisUsado.charAt(0).toUpperCase() + pagMaisUsado.slice(1)} />
+        {totalDescontos > 0 && (
+          <KpiCard icon={Tag} label="Total Descontos" valor={`- ${fmtMoeda(totalDescontos)}`} sub={`${pedidosComDesconto.length} pedido${pedidosComDesconto.length !== 1 ? 's' : ''}`} />
+        )}
       </div>
+
+      {/* Detalhamento de descontos */}
+      {pedidosComDesconto.length > 0 && (
+        <div style={cardStyle}>
+          <h3 style={{ color: C.text, fontWeight: 800, fontSize: '0.88rem', margin: '0 0 1rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+            Descontos Concedidos
+          </h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            {pedidosComDesconto.map(p => (
+              <div key={p.id} style={{
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                padding: '0.625rem 0.875rem', borderRadius: '10px',
+                background: 'rgba(255,82,82,0.06)', border: '1px solid rgba(255,82,82,0.15)',
+                flexWrap: 'wrap', gap: '4px',
+              }}>
+                <div style={{ flex: 1, minWidth: '140px' }}>
+                  <div style={{ color: C.text, fontWeight: 700, fontSize: '0.82rem' }}>
+                    #{p.numero} - {p.nome}
+                  </div>
+                  <div style={{ color: C.muted, fontSize: '0.7rem' }}>
+                    {fmtHora(p.created_at)}
+                    {p.desconto_tipo === 'porcentagem' && p.desconto_pct ? ` | ${p.desconto_pct}%` : ''}
+                    {p.desconto_obs ? ` | ${p.desconto_obs}` : ''}
+                  </div>
+                </div>
+                <span style={{ color: '#ff6b6b', fontWeight: 800, fontSize: '0.9rem' }}>
+                  - {fmtMoeda(Number(p.desconto_valor))}
+                </span>
+              </div>
+            ))}
+          </div>
+          <div style={{
+            display: 'flex', justifyContent: 'flex-end', marginTop: '0.75rem',
+            padding: '0.5rem 0', borderTop: '1px solid rgba(255,255,255,0.08)',
+          }}>
+            <span style={{ color: '#ff6b6b', fontWeight: 800, fontSize: '1rem' }}>
+              Total: - {fmtMoeda(totalDescontos)}
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* Grafico linha vendas por dia */}
       {dadosDias.length > 1 && (
@@ -4010,7 +4070,11 @@ function PaginaWhatsApp() {
       const url = comQR ? '/api/whatsapp/instance?qr=1' : '/api/whatsapp/instance'
       const res = await fetch(url)
       const data = await res.json()
-      setStatus(data)
+      setStatus(prev => {
+        if (data.connected) return data
+        // Sempre usar QR novo — QR antigo já expirou (dura ~30s)
+        return { ...data, qrcode: data.qrcode || null }
+      })
     } catch { setStatus({ connected: false, exists: false, error: true }) }
   }
 
@@ -4078,13 +4142,13 @@ function PaginaWhatsApp() {
     }, 15000)
   }
 
-  // Polling com QR — usado enquanto aguarda conexão (mais rápido)
+  // Polling com QR — usado enquanto aguarda conexão (QR expira em ~30s)
   function iniciarPollingQR() {
     if (timerRef.current) clearInterval(timerRef.current)
     timerRef.current = setInterval(async () => {
       await carregarStatus(true)
       await carregarSessoes()
-    }, 7000)
+    }, 4000)
   }
 
   useEffect(() => {
@@ -4099,6 +4163,7 @@ function PaginaWhatsApp() {
     if (status?.connected) {
       iniciarPolling()
     }
+    return () => { if (timerRef.current) clearInterval(timerRef.current) }
   }, [status?.connected])
 
   if (loading) return <p style={{ color: C.muted, textAlign: 'center', padding: '3rem' }}>Carregando...</p>
@@ -4227,7 +4292,7 @@ function PaginaWhatsApp() {
         </div>
 
         {/* QR CODE */}
-        {!status?.connected && status?.qrcode && (
+        {!status?.connected && typeof status?.qrcode === 'string' && status.qrcode.length > 10 && (
           <div style={{ marginTop: '1.25rem', textAlign: 'center' }}>
             <p style={{ color: C.gold, fontWeight: 700, fontSize: '0.85rem', marginBottom: '0.75rem' }}>
               Escaneie com o WhatsApp da loja:
@@ -4236,14 +4301,26 @@ function PaginaWhatsApp() {
               display: 'inline-block', padding: '1rem', background: '#fff', borderRadius: '16px',
               boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
             }}>
-              {status.qrcode.startsWith('data:') ? (
+              {status.qrcode.startsWith('data:image') ? (
                 <img src={status.qrcode} alt="QR Code" style={{ width: '280px', height: '280px' }} />
               ) : (
-                <img src={`data:image/png;base64,${status.qrcode}`} alt="QR Code" style={{ width: '280px', height: '280px' }} />
+                <img src={`data:image/png;base64,${status.qrcode}`} alt="QR Code" style={{ width: '280px', height: '280px' }} onError={e => { e.target.style.display = 'none' }} />
               )}
             </div>
             <p style={{ color: C.muted, fontSize: '0.72rem', marginTop: '0.5rem' }}>
-              O QR Code atualiza a cada 30 segundos
+              O QR Code atualiza a cada 30 segundos. Escaneie rapidamente.
+            </p>
+          </div>
+        )}
+        {!status?.connected && status?.exists && !status?.qrcode && !status?.error && (
+          <p style={{ color: C.muted, fontSize: '0.8rem', marginTop: '1rem', textAlign: 'center' }}>
+            Clique em "Gerar QR Code" para conectar.
+          </p>
+        )}
+        {status?.error && (
+          <div style={{ marginTop: '0.75rem', padding: '0.75rem', borderRadius: '10px', background: 'rgba(255,82,82,0.1)', border: '1px solid rgba(255,82,82,0.3)' }}>
+            <p style={{ color: '#FF5252', fontSize: '0.82rem', margin: 0, fontWeight: 700 }}>
+              ⚠️ Não foi possível conectar à Evolution API. Verifique se a URL e API Key estão configuradas nas variáveis de ambiente.
             </p>
           </div>
         )}
@@ -4497,6 +4574,7 @@ function PaginaConfiguracoes({ autoprint, onToggleAutoprint, onTestarImpressao, 
     dias_funcionamento: config?.dias_funcionamento || [0, 1, 2, 3, 4, 5, 6],
     entrega_ativa: config?.entrega_ativa ?? false,
     taxa_entrega: config?.taxa_entrega ?? 0,
+    senha_desconto: config?.senha_desconto || '1234',
   })
 
   useEffect(() => {
@@ -4514,6 +4592,7 @@ function PaginaConfiguracoes({ autoprint, onToggleAutoprint, onTestarImpressao, 
       dias_funcionamento: config.dias_funcionamento ?? f.dias_funcionamento,
       entrega_ativa: config.entrega_ativa ?? f.entrega_ativa,
       taxa_entrega: config.taxa_entrega ?? f.taxa_entrega,
+      senha_desconto: config.senha_desconto ?? f.senha_desconto,
     }))
   }, [config])
 
@@ -4528,9 +4607,11 @@ function PaginaConfiguracoes({ autoprint, onToggleAutoprint, onTestarImpressao, 
     try {
       await onSalvar(form)
       setOk(true)
+      window.scrollTo({ top: 0, behavior: 'smooth' })
       setTimeout(() => setOk(false), 2500)
     } catch (e) {
       setErroSalvar(e.message || 'Erro ao salvar')
+      window.scrollTo({ top: 0, behavior: 'smooth' })
       setTimeout(() => setErroSalvar(''), 5000)
     }
     setSalvando(false)
@@ -4660,6 +4741,23 @@ function PaginaConfiguracoes({ autoprint, onToggleAutoprint, onTestarImpressao, 
         <p style={{ color: C.muted, fontSize: '0.71rem', margin: '4px 0 0', fontStyle: 'italic' }}>
           Exibido para o cliente na tela de finalização do pedido.
         </p>
+      </div>
+
+      {/* Senha de Desconto */}
+      <div style={cardStyle}>
+        <h3 style={{ color: C.text, fontWeight: 800, fontSize: '0.92rem', margin: '0 0 0.875rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+          Senha de Desconto
+        </h3>
+        <p style={{ color: C.muted, fontSize: '0.75rem', margin: '0 0 0.625rem' }}>
+          Senha exigida para aplicar descontos no balcao e caixa.
+        </p>
+        <input
+          type="text"
+          value={form.senha_desconto}
+          onChange={e => setF('senha_desconto', e.target.value)}
+          placeholder="Senha para desconto"
+          style={{ ...inputStyle, maxWidth: '200px' }}
+        />
       </div>
 
       {/* Entrega / Delivery */}
@@ -5076,7 +5174,7 @@ function ModalSaboresBalcao({ tipo, onFechar, onAdicionar }) {
   )
 }
 
-function PaginaBalcao({ onPedidoCriado, onCaderneta }) {
+function PaginaBalcao({ onPedidoCriado, onCaderneta, mesaAdicionando, onCancelarMesa }) {
   const [cart, setCart] = useState([])
   const [tipoModal, setTipoModal] = useState(null)
   const [modo, setModo] = useState('levar')
@@ -5319,6 +5417,33 @@ function PaginaBalcao({ onPedidoCriado, onCaderneta }) {
         } else {
           const err = await res.json().catch(() => ({}))
           alert(`Erro ao anotar na caderneta: ${err.error || res.status}`)
+        }
+        setEnviando(false)
+        return
+      }
+
+      // ── ADICIONANDO ITENS A MESA EXISTENTE ──
+      if (mesaAdicionando) {
+        const itensExistentes = parseItens(mesaAdicionando.itens)
+        const novosItens = cart.map(i => ({
+          tipoId: i.tipoId, nome: i.nome, preco: i.preco, qtd: i.qtd,
+          sabores: i.sabores || [], adicionais: i.adicionais || [], observacao: i.observacao || '',
+        }))
+        const todosItens = [...itensExistentes, ...novosItens]
+        const novoTotal = somarCart(todosItens)
+        const r = await fetch('/api/pedido', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: mesaAdicionando.id, itens: todosItens, total: novoTotal, subtotal: novoTotal }),
+        })
+        if (r.ok) {
+          setSucesso(`Itens adicionados à mesa #${mesaAdicionando.numero}`)
+          setCart([])
+          setNomeCliente('')
+          setValorRecebido('')
+          setPagamento('dinheiro')
+          onPedidoCriado?.()
+          setTimeout(() => setSucesso(null), 5000)
         }
         setEnviando(false)
         return
@@ -5886,6 +6011,23 @@ function PaginaBalcao({ onPedidoCriado, onCaderneta }) {
       {/* ── COLUNA DIREITA: CARRINHO + CHECKOUT ── */}
       <div style={{ position: 'sticky', top: '1rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
 
+        {/* Banner: Adicionando itens a mesa */}
+        {mesaAdicionando && (
+          <div style={{ background: 'rgba(0,100,255,0.12)', border: '1px solid rgba(0,100,255,0.35)', borderRadius: '12px', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', marginBottom: '0.5rem' }}>
+            <div>
+              <div style={{ color: '#4da6ff', fontWeight: 800, fontSize: '0.88rem' }}>
+                📋 Adicionando itens — #{mesaAdicionando.numero}
+              </div>
+              <div style={{ color: C.muted, fontSize: '0.75rem' }}>
+                {mesaAdicionando.nome} · {fmtMoeda(mesaAdicionando.total)}
+              </div>
+            </div>
+            <button onClick={onCancelarMesa} style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '8px', color: '#fff', padding: '0.4rem 0.75rem', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 700, touchAction: 'manipulation' }}>
+              Cancelar
+            </button>
+          </div>
+        )}
+
         {/* Sucesso */}
         {sucesso && (
           <div style={{
@@ -6218,9 +6360,11 @@ function PaginaBalcao({ onPedidoCriado, onCaderneta }) {
             >
               {enviando
                 ? <><RefreshCw size={15} style={{ animation: 'spin 1s linear infinite' }} /> Registrando...</>
-                : pagamento === 'caderneta'
-                  ? <><BookOpen size={16} /> Anotar na Caderneta — {fmtMoeda(subtotal)}</>
-                  : <><Banknote size={16} /> Registrar Venda — {fmtMoeda(subtotal)}</>
+                : mesaAdicionando
+                  ? <><Plus size={16} /> + Adicionar à Mesa #{mesaAdicionando.numero} — {fmtMoeda(subtotal)}</>
+                  : pagamento === 'caderneta'
+                    ? <><BookOpen size={16} /> Anotar na Caderneta — {fmtMoeda(subtotal)}</>
+                    : <><Banknote size={16} /> Registrar Venda — {fmtMoeda(subtotal)}</>
               }
             </button>
               )
@@ -6244,7 +6388,7 @@ function PaginaBalcao({ onPedidoCriado, onCaderneta }) {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // PAGINA 8: MESAS ABERTAS
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function PaginaMesas({ pedidos, onAtualizar }) {
+function PaginaMesas({ pedidos, onAtualizar, onAdicionarItens }) {
   const [fechando, setFechando] = useState(null) // id do pedido mostrando pagamento
   const [pagamento, setPagamento] = useState('dinheiro')
   const [enviando, setEnviando] = useState(false)
@@ -6403,12 +6547,25 @@ function PaginaMesas({ pedidos, onAtualizar }) {
             ) : (
               <div style={{ display: 'flex', gap: '8px' }}>
                 <button
+                  onClick={() => onAdicionarItens?.(pedido)}
+                  style={{
+                    flex: 1, padding: '0.75rem', borderRadius: '12px', cursor: 'pointer',
+                    fontSize: '0.82rem', fontWeight: 700, border: '1px solid rgba(0,120,255,0.4)',
+                    background: 'rgba(0,120,255,0.15)', color: '#4da6ff',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                    touchAction: 'manipulation',
+                  }}
+                >
+                  <Plus size={14} /> + Itens
+                </button>
+                <button
                   onClick={() => { setFechando(pedido.id); setPagamento('dinheiro') }}
                   style={{
                     flex: 1, padding: '0.75rem', borderRadius: '12px', cursor: 'pointer',
                     fontSize: '0.88rem', fontWeight: 800, border: 'none',
                     background: `linear-gradient(145deg, ${C.success}, #00a844)`,
                     color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                    touchAction: 'manipulation',
                   }}
                 >
                   <Banknote size={16} /> Fechar Conta
@@ -6440,6 +6597,7 @@ export default function Admin() {
   // Navegacao
   const [paginaAtiva, setPaginaAtiva] = useState('pedidos')
   const [cadernetaKey, setCadernetaKey] = useState(0)
+  const [mesaAdicionando, setMesaAdicionando] = useState(null)
   const [sidebarAberta, setSidebarAberta] = useState(() => window.innerWidth >= 768)
   const [mobileOverlay, setMobileOverlay] = useState(false)
 
@@ -6557,6 +6715,11 @@ export default function Admin() {
       sessionStorage.setItem('carioca_admin', '1')
       setErrLogin('')
     } else setErrLogin('Senha incorreta.')
+  }
+
+  function adicionarItensMesaAdmin(pedido) {
+    setMesaAdicionando(pedido)
+    setPaginaAtiva('balcao')
   }
 
   // Acoes pedido
@@ -7055,10 +7218,15 @@ export default function Admin() {
             />
           )}
           {paginaAtiva === 'balcao' && (
-            <PaginaBalcao onPedidoCriado={() => carregarPedidos(true)} onCaderneta={() => setCadernetaKey(k => k + 1)} />
+            <PaginaBalcao
+              onPedidoCriado={() => { setMesaAdicionando(null); carregarPedidos(true) }}
+              onCaderneta={() => setCadernetaKey(k => k + 1)}
+              mesaAdicionando={mesaAdicionando}
+              onCancelarMesa={() => { setMesaAdicionando(null); setPaginaAtiva('mesas') }}
+            />
           )}
           {paginaAtiva === 'mesas' && (
-            <PaginaMesas pedidos={pedidos} onAtualizar={() => carregarPedidos(true)} />
+            <PaginaMesas pedidos={pedidos} onAtualizar={() => carregarPedidos(true)} onAdicionarItens={adicionarItensMesaAdmin} />
           )}
           {paginaAtiva === 'catalogo' && <PaginaCatalogo />}
           {paginaAtiva === 'cardapio' && (
