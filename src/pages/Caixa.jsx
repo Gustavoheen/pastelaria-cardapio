@@ -464,58 +464,8 @@ function SheetSabores({ tipo, onFechar, onAdicionar }) {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // SHEET DO CARRINHO (slide-up mobile)
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function SheetCarrinho({ aberto, onFechar, cart, onRemover, subtotal, onConfirmar, enviando, modo, mesaAdicionando, clientesCaderneta, onNovoCliente, senhaAdmin }) {
+function SheetCarrinho({ aberto, onFechar, cart, onRemover, subtotal, onConfirmar, enviando, modo, mesaAdicionando }) {
   const [nome, setNome] = useState('')
-  const [pagamento, setPagamento] = useState('dinheiro')
-  const [valorRecebido, setValorRecebido] = useState('')
-  const [buscaCaderneta, setBuscaCaderneta] = useState('')
-  const [clienteCaderneta, setClienteCaderneta] = useState(null)
-  const [saldoCaderneta, setSaldoCaderneta] = useState(0)
-  const [descontoTipo, setDescontoTipo] = useState('nenhum')
-  const [descontoValor, setDescontoValor] = useState('')
-  const [descontoItem, setDescontoItem] = useState(null)
-  const [descontoObs, setDescontoObs] = useState('')
-  const [senhaDesconto, setSenhaDesconto] = useState('')
-  const [descontoAutorizado, setDescontoAutorizado] = useState(false)
-  const [erroSenha, setErroSenha] = useState('')
-
-  function resetDesconto() {
-    setDescontoTipo('nenhum'); setDescontoValor(''); setDescontoItem(null)
-    setDescontoObs(''); setSenhaDesconto(''); setDescontoAutorizado(false); setErroSenha('')
-  }
-
-  function validarSenhaDesconto() {
-    const senhaCorreta = senhaAdmin || '1234'
-    if (senhaDesconto === senhaCorreta) {
-      setDescontoAutorizado(true); setErroSenha('')
-    } else {
-      setErroSenha('Senha incorreta'); setTimeout(() => setErroSenha(''), 2500)
-    }
-  }
-
-  const descontoCalculado = (() => {
-    if (!descontoAutorizado) return 0
-    if (descontoTipo === 'valor') {
-      const v = parseFloat(String(descontoValor).replace(',', '.')) || 0
-      return Math.min(v, subtotal)
-    }
-    if (descontoTipo === 'porcentagem') {
-      const pct = parseFloat(String(descontoValor).replace(',', '.')) || 0
-      return Math.round(subtotal * Math.min(pct, 100) / 100 * 100) / 100
-    }
-    if (descontoTipo === 'item' && descontoItem) {
-      const item = cart.find(i => i.chave === descontoItem)
-      return item ? Math.round(item.preco * item.qtd * 100) / 100 : 0
-    }
-    return 0
-  })()
-  const totalComDesconto = Math.max(0, Math.round((subtotal - descontoCalculado) * 100) / 100)
-  const descontoPct = descontoTipo === 'porcentagem' ? (parseFloat(String(descontoValor).replace(',', '.')) || 0) : null
-
-  const valorRec = parseFloat(String(valorRecebido).replace(',', '.')) || 0
-  const troco = pagamento === 'dinheiro' && valorRec > totalComDesconto ? Math.round((valorRec - totalComDesconto) * 100) / 100 : 0
-  const trocoNeg = pagamento === 'dinheiro' && valorRec > 0 && valorRec < totalComDesconto
-  const podeConfirmar = pagamento !== 'caderneta' || !!clienteCaderneta
 
   if (!aberto) return null
 
@@ -598,87 +548,7 @@ function SheetCarrinho({ aberto, onFechar, cart, onRemover, subtotal, onConfirma
           </span>
         </div>
 
-        {!mesaAdicionando && (<>
-
-        {/* Desconto / Cortesia */}
-        <div style={{ marginBottom: '0.75rem' }}>
-          <label style={{ display: 'block', color: C.muted, fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '6px' }}>
-            Desconto / Cortesia
-          </label>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '6px', marginBottom: descontoTipo !== 'nenhum' ? '8px' : '0' }}>
-            {[['nenhum','Nenhum'],['valor','R$ Fixo'],['porcentagem','% Off']].map(([t, label]) => (
-              <button key={t} onClick={() => resetDesconto() || setDescontoTipo(t)} style={{
-                padding: '0.5rem 0', borderRadius: '10px', cursor: 'pointer',
-                fontSize: '0.72rem', fontWeight: 700, border: 'none',
-                background: descontoTipo === t ? 'linear-gradient(145deg,#1a6b1a,#0d4a0d)' : 'rgba(255,255,255,0.07)',
-                color: descontoTipo === t ? '#fff' : C.muted,
-              }}>
-                {label}
-              </button>
-            ))}
-          </div>
-
-          {/* Senha do admin para autorizar */}
-          {descontoTipo !== 'nenhum' && !descontoAutorizado && (
-            <div style={{ marginBottom: '8px' }}>
-              <div style={{ display: 'flex', gap: '6px' }}>
-                <input type="password" value={senhaDesconto} onChange={e => setSenhaDesconto(e.target.value)}
-                  placeholder="Senha do administrador"
-                  onKeyDown={e => e.key === 'Enter' && validarSenhaDesconto()}
-                  style={{ flex: 1, padding: '0.625rem 0.875rem', borderRadius: '10px', fontSize: '0.85rem',
-                    background: 'rgba(255,255,255,0.07)', border: `1px solid ${erroSenha ? 'rgba(255,82,82,0.5)' : C.border}`,
-                    color: C.text, outline: 'none', boxSizing: 'border-box' }} />
-                <button onClick={validarSenhaDesconto} style={{
-                  padding: '0 1rem', borderRadius: '10px', cursor: 'pointer',
-                  background: 'linear-gradient(145deg,#1a6b1a,#0d4a0d)', border: 'none',
-                  color: '#fff', fontWeight: 700, fontSize: '0.82rem',
-                }}>OK</button>
-              </div>
-              {erroSenha && <p style={{ color: '#FF5252', fontSize: '0.72rem', margin: '4px 0 0', fontWeight: 700 }}>{erroSenha}</p>}
-            </div>
-          )}
-
-          {/* Campos de desconto — só após senha */}
-          {descontoTipo !== 'nenhum' && descontoAutorizado && (<>
-            {descontoTipo === 'valor' && (
-              <input type="number" value={descontoValor} onChange={e => setDescontoValor(e.target.value)}
-                placeholder="Valor a descontar (R$)" min="0" step="0.01"
-                style={{ width: '100%', padding: '0.625rem 0.875rem', borderRadius: '10px', fontSize: '0.85rem',
-                  background: 'rgba(255,255,255,0.07)', border: `1px solid ${C.border}`,
-                  color: C.text, outline: 'none', boxSizing: 'border-box', marginBottom: '6px' }} />
-            )}
-            {descontoTipo === 'porcentagem' && (
-              <input type="number" value={descontoValor} onChange={e => setDescontoValor(e.target.value)}
-                placeholder="Porcentagem (%)" min="0" max="100" step="1"
-                style={{ width: '100%', padding: '0.625rem 0.875rem', borderRadius: '10px', fontSize: '0.85rem',
-                  background: 'rgba(255,255,255,0.07)', border: `1px solid ${C.border}`,
-                  color: C.text, outline: 'none', boxSizing: 'border-box', marginBottom: '6px' }} />
-            )}
-            <input type="text" value={descontoObs} onChange={e => setDescontoObs(e.target.value)}
-              placeholder="Motivo do desconto (obrigatorio)"
-              style={{ width: '100%', padding: '0.625rem 0.875rem', borderRadius: '10px', fontSize: '0.82rem',
-                background: 'rgba(255,255,255,0.07)', border: `1px solid rgba(0,200,0,0.3)`,
-                color: C.text, outline: 'none', boxSizing: 'border-box' }} />
-          </>)}
-        </div>
-
-        {/* Resumo do desconto */}
-        {descontoCalculado > 0 && (
-          <div style={{
-            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-            padding: '0.5rem 0.875rem', borderRadius: '10px', marginBottom: '0.75rem',
-            background: 'rgba(0,180,0,0.1)', border: '1px solid rgba(0,200,0,0.25)',
-          }}>
-            <span style={{ color: '#4ade80', fontSize: '0.82rem', fontWeight: 700 }}>
-              {descontoTipo === 'porcentagem' ? `${descontoValor}% de desconto` : 'Desconto aplicado'}
-            </span>
-            <span style={{ color: '#4ade80', fontWeight: 800, fontSize: '0.9rem' }}>
-              - {fmtMoeda(descontoCalculado)}
-            </span>
-          </div>
-        )}
-
-        {/* Cliente */}
+        {!mesaAdicionando && (
         <div style={{ marginBottom: '0.75rem' }}>
           <label style={{ display: 'block', color: C.muted, fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '4px' }}>
             Cliente (opcional)
@@ -687,7 +557,7 @@ function SheetCarrinho({ aberto, onFechar, cart, onRemover, subtotal, onConfirma
             type="text"
             value={nome}
             onChange={e => setNome(e.target.value)}
-            placeholder="Balcão"
+            placeholder={modo === 'local' ? 'Nome da mesa' : 'Nome do cliente'}
             style={{
               width: '100%', padding: '0.7rem 0.875rem', borderRadius: '12px', fontSize: '0.88rem',
               background: 'rgba(255,255,255,0.07)', border: `1px solid ${C.border}`,
@@ -695,196 +565,31 @@ function SheetCarrinho({ aberto, onFechar, cart, onRemover, subtotal, onConfirma
             }}
           />
         </div>
-
-        {/* Pagamento */}
-        <div style={{ marginBottom: '0.75rem' }}>
-          <label style={{ display: 'block', color: C.muted, fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '6px' }}>
-            Pagamento
-          </label>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr', gap: '6px' }}>
-            {['dinheiro', 'pix', 'debito', 'credito', 'caderneta'].map(p => (
-              <button key={p} onClick={() => { setPagamento(p); setValorRecebido(''); if (p !== 'caderneta') { setClienteCaderneta(null); setBuscaCaderneta('') } }} style={{
-                padding: '0.6rem 0', borderRadius: '10px', cursor: 'pointer',
-                fontSize: '0.65rem', fontWeight: 700, border: 'none',
-                background: pagamento === p
-                  ? p === 'caderneta' ? 'linear-gradient(145deg, #b35c00, #7a3f00)' : `linear-gradient(145deg, ${C.red}, ${C.redDark})`
-                  : 'rgba(255,255,255,0.07)',
-                color: pagamento === p ? '#fff' : C.muted, textTransform: 'capitalize',
-              }}>
-                {p === 'dinheiro' ? 'Dinheiro' : p === 'debito' ? 'Débito' : p === 'credito' ? 'Crédito' : p === 'caderneta' ? '📒 Anotar' : 'PIX'}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Seleção de cliente para caderneta */}
-        {pagamento === 'caderneta' && (
-          <div style={{ marginBottom: '0.75rem' }}>
-            <label style={{ display: 'block', color: C.muted, fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '4px' }}>
-              Cliente da caderneta *
-            </label>
-            {clienteCaderneta ? (
-              <div style={{
-                padding: '0.625rem 0.875rem', borderRadius: '10px',
-                background: 'rgba(179,92,0,0.15)', border: '1px solid rgba(179,92,0,0.4)',
-                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-              }}>
-                <div>
-                  <div style={{ color: C.text, fontWeight: 700, fontSize: '0.88rem' }}>{clienteCaderneta.nome}</div>
-                  <div style={{ color: C.muted, fontSize: '0.72rem' }}>Em aberto: {fmtMoeda(saldoCaderneta)}</div>
-                </div>
-                <button
-                  onClick={() => { setClienteCaderneta(null); setBuscaCaderneta(''); setSaldoCaderneta(0) }}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: C.muted, fontSize: '0.85rem' }}
-                >✕</button>
-              </div>
-            ) : (
-              <div style={{ position: 'relative' }}>
-                <input
-                  type="text"
-                  value={buscaCaderneta}
-                  onChange={e => setBuscaCaderneta(e.target.value)}
-                  placeholder="Buscar cliente por nome..."
-                  style={{
-                    width: '100%', padding: '0.7rem 0.875rem', borderRadius: '12px', fontSize: '0.88rem',
-                    background: 'rgba(255,255,255,0.07)', border: `1px solid ${C.border}`,
-                    color: C.text, outline: 'none', boxSizing: 'border-box',
-                  }}
-                />
-                {buscaCaderneta.trim().length >= 2 && (() => {
-                  const q = buscaCaderneta.trim().toLowerCase()
-                  const matches = (clientesCaderneta || []).filter(c =>
-                    c.nome?.toLowerCase().includes(q) || (c.cpf || '').includes(buscaCaderneta.replace(/\D/g, ''))
-                  ).slice(0, 5)
-                  const nomeNovo = buscaCaderneta.trim()
-                  return (
-                    <div style={{
-                      position: 'absolute', left: 0, right: 0, top: '100%', zIndex: 50,
-                      background: 'rgba(30,8,8,0.98)', border: `1px solid ${C.border}`,
-                      borderRadius: '10px', overflow: 'hidden', marginTop: '4px',
-                      boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
-                    }}>
-                      {matches.map(c => (
-                        <button
-                          key={c.id}
-                          onClick={async () => {
-                            const r = await fetch(`/api/caderneta?cliente_id=${c.id}`).then(r => r.json()).catch(() => [])
-                            const saldo = Array.isArray(r) ? r.filter(e => !e.pago).reduce((s, e) => s + Number(e.valor), 0) : 0
-                            setClienteCaderneta(c)
-                            setSaldoCaderneta(saldo)
-                            setBuscaCaderneta('')
-                          }}
-                          style={{
-                            display: 'block', width: '100%', padding: '0.625rem 0.875rem',
-                            background: 'none', border: 'none', borderBottom: `1px solid ${C.border}`,
-                            cursor: 'pointer', textAlign: 'left',
-                          }}
-                        >
-                          <div style={{ color: C.text, fontWeight: 700, fontSize: '0.85rem' }}>{c.nome}</div>
-                          <div style={{ color: C.muted, fontSize: '0.7rem' }}>{c.telefone}</div>
-                        </button>
-                      ))}
-                      {/* Opção de criar novo cliente */}
-                      <button
-                        onClick={async () => {
-                          const res = await fetch('/api/clientes', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ nome: nomeNovo, manual: true }),
-                          })
-                          const novo = await res.json()
-                          if (res.ok || res.status === 201) {
-                            onNovoCliente?.(novo)
-                            setClienteCaderneta(novo)
-                            setSaldoCaderneta(0)
-                            setBuscaCaderneta('')
-                          }
-                        }}
-                        style={{
-                          display: 'block', width: '100%', padding: '0.625rem 0.875rem',
-                          background: 'rgba(179,92,0,0.15)', border: 'none',
-                          cursor: 'pointer', textAlign: 'left',
-                        }}
-                      >
-                        <div style={{ color: '#f5a623', fontWeight: 700, fontSize: '0.85rem' }}>+ Criar "{nomeNovo}"</div>
-                        <div style={{ color: 'rgba(245,166,35,0.6)', fontSize: '0.7rem' }}>Novo cliente na caderneta</div>
-                      </button>
-                    </div>
-                  )
-                })()}
-              </div>
-            )}
-          </div>
         )}
-
-        {/* Troco */}
-        {pagamento === 'dinheiro' && (
-          <div style={{ marginBottom: '0.875rem' }}>
-            <label style={{ display: 'block', color: C.muted, fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '4px' }}>
-              Valor recebido (R$)
-            </label>
-            <input
-              type="number"
-              value={valorRecebido}
-              onChange={e => setValorRecebido(e.target.value)}
-              placeholder="0,00"
-              min="0"
-              step="0.01"
-              style={{
-                width: '100%', padding: '0.7rem 0.875rem', borderRadius: '12px', fontSize: '0.88rem',
-                background: 'rgba(255,255,255,0.07)', border: `1px solid ${C.border}`,
-                color: C.text, outline: 'none', boxSizing: 'border-box',
-              }}
-            />
-            {valorRec > 0 && (
-              <div style={{
-                marginTop: '8px', padding: '0.625rem 0.875rem', borderRadius: '10px',
-                background: trocoNeg ? 'rgba(200,0,0,0.15)' : 'rgba(0,200,80,0.12)',
-                border: `1px solid ${trocoNeg ? 'rgba(200,0,0,0.35)' : 'rgba(0,200,80,0.3)'}`,
-                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-              }}>
-                <span style={{ color: trocoNeg ? '#ff7777' : C.muted, fontSize: '0.82rem', fontWeight: 600 }}>
-                  {trocoNeg ? 'Valor insuficiente' : 'Troco'}
-                </span>
-                {!trocoNeg && (
-                  <span style={{ color: C.success, fontFamily: 'Bebas Neue, sans-serif', fontSize: '1.4rem' }}>
-                    {fmtMoeda(troco)}
-                  </span>
-                )}
-              </div>
-            )}
-          </div>
-        )}
-        </>)}
 
         {/* Confirmar */}
         <button
-          onClick={() => mesaAdicionando ? onConfirmar({}) : onConfirmar({
-            nome, pagamento,
-            troco: troco > 0 ? troco : null,
-            clienteCaderneta,
-            desconto: descontoCalculado > 0 ? { tipo: descontoTipo, valor: descontoCalculado, pct: descontoPct, obs: descontoObs } : null,
-          })}
-          disabled={enviando || trocoNeg || !podeConfirmar || (descontoCalculado > 0 && !descontoObs.trim())}
+          onClick={() => onConfirmar({ nome })}
+          disabled={enviando}
           style={{
             width: '100%', padding: '1rem', borderRadius: '14px',
-            cursor: enviando || trocoNeg || !podeConfirmar ? 'not-allowed' : 'pointer',
+            cursor: enviando ? 'not-allowed' : 'pointer',
             fontSize: '1rem', fontWeight: 800, border: 'none',
-            background: trocoNeg || enviando || !podeConfirmar
+            background: enviando
               ? 'rgba(255,255,255,0.08)'
               : `linear-gradient(145deg, ${C.gold}, #d4a800)`,
-            color: trocoNeg || enviando || !podeConfirmar ? C.muted : '#1a1000',
-            boxShadow: !trocoNeg && !enviando && podeConfirmar ? '0 6px 20px rgba(245,200,0,0.3)' : 'none',
+            color: enviando ? C.muted : '#1a1000',
+            boxShadow: !enviando ? '0 6px 20px rgba(245,200,0,0.3)' : 'none',
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
           }}
         >
           {enviando
             ? <><RefreshCw size={15} style={{ animation: 'spin 1s linear infinite' }} /> Registrando...</>
             : mesaAdicionando
-              ? <><Plus size={16} /> Adicionar à mesa #{mesaAdicionando.numero} — {fmtMoeda(subtotal)}</>
+              ? <><Plus size={16} /> Adicionar a mesa #{mesaAdicionando.numero} — {fmtMoeda(subtotal)}</>
               : modo === 'local'
-                ? <><UtensilsCrossed size={16} /> Abrir conta — {fmtMoeda(totalComDesconto)}</>
-                : <><Banknote size={16} /> Registrar — {fmtMoeda(totalComDesconto)}</>
+                ? <><UtensilsCrossed size={16} /> Abrir conta — {fmtMoeda(subtotal)}</>
+                : <><ShoppingCart size={16} /> Registrar pedido — {fmtMoeda(subtotal)}</>
           }
         </button>
       </div>
@@ -1006,70 +711,11 @@ function AbaBalcao({ onPedidoCriado, modo, setModo, mesaAdicionando, onCancelarM
     setAvPreco('')
   }
 
-  async function confirmarVenda({ nome, pagamento, troco, clienteCaderneta, desconto }) {
+  async function confirmarVenda({ nome }) {
     setEnviando(true)
     const isLocal = modo === 'local'
-    const descontoValorReal = desconto?.valor || 0
     const subtotalOriginal = somarCart(cart)
-    const totalFinal = Math.max(0, Math.round((subtotalOriginal - descontoValorReal) * 100) / 100)
-    const descontoSufixo = descontoValorReal > 0
-      ? `\n\uD83C\uDF81 DESCONTO: R$ ${descontoValorReal.toFixed(2).replace('.', ',')}${desconto.obs ? ` — ${desconto.obs}` : ''}`
-      : ''
     try {
-      // ── CADERNETA (fiado) ──
-      if (pagamento === 'caderneta' && clienteCaderneta) {
-        const descricao = cart.map(i => `${i.qtd}x ${i.nome}`).join(', ')
-        const subtotalAtual = subtotalOriginal
-        const cadRes = await fetch('/api/caderneta', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            cliente_id: clienteCaderneta.id,
-            descricao,
-            itens: cart.map(i => ({ nome: i.nome, qtd: i.qtd, preco: i.preco })),
-            valor: totalFinal,
-            data: new Date().toLocaleDateString('pt-BR'),
-          }),
-        })
-        if (cadRes.ok) {
-          // Registrar no fluxo de caixa
-          try {
-            const pedidoRes = await fetch('/api/pedido', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                nome: clienteCaderneta.nome,
-                telefone: '00000000000',
-                pagamento: 'caderneta',
-                itens: cart.map(i => ({ tipoId: i.tipoId || 'diverso', nome: i.nome, preco: i.preco, qtd: i.qtd, sabores: i.sabores || [], adicionais: i.adicionais || [], observacao: i.observacao || '' })),
-                subtotal: subtotalOriginal,
-                total: totalFinal,
-                origem: 'balcao',
-                observacao: `\uD83D\uDCD2 FIADO — ${clienteCaderneta.nome}${descontoSufixo}`,
-                tipo_entrega: 'levar',
-              }),
-            })
-            if (pedidoRes.ok) {
-              const pedido = await pedidoRes.json()
-              await fetch('/api/pedido', {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id: pedido.id, status: 'entregue' }),
-              })
-            }
-          } catch (_) {}
-          setSucesso({ numero: clienteCaderneta.nome, modo: 'caderneta' })
-          setCart([])
-          setCartAberto(false)
-          onPedidoCriado?.()
-          setTimeout(() => setSucesso(null), 5000)
-        } else {
-          alert('Erro ao anotar na caderneta')
-        }
-        setEnviando(false)
-        return
-      }
-
       // ── ADICIONANDO ITENS A MESA EXISTENTE ──
       if (mesaAdicionando) {
         const itensExistentes = parseItens(mesaAdicionando.itens)
@@ -1101,27 +747,19 @@ function AbaBalcao({ onPedidoCriado, modo, setModo, mesaAdicionando, onCancelarM
         return
       }
 
-      // ── NOVO PEDIDO ──
+      // ── NOVO PEDIDO (entra na fila como recebido — checkout na aba Pedidos) ──
       const obsPrefix = isLocal ? '\ud83c\udf7d\ufe0f COMER NO LOCAL' : '\ud83d\udce6 LEVAR'
       const body = {
         nome: nome?.trim() || (isLocal ? 'Mesa' : 'Balcao'),
         telefone: '00000000000',
-        pagamento,
-        troco,
+        pagamento: 'pendente',
         itens: cart.map(i => ({
           tipoId: i.tipoId, nome: i.nome, preco: i.preco, qtd: i.qtd,
           sabores: i.sabores || [], adicionais: i.adicionais || [], observacao: i.observacao || '',
         })),
-        subtotal: subtotalOriginal, total: totalFinal, origem: 'balcao',
-        observacao: obsPrefix + descontoSufixo,
+        subtotal: subtotalOriginal, total: subtotalOriginal, origem: 'balcao',
+        observacao: obsPrefix,
         tipo_entrega: isLocal ? 'local' : 'levar',
-      }
-      // Campos dedicados de desconto
-      if (desconto?.valor > 0) {
-        body.desconto_tipo = desconto.tipo
-        body.desconto_valor = desconto.valor
-        body.desconto_pct = desconto.pct || null
-        body.desconto_obs = desconto.obs || ''
       }
       const res = await fetch('/api/pedido', {
         method: 'POST',
@@ -1130,7 +768,6 @@ function AbaBalcao({ onPedidoCriado, modo, setModo, mesaAdicionando, onCancelarM
       })
       if (res.ok) {
         const pedido = await res.json()
-        console.log("PEDIDO_V3_SEM_PATCH", pedido.numero)
         setSucesso({ numero: pedido.numero, modo: isLocal ? 'local' : 'levar' })
         setCart([])
         setCartAberto(false)
@@ -1522,9 +1159,6 @@ function AbaBalcao({ onPedidoCriado, modo, setModo, mesaAdicionando, onCancelarM
         enviando={enviando}
         modo={modo}
         mesaAdicionando={mesaAdicionando}
-        clientesCaderneta={clientesCaderneta}
-        onNovoCliente={novo => setClientesCaderneta(prev => [novo, ...prev])}
-        senhaAdmin={cardapioState?.senha_desconto}
       />
     </div>
   )
