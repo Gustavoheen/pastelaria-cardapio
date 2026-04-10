@@ -211,6 +211,7 @@ module.exports = async function handler(req, res) {
     if (total !== undefined) updates.total = Number(total) || 0
     if (subtotal !== undefined) updates.subtotal = Number(subtotal) || 0
     if (pagamento !== undefined) updates.pagamento = pagamento
+    if (req.body.troco !== undefined) updates.troco = req.body.troco
     if (nome !== undefined) updates.nome = nome
     if (observacao !== undefined) updates.observacao = observacao
     if (req.body.desconto_tipo !== undefined) {

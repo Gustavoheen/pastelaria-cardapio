@@ -86,7 +86,7 @@ function useTimer(createdAt) {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // CARD DE PEDIDO (mobile)
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function CardPedido({ pedido, onStatus }) {
+function CardPedido({ pedido, onStatus, onFinalizar }) {
   const min = useTimer(pedido.created_at)
   const info = STATUS_FLOW[pedido.status] || STATUS_FLOW.recebido
   const corTempo = min < 10 ? C.success : min < 20 ? C.warning : C.danger
@@ -177,7 +177,7 @@ function CardPedido({ pedido, onStatus }) {
             <ChevronLeft size={14} /> Voltar
           </button>
         )}
-        {info.proximo && (
+        {info.proximo && info.proximo !== 'entregue' && (
           <button
             onClick={() => onStatus(pedido.id, info.proximo)}
             style={{
@@ -192,6 +192,21 @@ function CardPedido({ pedido, onStatus }) {
             {info.rotuloAvanco} <ChevronRight size={14} />
           </button>
         )}
+        {info.proximo === 'entregue' && (
+          <button
+            onClick={() => onFinalizar(pedido)}
+            style={{
+              flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+              padding: '0.7rem', borderRadius: '10px', cursor: 'pointer',
+              background: `linear-gradient(145deg, ${C.success}, #009940)`,
+              border: 'none', color: '#fff',
+              fontSize: '0.88rem', fontWeight: 800,
+              boxShadow: `0 4px 14px rgba(0,200,80,0.3)`,
+            }}
+          >
+            Finalizar venda <ChevronRight size={14} />
+          </button>
+        )}
       </div>
     </div>
   )
@@ -200,7 +215,7 @@ function CardPedido({ pedido, onStatus }) {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // ABA PEDIDOS
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function AbaPedidos({ pedidos, onStatus, onAtualizar, carregando }) {
+function AbaPedidos({ pedidos, onStatus, onAtualizar, carregando, onFinalizar }) {
   const [filtro, setFiltro] = useState('ativos')
 
   const ativos = pedidos.filter(p => ['recebido', 'preparando', 'pronto'].includes(p.status))
@@ -283,7 +298,7 @@ function AbaPedidos({ pedidos, onStatus, onAtualizar, carregando }) {
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
           {lista.map(p => (
-            <CardPedido key={p.id} pedido={p} onStatus={onStatus} />
+            <CardPedido key={p.id} pedido={p} onStatus={onStatus} onFinalizar={onFinalizar} />
           ))}
         </div>
       )}
@@ -2027,7 +2042,8 @@ export default function Caixa() {
       const totalOriginal = Number(conta?.total || 0)
       const descontoValorReal = desconto?.valor || 0
       const totalFinal = Math.max(0, Math.round((totalOriginal - descontoValorReal) * 100) / 100)
-      const patchBody = { id: pedidoId, status: 'entregue' }
+      const patchBody = { id: pedidoId, status: 'entregue', force_status: true, pagamento }
+      if (troco) patchBody.troco = troco
       if (descontoValorReal > 0) {
         patchBody.total = totalFinal
         patchBody.subtotal = totalOriginal
@@ -2065,14 +2081,16 @@ export default function Caixa() {
     else setErrLogin('Senha incorreta.')
   }
 
-  // Filter online orders (exclude balcao) for Pedidos tab
-  const pedidosOnline = pedidos.filter(p => p.origem !== 'balcao')
-  const pendentes = pedidosOnline.filter(p => ['recebido', 'preparando'].includes(p.status)).length
+  // Todos os pedidos ativos (site + balcao) para aba Pedidos
+  // Mesas abertas ficam na aba Mesas, os demais na aba Pedidos
   const mesasAbertas = pedidos.filter(p =>
     p.origem === 'balcao' &&
     (p.observacao || '').includes('COMER NO LOCAL') &&
     p.status === 'preparando'
-  ).length
+  )
+  const mesasIds = new Set(mesasAbertas.map(p => p.id))
+  const pedidosTodos = pedidos.filter(p => !mesasIds.has(p.id))
+  const pendentes = pedidosTodos.filter(p => ['recebido', 'preparando'].includes(p.status)).length
 
   // ── Login ───────────────────────────────────────────────────────
   if (!logado) {
@@ -2181,10 +2199,11 @@ export default function Caixa() {
       <main style={{ flex: 1, padding: '1rem 1rem 1.5rem', overflowX: 'hidden' }}>
         {aba === 'pedidos' && (
           <AbaPedidos
-            pedidos={pedidosOnline}
+            pedidos={pedidosTodos}
             onStatus={atualizarStatus}
             onAtualizar={() => carregarPedidos()}
             carregando={carregando}
+            onFinalizar={p => setContaSheet(p)}
           />
         )}
         {aba === 'balcao' && (
@@ -2230,7 +2249,7 @@ export default function Caixa() {
         {[
           { id: 'pedidos', label: 'Pedidos', icon: ClipboardList, badge: pendentes },
           { id: 'balcao',  label: 'Balcao',  icon: Store, badge: 0 },
-          { id: 'mesas',   label: 'Mesas',   icon: UtensilsCrossed, badge: mesasAbertas },
+          { id: 'mesas',   label: 'Mesas',   icon: UtensilsCrossed, badge: mesasAbertas.length },
         ].map(item => {
           const ativo = aba === item.id
           return (
