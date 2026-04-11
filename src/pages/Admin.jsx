@@ -527,7 +527,7 @@ function PaginaDashboard({ pedidos, onVerPedidos, onExcluir, onSalvarPedido, car
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                  {['Hora', 'Origem', '#', 'Cliente', 'Itens', 'Pagamento', 'Valor', 'Ações'].map(h => (
+                  {['Hora', 'Origem', '#', 'Cliente', 'Itens', 'Pagamento', 'Valor', 'Desconto', 'Ações'].map(h => (
                     <th key={h} style={{ padding: '0.55rem 0.75rem', color: 'rgba(255,255,255,0.5)', fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'left', whiteSpace: 'nowrap', position: 'sticky', top: 0, background: 'rgba(20,5,5,0.95)', zIndex: 1 }}>
                       {h}
                     </th>
@@ -570,6 +570,16 @@ function PaginaDashboard({ pedidos, onVerPedidos, onExcluir, onSalvarPedido, car
                         </td>
                         <td style={{ padding: '0.5rem 0.75rem', color: C.success, fontSize: '0.88rem', fontWeight: 900, whiteSpace: 'nowrap' }}>
                           {fmtMoeda(v.total)}
+                        </td>
+                        <td style={{ padding: '0.5rem 0.75rem', fontSize: '0.75rem', whiteSpace: 'nowrap' }}>
+                          {Number(v.desconto_valor) > 0 ? (
+                            <div title={v.desconto_obs || ''}>
+                              <span style={{ color: '#ff6b6b', fontWeight: 700 }}>-{fmtMoeda(v.desconto_valor)}</span>
+                              {v.desconto_obs && <div style={{ color: C.muted, fontSize: '0.65rem', maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis' }}>{v.desconto_obs}</div>}
+                            </div>
+                          ) : (
+                            <span style={{ color: 'rgba(255,255,255,0.15)' }}>—</span>
+                          )}
                         </td>
                         <td style={{ padding: '0.5rem 0.75rem', whiteSpace: 'nowrap' }}>
                           <div style={{ display: 'flex', gap: '4px' }}>
