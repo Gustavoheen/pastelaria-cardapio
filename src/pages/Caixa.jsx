@@ -160,6 +160,11 @@ function CardPedido({ pedido, onStatus, onFinalizar }) {
         <div style={{ color: C.muted, fontSize: '0.7rem', marginTop: '2px' }}>
           {fmtHora(pedido.created_at)} · {pedido.pagamento?.toUpperCase()}
         </div>
+        {Number(pedido.desconto_valor) > 0 && (
+          <div style={{ color: '#ff6b6b', fontSize: '0.7rem', marginTop: '2px', fontWeight: 700 }}>
+            Desconto: -{fmtMoeda(pedido.desconto_valor)}{pedido.desconto_obs ? ` — ${pedido.desconto_obs}` : ''}
+          </div>
+        )}
       </div>
 
       {/* Botões de ação */}
