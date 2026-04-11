@@ -1263,7 +1263,7 @@ function PainelDetalhe({ pedido, onStatus, onImprimir, onExcluir, onFechar }) {
   )
 }
 
-function CardPedido({ pedido, expandido, onToggle, onStatus, onImprimir, onExcluir, isNovo }) {
+function CardPedido({ pedido, expandido, onToggle, onStatus, onImprimir, onExcluir, isNovo, onFinalizar }) {
   const info = STATUS_FLOW[pedido.status] || STATUS_FLOW.recebido
   const itens = parseItens(pedido.itens)
   const resumo = itens.slice(0, 3).map(i => `${i.qtd || 1}x ${i.nome}`).join(' + ')
@@ -1626,6 +1626,7 @@ function PaginaPedidos({ pedidos, novosIds, onStatus, onImprimir, onExcluir, onA
                 onImprimir={onImprimir}
                 onExcluir={onExcluir}
                 isNovo={novosIds?.has(p.id)}
+                onFinalizar={onFinalizar}
               />
             ))
           )}
@@ -1663,6 +1664,7 @@ function PaginaPedidos({ pedidos, novosIds, onStatus, onImprimir, onExcluir, onA
                 onImprimir={onImprimir}
                 onExcluir={onExcluir}
                 isNovo={false}
+                onFinalizar={onFinalizar}
               />
             ))
           )}
@@ -6584,9 +6586,9 @@ function PaginaMesas({ pedidos, onAtualizar, onAdicionarItens }) {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// MODAL CHECKOUT (pagamento + desconto)
+// MODAL CHECKOUT (pagamento + desconto) — exportado para evitar tree-shaking
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function ModalCheckout({ pedido, onFechar, onConfirmar, enviando, senhaAdmin }) {
+export function ModalCheckout({ pedido, onFechar, onConfirmar, enviando, senhaAdmin }) {
   const [pagamento, setPagamento] = useState(pedido?.pagamento === 'pendente' ? 'dinheiro' : (pedido?.pagamento || 'dinheiro'))
   const [valorRecebido, setValorRecebido] = useState('')
   const [descontoTipo, setDescontoTipo] = useState('nenhum')
@@ -6750,6 +6752,7 @@ function ModalCheckout({ pedido, onFechar, onConfirmar, enviando, senhaAdmin }) 
 // ADMIN PRINCIPAL
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 export default function Admin() {
+  console.log("ADMIN_BUILD_V4_WITH_CHECKOUT")
   // Auth
   const [logado, setLogado] = useState(() => sessionStorage.getItem('carioca_admin') === '1')
   const [senha, setSenha] = useState('')
@@ -7452,16 +7455,8 @@ export default function Admin() {
         </main>
       </div>
 
-      {/* Modal Checkout — Finalizar Pedido com pagamento + desconto */}
-      {checkoutPedido && (
-        <ModalCheckout
-          pedido={checkoutPedido}
-          onFechar={() => setCheckoutPedido(null)}
-          onConfirmar={fecharCheckout}
-          enviando={fechandoCheckout}
-          senhaAdmin={configLoja?.senha_desconto}
-        />
-      )}
+      {/* Modal Checkout */}
+      {checkoutPedido !== null && <ModalCheckout pedido={checkoutPedido} onFechar={() => setCheckoutPedido(null)} onConfirmar={fecharCheckout} enviando={fechandoCheckout} senhaAdmin={configLoja?.senha_desconto} />}
 
       {/* Estilos globais injetados */}
       <style>{`

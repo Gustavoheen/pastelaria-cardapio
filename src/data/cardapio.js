@@ -65,6 +65,13 @@ export const categorias = [
         imagens: { 'Laranja': B('kapo-laranja.png'), 'Uva': B('kapo-uva.png') },
       },
 
+      // ── Brahma ──────────────────────────────────────────────────
+      {
+        id: 'brahma-latao', nome: 'Super Latão Brahma', subtitulo: 'Chopp 550ml',
+        preco: 8.50,
+        imagem: B('brahma-latao.png'),
+      },
+
       // ── Monster Energy ───────────────────────────────────────────
       {
         id: 'monster', nome: 'Monster Energy', subtitulo: 'Energético 473ml',
