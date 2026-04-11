@@ -6015,7 +6015,7 @@ function PaginaBalcao({ onPedidoCriado, onCaderneta, mesaAdicionando, onCancelar
       </div>
 
       {/* ── COLUNA DIREITA: CARRINHO + CHECKOUT ── */}
-      <div style={{ position: 'sticky', top: '1rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <div style={{ position: 'sticky', top: '1rem', maxHeight: 'calc(100vh - 5rem)', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
 
         {/* Banner: Adicionando itens a mesa */}
         {mesaAdicionando && (
@@ -6633,8 +6633,8 @@ export function ModalCheckout({ pedido, onFechar, onConfirmar, enviando, senhaAd
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={onFechar}>
       <div onClick={e => e.stopPropagation()} style={{
-        width: '95%', maxWidth: '440px', maxHeight: '90vh', overflowY: 'auto',
-        background: C.bg, borderRadius: '20px', border: `1px solid ${C.cardBorder}`, padding: '1.5rem',
+        width: '95%', maxWidth: '440px', maxHeight: '85vh', overflowY: 'auto',
+        background: C.bg, borderRadius: '20px', border: `1px solid ${C.cardBorder}`, padding: '1.25rem',
       }}>
         {/* Titulo */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
@@ -7407,7 +7407,7 @@ export default function Admin() {
         </header>
 
         {/* PAGE CONTENT */}
-        <main style={{ flex: 1, padding: '1.5rem', overflowX: 'hidden' }}>
+        <main style={{ flex: 1, padding: '1.5rem', minWidth: 0 }}>
           {paginaAtiva === 'dashboard' && (
             <PaginaDashboard pedidos={pedidos} onVerPedidos={() => navegar('pedidos')} onExcluir={excluirPedido} onSalvarPedido={salvarPedido} carregarPedidos={carregarPedidos} onImprimir={imprimir} />
           )}
