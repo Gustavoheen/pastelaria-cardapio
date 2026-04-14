@@ -1779,10 +1779,13 @@ export default function Caixa() {
 
   // ── App ─────────────────────────────────────────────────────────
   return (
-    <div id="caixa-root-wrapper" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <div id="caixa-root-wrapper" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'linear-gradient(135deg, rgba(255,220,220,0.98) 0%, rgba(255,235,235,0.99) 50%, rgba(255,225,225,0.98) 100%)' }}>
       <style>{`
         #caixa-root-wrapper, #caixa-root-wrapper * {
           font-weight: 900 !important;
+        }
+        #caixa-root-wrapper {
+          min-height: 100vh;
         }
       `}</style>
 

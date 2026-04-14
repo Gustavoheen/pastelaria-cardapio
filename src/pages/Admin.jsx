@@ -7117,10 +7117,13 @@ export default function Admin() {
   const larguraSidebar = sidebarAberta ? '240px' : '60px'
 
   return (
-    <div id="admin-root-wrapper" style={{ minHeight: '100vh', display: 'flex', position: 'relative' }}>
+    <div id="admin-root-wrapper" style={{ minHeight: '100vh', display: 'flex', position: 'relative', background: 'linear-gradient(135deg, rgba(255,220,220,0.98) 0%, rgba(255,235,235,0.99) 50%, rgba(255,225,225,0.98) 100%)' }}>
       <style>{`
         #admin-root-wrapper, #admin-root-wrapper * {
           font-weight: 900 !important;
+        }
+        #admin-root-wrapper {
+          min-height: 100vh;
         }
       `}</style>
 
