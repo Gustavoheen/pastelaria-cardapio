@@ -1781,12 +1781,30 @@ export default function Caixa() {
   return (
     <div id="caixa-root-wrapper" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'linear-gradient(135deg, rgba(255,220,220,0.98) 0%, rgba(255,235,235,0.99) 50%, rgba(255,225,225,0.98) 100%)' }}>
       <style>{`
+        html:has(#caixa-root-wrapper) {
+          font-size: clamp(15px, 1.25vw, 17px);
+        }
+
         #caixa-root-wrapper, #caixa-root-wrapper * {
           font-weight: 900 !important;
+          -webkit-text-stroke: 0.35px rgba(20,0,0,0.28);
         }
+
+        #caixa-root-wrapper button[style*="linear-gradient"],
+        #caixa-root-wrapper button[style*="#C62828"],
+        #caixa-root-wrapper button[style*="#8B0000"],
+        #caixa-root-wrapper button[style*="#166534"] {
+          -webkit-text-stroke: 0.35px rgba(255,255,255,0.3) !important;
+        }
+
         #caixa-root-wrapper {
           min-height: 100vh;
         }
+
+        #caixa-root-wrapper ::-webkit-scrollbar { width: 5px; height: 5px; }
+        #caixa-root-wrapper ::-webkit-scrollbar-track { background: rgba(255,220,220,0.3); border-radius: 4px; }
+        #caixa-root-wrapper ::-webkit-scrollbar-thumb { background: rgba(160,0,0,0.35); border-radius: 4px; }
+        #caixa-root-wrapper ::-webkit-scrollbar-thumb:hover { background: rgba(160,0,0,0.55); }
       `}</style>
 
       {/* Toast */}

@@ -1602,13 +1602,13 @@ function PaginaPedidos({ pedidos, novosIds, onStatus, onImprimir, onExcluir, onA
       </div>
 
       {/* ══ SPLIT: Site | Balcão ══ */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 400px), 1fr))', gap: '1rem', minHeight: '200px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 400px), 1fr))', gap: '1rem', alignItems: 'start' }}>
 
         {/* ── PEDIDOS SITE ── */}
         <div style={{
-          background: 'rgba(255,235,235,0.55)', border: '1px solid rgba(255,255,255,0.1)',
+          background: 'rgba(255,235,235,0.55)', border: '1px solid rgba(200,150,150,0.3)',
           borderRadius: '16px', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem',
-          maxHeight: '80vh', overflowY: 'auto',
+          height: 'calc(100vh - 210px)', overflowY: 'auto', overflowX: 'hidden',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
             <h3 style={{ margin: 0, color: '#1A0000', fontSize: '1rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -1644,9 +1644,9 @@ function PaginaPedidos({ pedidos, novosIds, onStatus, onImprimir, onExcluir, onA
 
         {/* ── PEDIDOS BALCÃO ── */}
         <div style={{
-          background: 'rgba(245,200,0,0.04)', border: '1px solid rgba(245,200,0,0.15)',
+          background: 'rgba(255,250,220,0.55)', border: '1px solid rgba(200,180,50,0.25)',
           borderRadius: '16px', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem',
-          maxHeight: '80vh', overflowY: 'auto',
+          height: 'calc(100vh - 210px)', overflowY: 'auto', overflowX: 'hidden',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
             <h3 style={{ margin: 0, color: '#1A0000', fontSize: '1rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -7119,12 +7119,41 @@ export default function Admin() {
   return (
     <div id="admin-root-wrapper" style={{ minHeight: '100vh', display: 'flex', position: 'relative', background: 'linear-gradient(135deg, rgba(255,220,220,0.98) 0%, rgba(255,235,235,0.99) 50%, rgba(255,225,225,0.98) 100%)' }}>
       <style>{`
+        /* Font scaling: rem sobe junto com viewport em telas pequenas */
+        html:has(#admin-root-wrapper) {
+          font-size: clamp(15px, 1.25vw, 17px);
+        }
+
+        /* Bold + contorno sutil em todas as letras */
         #admin-root-wrapper, #admin-root-wrapper * {
           font-weight: 900 !important;
+          -webkit-text-stroke: 0.35px rgba(20,0,0,0.28);
         }
+
+        /* Botões com texto branco: contorno claro, não escuro */
+        #admin-root-wrapper button[style*="linear-gradient"],
+        #admin-root-wrapper button[style*="#C62828"],
+        #admin-root-wrapper button[style*="#8B0000"],
+        #admin-root-wrapper button[style*="#166534"] {
+          -webkit-text-stroke: 0.35px rgba(255,255,255,0.3) !important;
+        }
+
         #admin-root-wrapper {
           min-height: 100vh;
         }
+
+        /* Modais responsivos */
+        #admin-root-wrapper [data-modal] {
+          max-height: 92vh !important;
+          overflow-y: auto !important;
+          width: min(96vw, 520px) !important;
+        }
+
+        /* Scroll suave em painéis */
+        #admin-root-wrapper ::-webkit-scrollbar { width: 5px; height: 5px; }
+        #admin-root-wrapper ::-webkit-scrollbar-track { background: rgba(255,220,220,0.3); border-radius: 4px; }
+        #admin-root-wrapper ::-webkit-scrollbar-thumb { background: rgba(160,0,0,0.35); border-radius: 4px; }
+        #admin-root-wrapper ::-webkit-scrollbar-thumb:hover { background: rgba(160,0,0,0.55); }
       `}</style>
 
       {/* Print area (invisivel em tela) */}
