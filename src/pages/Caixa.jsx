@@ -1789,6 +1789,28 @@ export default function Caixa() {
           font-weight: 900 !important;
         }
 
+        #caixa-root-wrapper span,
+        #caixa-root-wrapper p,
+        #caixa-root-wrapper h1, #caixa-root-wrapper h2, #caixa-root-wrapper h3,
+        #caixa-root-wrapper h4, #caixa-root-wrapper h5, #caixa-root-wrapper h6,
+        #caixa-root-wrapper td, #caixa-root-wrapper th,
+        #caixa-root-wrapper label,
+        #caixa-root-wrapper li {
+          text-shadow:
+            0.4px  0px   0px rgba(15,0,0,0.35),
+           -0.4px  0px   0px rgba(15,0,0,0.35),
+            0px    0.4px 0px rgba(15,0,0,0.35),
+            0px   -0.4px 0px rgba(15,0,0,0.35);
+        }
+
+        #caixa-root-wrapper button span {
+          text-shadow:
+            0.3px  0px   0px rgba(255,255,255,0.2),
+           -0.3px  0px   0px rgba(255,255,255,0.2),
+            0px    0.3px 0px rgba(255,255,255,0.2),
+            0px   -0.3px 0px rgba(255,255,255,0.2);
+        }
+
         #caixa-root-wrapper {
           min-height: 100vh;
         }

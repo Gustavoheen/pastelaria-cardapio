@@ -7129,6 +7129,30 @@ export default function Admin() {
           font-weight: 900 !important;
         }
 
+        /* Contorno sutil: text-shadow em 4 direções nas letras (não afeta layout) */
+        #admin-root-wrapper span,
+        #admin-root-wrapper p,
+        #admin-root-wrapper h1, #admin-root-wrapper h2, #admin-root-wrapper h3,
+        #admin-root-wrapper h4, #admin-root-wrapper h5, #admin-root-wrapper h6,
+        #admin-root-wrapper td, #admin-root-wrapper th,
+        #admin-root-wrapper label,
+        #admin-root-wrapper li {
+          text-shadow:
+            0.4px  0px   0px rgba(15,0,0,0.35),
+           -0.4px  0px   0px rgba(15,0,0,0.35),
+            0px    0.4px 0px rgba(15,0,0,0.35),
+            0px   -0.4px 0px rgba(15,0,0,0.35);
+        }
+
+        /* Botões com fundo colorido: contorno branco translúcido */
+        #admin-root-wrapper button span {
+          text-shadow:
+            0.3px  0px   0px rgba(255,255,255,0.2),
+           -0.3px  0px   0px rgba(255,255,255,0.2),
+            0px    0.3px 0px rgba(255,255,255,0.2),
+            0px   -0.3px 0px rgba(255,255,255,0.2);
+        }
+
         #admin-root-wrapper {
           min-height: 100vh;
         }
