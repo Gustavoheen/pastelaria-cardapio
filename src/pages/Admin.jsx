@@ -7204,9 +7204,9 @@ export default function Admin() {
       <aside style={{
         position: 'fixed', top: 0, left: 0, bottom: 0, zIndex: 160,
         width: larguraSidebar,
-        background: 'rgba(140,0,0,0.92)',
+        background: 'rgba(200,0,0,0.28)',
         backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
-        borderRight: '1px solid rgba(255,255,255,0.08)',
+        borderRight: '1px solid rgba(150,0,0,0.25)',
         display: 'flex', flexDirection: 'column',
         transition: 'width 0.25s ease',
         overflow: 'hidden',
@@ -7215,16 +7215,16 @@ export default function Admin() {
         {/* Logo */}
         <div style={{
           padding: sidebarAberta ? '1.25rem 1rem 1rem' : '1.25rem 0 1rem',
-          borderBottom: '1px solid rgba(255,255,255,0.06)',
+          borderBottom: '1px solid rgba(150,0,0,0.20)',
           display: 'flex', alignItems: 'center', justifyContent: sidebarAberta ? 'space-between' : 'center',
           flexShrink: 0,
         }}>
           {sidebarAberta && (
             <div>
-              <div style={{ color: C.gold, fontFamily: 'Bebas Neue, sans-serif', fontSize: '1.1rem', letterSpacing: '2px', lineHeight: 1 }}>
+              <div style={{ color: '#5C1A00', fontFamily: 'Bebas Neue, sans-serif', fontSize: '1.1rem', letterSpacing: '2px', lineHeight: 1, textShadow: '0 1px 4px rgba(0,0,0,0.6), 0 0 8px rgba(0,0,0,0.4)' }}>
                 Pastel do Carioca
               </div>
-              <div style={{ color: C.muted, fontSize: '0.65rem', marginTop: '2px' }}>Admin v2</div>
+              <div style={{ color: '#5C1A00', fontSize: '0.65rem', marginTop: '2px', textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}>Admin v2</div>
             </div>
           )}
           <button
@@ -7266,19 +7266,20 @@ export default function Admin() {
                     ? `3px solid #FF4444`
                     : ativo ? `3px solid ${C.red}` : '3px solid transparent',
                   cursor: 'pointer',
-                  color: ativo || temAlerta ? C.text : C.muted,
-                  fontSize: '0.85rem', fontWeight: ativo || temAlerta ? 700 : 500,
+                  color: '#3D0000',
+                  fontSize: '0.85rem', fontWeight: ativo || temAlerta ? 900 : 700,
+                  textShadow: '0 1px 4px rgba(0,0,0,0.55), 0 0 8px rgba(0,0,0,0.35)',
                   transition: 'all 0.15s',
                   textAlign: 'left', position: 'relative',
                   animation: temAlerta ? 'pulseBorder 1s ease-in-out infinite' : 'none',
                 }}
-                onMouseEnter={e => { if (!ativo && !temAlerta) e.currentTarget.style.background = 'rgba(255,255,255,0.05)' }}
+                onMouseEnter={e => { if (!ativo && !temAlerta) e.currentTarget.style.background = 'rgba(180,0,0,0.18)' }}
                 onMouseLeave={e => { if (!ativo && !temAlerta) e.currentTarget.style.background = 'transparent' }}
               >
                 <item.icon
                   size={18}
-                  color={temAlerta ? '#FF6666' : ativo ? '#FF7777' : 'rgba(255,255,255,0.55)'}
-                  style={{ flexShrink: 0, animation: temAlerta ? 'bellShake 0.6s ease-in-out infinite' : 'none' }}
+                  color={temAlerta ? '#CC0000' : ativo ? '#8B0000' : '#5C1A00'}
+                  style={{ flexShrink: 0, animation: temAlerta ? 'bellShake 0.6s ease-in-out infinite' : 'none', filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.5))' }}
                 />
                 {sidebarAberta && (
                   <span style={{ flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -7320,7 +7321,7 @@ export default function Admin() {
         </nav>
 
         {/* Rodape sidebar */}
-        <div style={{ padding: '0.75rem 0', borderTop: '1px solid rgba(255,255,255,0.06)', flexShrink: 0 }}>
+        <div style={{ padding: '0.75rem 0', borderTop: '1px solid rgba(150,0,0,0.20)', flexShrink: 0 }}>
           {/* Toggle autoprint */}
           <button
             onClick={toggleAutoprint}
@@ -7331,10 +7332,11 @@ export default function Admin() {
               justifyContent: sidebarAberta ? 'flex-start' : 'center',
               padding: sidebarAberta ? '0.6rem 1rem' : '0.6rem 0',
               background: 'none', border: 'none', cursor: 'pointer',
-              color: autoprint ? C.success : C.muted, fontSize: '0.82rem',
+              color: '#3D0000', fontSize: '0.82rem',
+              textShadow: '0 1px 4px rgba(0,0,0,0.55)',
             }}
           >
-            <Printer size={16} color={autoprint ? C.success : 'rgba(255,255,255,0.3)'} style={{ flexShrink: 0 }} />
+            <Printer size={16} color={autoprint ? '#166534' : '#5C1A00'} style={{ flexShrink: 0, filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.5))' }} />
             {sidebarAberta && <span>Autoprint {autoprint ? 'ON' : 'OFF'}</span>}
           </button>
 
@@ -7348,10 +7350,11 @@ export default function Admin() {
               justifyContent: sidebarAberta ? 'flex-start' : 'center',
               padding: sidebarAberta ? '0.6rem 1rem' : '0.6rem 0',
               background: 'none', border: 'none', cursor: 'pointer',
-              color: C.muted, fontSize: '0.82rem',
+              color: '#3D0000', fontSize: '0.82rem',
+              textShadow: '0 1px 4px rgba(0,0,0,0.55)',
             }}
           >
-            <LogOut size={16} color="rgba(255,255,255,0.3)" style={{ flexShrink: 0 }} />
+            <LogOut size={16} color="#5C1A00" style={{ flexShrink: 0, filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.5))' }} />
             {sidebarAberta && <span>Sair</span>}
           </button>
         </div>
