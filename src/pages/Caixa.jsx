@@ -12,17 +12,17 @@ import {
 
 // ── Paleta ──────────────────────────────────────────────────────
 const C = {
-  bg:         '#1a0000',
-  card:       'rgba(255,255,255,0.06)',
-  border:     'rgba(255,255,255,0.10)',
-  red:        '#CC0000',
+  bg:         'rgba(255,235,235,0.88)',
+  card:       'rgba(255,255,255,0.82)',
+  border:     'rgba(180,0,0,0.22)',
+  red:        '#C62828',
   redDark:    '#8B0000',
-  gold:       '#F5C800',
-  text:       '#FFFFFF',
-  muted:      'rgba(255,255,255,0.45)',
-  success:    '#00c853',
-  warning:    '#F5C800',
-  danger:     '#CC0000',
+  gold:       '#92400E',
+  text:       '#1A0000',
+  muted:      'rgba(100,0,0,0.65)',
+  success:    '#166534',
+  warning:    '#92400E',
+  danger:     '#991B1B',
 }
 
 // ── Status ───────────────────────────────────────────────────────
@@ -175,7 +175,7 @@ function CardPedido({ pedido, onStatus, onFinalizar }) {
             style={{
               display: 'flex', alignItems: 'center', gap: '4px',
               padding: '0.6rem 0.875rem', borderRadius: '10px', cursor: 'pointer',
-              background: 'rgba(255,255,255,0.07)', border: `1px solid ${C.border}`,
+              background: 'rgba(255,235,235,0.70)', border: `1px solid ${C.border}`,
               color: C.muted, fontSize: '0.78rem', fontWeight: 600,
             }}
           >
@@ -268,7 +268,7 @@ function AbaPedidos({ pedidos, onStatus, onAtualizar, carregando, onFinalizar })
             style={{
               padding: '0.4rem 0.875rem', borderRadius: '20px', cursor: 'pointer',
               fontSize: '0.78rem', fontWeight: 700, border: 'none',
-              background: filtro === f ? C.red : 'rgba(255,255,255,0.07)',
+              background: filtro === f ? C.red : 'rgba(255,235,235,0.70)',
               color: filtro === f ? '#fff' : C.muted,
             }}
           >
@@ -279,7 +279,7 @@ function AbaPedidos({ pedidos, onStatus, onAtualizar, carregando, onFinalizar })
           onClick={onAtualizar}
           style={{
             marginLeft: 'auto', padding: '0.4rem 0.75rem', borderRadius: '20px', cursor: 'pointer',
-            background: 'rgba(255,255,255,0.07)', border: `1px solid ${C.border}`,
+            background: 'rgba(255,235,235,0.70)', border: `1px solid ${C.border}`,
             color: C.muted, display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.75rem',
           }}
         >
@@ -363,7 +363,7 @@ function SheetSabores({ tipo, onFechar, onAdicionar }) {
         onClick={e => e.stopPropagation()}
         style={{
           width: '100%', maxHeight: '88vh', overflowY: 'auto',
-          background: 'rgba(24,0,0,0.98)',
+          background: 'rgba(255,240,240,0.97)',
           borderRadius: '24px 24px 0 0',
           border: `1px solid ${C.border}`,
           padding: '0.75rem 1.25rem 2rem',
@@ -397,8 +397,8 @@ function SheetSabores({ tipo, onFechar, onAdicionar }) {
                 <button key={s} onClick={() => toggleSabor(s)} disabled={bloq} style={{
                   padding: '8px 14px', borderRadius: '20px', cursor: bloq ? 'default' : 'pointer',
                   fontSize: '0.82rem', fontWeight: sel ? 700 : 500, border: 'none',
-                  background: sel ? `linear-gradient(145deg, ${C.red}, ${C.redDark})` : 'rgba(255,255,255,0.08)',
-                  color: sel ? '#fff' : bloq ? 'rgba(255,255,255,0.4)' : C.text,
+                  background: sel ? `linear-gradient(145deg, ${C.red}, ${C.redDark})` : 'rgba(255,235,235,0.75)',
+                  color: sel ? '#fff' : bloq ? 'rgba(100,0,0,0.40)' : C.text,
                 }}>
                   {s}
                 </button>
@@ -421,8 +421,8 @@ function SheetSabores({ tipo, onFechar, onAdicionar }) {
                   <button key={a} onClick={() => toggleAd(a)} disabled={bloq} style={{
                     padding: '8px 14px', borderRadius: '20px', cursor: bloq ? 'default' : 'pointer',
                     fontSize: '0.82rem', fontWeight: sel ? 700 : 500, border: 'none',
-                    background: sel ? 'rgba(245,200,0,0.25)' : 'rgba(255,255,255,0.08)',
-                    color: sel ? C.gold : bloq ? 'rgba(255,255,255,0.4)' : C.text,
+                    background: sel ? 'rgba(245,200,0,0.25)' : 'rgba(255,235,235,0.75)',
+                    color: sel ? C.gold : bloq ? 'rgba(100,0,0,0.40)' : C.text,
                   }}>
                     {a}
                   </button>
@@ -441,7 +441,7 @@ function SheetSabores({ tipo, onFechar, onAdicionar }) {
             placeholder="Observação (opcional)"
             style={{
               width: '100%', padding: '0.7rem 0.875rem', borderRadius: '12px', fontSize: '0.88rem',
-              background: 'rgba(255,255,255,0.07)', border: `1px solid ${C.border}`,
+              background: 'rgba(255,235,235,0.70)', border: `1px solid ${C.border}`,
               color: C.text, outline: 'none', boxSizing: 'border-box',
             }}
           />
@@ -454,7 +454,7 @@ function SheetSabores({ tipo, onFechar, onAdicionar }) {
           style={{
             width: '100%', padding: '1rem', borderRadius: '14px', cursor: sabores.length ? 'pointer' : 'not-allowed',
             fontSize: '1rem', fontWeight: 800, border: 'none',
-            background: sabores.length ? `linear-gradient(145deg, ${C.red}, ${C.redDark})` : 'rgba(255,255,255,0.08)',
+            background: sabores.length ? `linear-gradient(145deg, ${C.red}, ${C.redDark})` : 'rgba(255,235,235,0.75)',
             color: sabores.length ? '#fff' : C.muted,
             boxShadow: sabores.length ? `0 6px 20px rgba(229,57,53,0.4)` : 'none',
           }}
@@ -484,7 +484,7 @@ function SheetCarrinho({ aberto, onFechar, cart, onRemover, subtotal, onConfirma
         onClick={e => e.stopPropagation()}
         style={{
           width: '100%', maxHeight: '92vh', overflowY: 'auto',
-          background: 'rgba(24,0,0,0.98)',
+          background: 'rgba(255,240,240,0.97)',
           borderRadius: '24px 24px 0 0',
           border: `1px solid ${C.border}`,
           padding: '0.75rem 1.25rem 2.5rem',
@@ -511,7 +511,7 @@ function SheetCarrinho({ aberto, onFechar, cart, onRemover, subtotal, onConfirma
             <div key={item.chave} style={{
               display: 'flex', alignItems: 'flex-start', gap: '8px',
               padding: '8px 10px', borderRadius: '10px',
-              background: 'rgba(255,255,255,0.04)', border: `1px solid ${C.border}`,
+              background: 'rgba(255,235,235,0.55)', border: `1px solid ${C.border}`,
             }}>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ color: C.text, fontSize: '0.85rem', fontWeight: 700 }}>
@@ -565,7 +565,7 @@ function SheetCarrinho({ aberto, onFechar, cart, onRemover, subtotal, onConfirma
             placeholder={modo === 'local' ? 'Nome da mesa' : 'Nome do cliente'}
             style={{
               width: '100%', padding: '0.7rem 0.875rem', borderRadius: '12px', fontSize: '0.88rem',
-              background: 'rgba(255,255,255,0.07)', border: `1px solid ${C.border}`,
+              background: 'rgba(255,235,235,0.70)', border: `1px solid ${C.border}`,
               color: C.text, outline: 'none', boxSizing: 'border-box',
             }}
           />
@@ -581,7 +581,7 @@ function SheetCarrinho({ aberto, onFechar, cart, onRemover, subtotal, onConfirma
             cursor: enviando ? 'not-allowed' : 'pointer',
             fontSize: '1rem', fontWeight: 800, border: 'none',
             background: enviando
-              ? 'rgba(255,255,255,0.08)'
+              ? 'rgba(255,235,235,0.75)'
               : `linear-gradient(145deg, ${C.gold}, #d4a800)`,
             color: enviando ? C.muted : '#1a1000',
             boxShadow: !enviando ? '0 6px 20px rgba(245,200,0,0.3)' : 'none',
@@ -787,7 +787,7 @@ function AbaBalcao({ onPedidoCriado, modo, setModo, mesaAdicionando, onCancelarM
 
   const inputStyle = {
     padding: '0.7rem 0.875rem', borderRadius: '12px', fontSize: '0.88rem',
-    background: 'rgba(255,255,255,0.07)', border: `1px solid ${C.border}`,
+    background: 'rgba(255,235,235,0.70)', border: `1px solid ${C.border}`,
     color: C.text, outline: 'none', boxSizing: 'border-box',
   }
 
@@ -853,7 +853,7 @@ function AbaBalcao({ onPedidoCriado, modo, setModo, mesaAdicionando, onCancelarM
             fontSize: '0.95rem', fontWeight: 800, border: 'none',
             background: modo === 'local'
               ? 'linear-gradient(145deg, #0066cc, #004499)'
-              : 'rgba(255,255,255,0.06)',
+              : 'rgba(255,235,235,0.70)',
             color: modo === 'local' ? '#fff' : C.muted,
             boxShadow: modo === 'local' ? '0 4px 16px rgba(0,102,204,0.4)' : 'none',
             transition: 'all 0.15s',
@@ -869,7 +869,7 @@ function AbaBalcao({ onPedidoCriado, modo, setModo, mesaAdicionando, onCancelarM
             fontSize: '0.95rem', fontWeight: 800, border: 'none',
             background: modo === 'levar'
               ? `linear-gradient(145deg, ${C.gold}, #d4a800)`
-              : 'rgba(255,255,255,0.06)',
+              : 'rgba(255,235,235,0.70)',
             color: modo === 'levar' ? '#1a1000' : C.muted,
             boxShadow: modo === 'levar' ? '0 4px 16px rgba(245,200,0,0.4)' : 'none',
             transition: 'all 0.15s',
@@ -909,7 +909,7 @@ function AbaBalcao({ onPedidoCriado, modo, setModo, mesaAdicionando, onCancelarM
             <button key={tipo.id} onClick={() => setTipoSabores(tipo)} style={{
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
               padding: '0.875rem 1rem', borderRadius: '14px', cursor: 'pointer', textAlign: 'left',
-              background: 'rgba(255,255,255,0.05)', border: `1px solid ${C.border}`,
+              background: 'rgba(255,235,235,0.60)', border: `1px solid ${C.border}`,
               transition: 'all 0.12s',
             }}>
               <div>
@@ -943,7 +943,7 @@ function AbaBalcao({ onPedidoCriado, modo, setModo, mesaAdicionando, onCancelarM
               <div key={doce.id} style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                 padding: '0.75rem 1rem', borderRadius: '12px',
-                background: qtd > 0 ? 'rgba(229,57,53,0.1)' : 'rgba(255,255,255,0.04)',
+                background: qtd > 0 ? 'rgba(229,57,53,0.1)' : 'rgba(255,235,235,0.55)',
                 border: `1px solid ${qtd > 0 ? 'rgba(229,57,53,0.35)' : C.border}`,
               }}>
                 <div>
@@ -964,7 +964,7 @@ function AbaBalcao({ onPedidoCriado, modo, setModo, mesaAdicionando, onCancelarM
                       borderRadius: '11px', cursor: 'pointer', color: '#ff7777', fontSize: '1.4rem', fontWeight: 900,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                     }}>−</button>
-                    <span style={{ minWidth: '32px', textAlign: 'center', color: '#fff', fontWeight: 900, fontSize: '1.1rem' }}>{qtd}</span>
+                    <span style={{ minWidth: '32px', textAlign: 'center', color: '#1A0000', fontWeight: 900, fontSize: '1.1rem' }}>{qtd}</span>
                     <button onClick={() => addDoce(doce)} style={{
                       width: '48px', height: '48px', background: 'rgba(0,200,80,0.15)', border: 'none',
                       borderRadius: '11px', cursor: 'pointer', color: '#6aff9e', fontSize: '1.4rem', fontWeight: 900,
@@ -988,7 +988,7 @@ function AbaBalcao({ onPedidoCriado, modo, setModo, mesaAdicionando, onCancelarM
               return (
                 <div key={beb.id} style={{
                   padding: '0.75rem 1rem', borderRadius: '12px',
-                  background: 'rgba(255,255,255,0.04)', border: `1px solid ${C.border}`,
+                  background: 'rgba(255,235,235,0.55)', border: `1px solid ${C.border}`,
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
                     <div>
@@ -1004,8 +1004,8 @@ function AbaBalcao({ onPedidoCriado, modo, setModo, mesaAdicionando, onCancelarM
                         <div key={sabor} style={{
                           display: 'flex', alignItems: 'center', gap: '4px',
                           padding: '4px 8px', borderRadius: '8px',
-                          background: qtd > 0 ? 'rgba(229,57,53,0.15)' : 'rgba(255,255,255,0.06)',
-                          border: `1px solid ${qtd > 0 ? 'rgba(229,57,53,0.35)' : 'rgba(255,255,255,0.08)'}`,
+                          background: qtd > 0 ? 'rgba(229,57,53,0.15)' : 'rgba(255,235,235,0.70)',
+                          border: `1px solid ${qtd > 0 ? 'rgba(229,57,53,0.35)' : 'rgba(255,235,235,0.75)'}`,
                         }}>
                           <span style={{ color: qtd > 0 ? '#fff' : C.muted, fontSize: '0.72rem', fontWeight: 600 }}>{sabor}</span>
                           {qtd > 0 && (
@@ -1015,7 +1015,7 @@ function AbaBalcao({ onPedidoCriado, modo, setModo, mesaAdicionando, onCancelarM
                                 borderRadius: '7px', cursor: 'pointer', color: '#ff7777', fontSize: '1rem', fontWeight: 900,
                                 display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
                               }}>−</button>
-                              <span style={{ color: '#fff', fontWeight: 900, fontSize: '0.85rem', minWidth: '18px', textAlign: 'center' }}>{qtd}</span>
+                              <span style={{ color: '#1A0000', fontWeight: 900, fontSize: '0.85rem', minWidth: '18px', textAlign: 'center' }}>{qtd}</span>
                             </>
                           )}
                           <button onClick={() => addBebidaSabor(beb, sabor)} style={{
@@ -1039,7 +1039,7 @@ function AbaBalcao({ onPedidoCriado, modo, setModo, mesaAdicionando, onCancelarM
               <div key={beb.id} style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                 padding: '0.75rem 1rem', borderRadius: '12px',
-                background: qtd > 0 ? 'rgba(229,57,53,0.1)' : 'rgba(255,255,255,0.04)',
+                background: qtd > 0 ? 'rgba(229,57,53,0.1)' : 'rgba(255,235,235,0.55)',
                 border: `1px solid ${qtd > 0 ? 'rgba(229,57,53,0.35)' : C.border}`,
               }}>
                 <div>
@@ -1061,7 +1061,7 @@ function AbaBalcao({ onPedidoCriado, modo, setModo, mesaAdicionando, onCancelarM
                       borderRadius: '11px', cursor: 'pointer', color: '#ff7777', fontSize: '1.4rem', fontWeight: 900,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                     }}>−</button>
-                    <span style={{ minWidth: '32px', textAlign: 'center', color: '#fff', fontWeight: 900, fontSize: '1.1rem' }}>{qtd}</span>
+                    <span style={{ minWidth: '32px', textAlign: 'center', color: '#1A0000', fontWeight: 900, fontSize: '1.1rem' }}>{qtd}</span>
                     <button onClick={() => addBebida(beb)} style={{
                       width: '48px', height: '48px', background: 'rgba(0,200,80,0.15)', border: 'none',
                       borderRadius: '11px', cursor: 'pointer', color: '#6aff9e', fontSize: '1.4rem', fontWeight: 900,
@@ -1078,7 +1078,7 @@ function AbaBalcao({ onPedidoCriado, modo, setModo, mesaAdicionando, onCancelarM
       {/* Avulso */}
       {secao === 'avulso' && (
         <div style={{
-          background: 'rgba(255,255,255,0.05)', border: `1px solid ${C.border}`,
+          background: 'rgba(255,235,235,0.60)', border: `1px solid ${C.border}`,
           borderRadius: '16px', padding: '1.25rem',
           display: 'flex', flexDirection: 'column', gap: '0.75rem',
         }}>
@@ -1107,7 +1107,7 @@ function AbaBalcao({ onPedidoCriado, modo, setModo, mesaAdicionando, onCancelarM
               fontSize: '0.95rem', fontWeight: 800, border: 'none',
               background: avNome.trim() && parseFloat(avPreco) > 0
                 ? `linear-gradient(145deg, ${C.red}, ${C.redDark})`
-                : 'rgba(255,255,255,0.08)',
+                : 'rgba(255,235,235,0.75)',
               color: avNome.trim() && parseFloat(avPreco) > 0 ? '#fff' : C.muted,
             }}
           >
@@ -1203,7 +1203,7 @@ function AbaMesas({ pedidos, onAtualizar, carregando, onAdicionarItens, onFechar
           onClick={onAtualizar}
           style={{
             padding: '0.4rem 0.75rem', borderRadius: '20px', cursor: 'pointer',
-            background: 'rgba(255,255,255,0.07)', border: `1px solid ${C.border}`,
+            background: 'rgba(255,235,235,0.70)', border: `1px solid ${C.border}`,
             color: C.muted, display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.75rem',
           }}
         >
@@ -1386,7 +1386,7 @@ function SheetFecharConta({ pedido, onFechar, onConfirmar, enviando, senhaAdmin 
         onClick={e => e.stopPropagation()}
         style={{
           width: '100%', maxHeight: '92vh', overflowY: 'auto',
-          background: 'rgba(24,0,0,0.98)',
+          background: 'rgba(255,240,240,0.97)',
           borderRadius: '24px 24px 0 0',
           border: `1px solid ${C.border}`,
           padding: '0.75rem 1.25rem 2.5rem',
@@ -1445,7 +1445,7 @@ function SheetFecharConta({ pedido, onFechar, onConfirmar, enviando, senhaAdmin 
               <button key={t} onClick={() => resetDesconto() || setDescontoTipo(t)} style={{
                 padding: '0.5rem 0', borderRadius: '10px', cursor: 'pointer',
                 fontSize: '0.72rem', fontWeight: 700, border: 'none',
-                background: descontoTipo === t ? 'linear-gradient(145deg,#1a6b1a,#0d4a0d)' : 'rgba(255,255,255,0.07)',
+                background: descontoTipo === t ? 'linear-gradient(145deg,#1a6b1a,#0d4a0d)' : 'rgba(255,235,235,0.70)',
                 color: descontoTipo === t ? '#fff' : C.muted,
               }}>
                 {label}
@@ -1461,7 +1461,7 @@ function SheetFecharConta({ pedido, onFechar, onConfirmar, enviando, senhaAdmin 
                   placeholder="Senha do administrador"
                   onKeyDown={e => e.key === 'Enter' && validarSenhaDesconto()}
                   style={{ flex: 1, padding: '0.625rem 0.875rem', borderRadius: '10px', fontSize: '0.85rem',
-                    background: 'rgba(255,255,255,0.07)', border: `1px solid ${erroSenha ? 'rgba(255,82,82,0.5)' : C.border}`,
+                    background: 'rgba(255,235,235,0.70)', border: `1px solid ${erroSenha ? 'rgba(255,82,82,0.5)' : C.border}`,
                     color: C.text, outline: 'none', boxSizing: 'border-box' }} />
                 <button onClick={validarSenhaDesconto} style={{
                   padding: '0 1rem', borderRadius: '10px', cursor: 'pointer',
@@ -1479,20 +1479,20 @@ function SheetFecharConta({ pedido, onFechar, onConfirmar, enviando, senhaAdmin 
               <input type="number" value={descontoValor} onChange={e => setDescontoValor(e.target.value)}
                 placeholder="Valor a descontar (R$)" min="0" step="0.01"
                 style={{ width: '100%', padding: '0.625rem 0.875rem', borderRadius: '10px', fontSize: '0.85rem',
-                  background: 'rgba(255,255,255,0.07)', border: `1px solid ${C.border}`,
+                  background: 'rgba(255,235,235,0.70)', border: `1px solid ${C.border}`,
                   color: C.text, outline: 'none', boxSizing: 'border-box', marginBottom: '6px' }} />
             )}
             {descontoTipo === 'porcentagem' && (
               <input type="number" value={descontoValor} onChange={e => setDescontoValor(e.target.value)}
                 placeholder="Porcentagem (%)" min="0" max="100" step="1"
                 style={{ width: '100%', padding: '0.625rem 0.875rem', borderRadius: '10px', fontSize: '0.85rem',
-                  background: 'rgba(255,255,255,0.07)', border: `1px solid ${C.border}`,
+                  background: 'rgba(255,235,235,0.70)', border: `1px solid ${C.border}`,
                   color: C.text, outline: 'none', boxSizing: 'border-box', marginBottom: '6px' }} />
             )}
             <input type="text" value={descontoObs} onChange={e => setDescontoObs(e.target.value)}
               placeholder="Motivo do desconto (obrigatorio)"
               style={{ width: '100%', padding: '0.625rem 0.875rem', borderRadius: '10px', fontSize: '0.82rem',
-                background: 'rgba(255,255,255,0.07)', border: `1px solid rgba(0,200,0,0.3)`,
+                background: 'rgba(255,235,235,0.70)', border: `1px solid rgba(0,200,0,0.3)`,
                 color: C.text, outline: 'none', boxSizing: 'border-box' }} />
           </>)}
         </div>
@@ -1523,7 +1523,7 @@ function SheetFecharConta({ pedido, onFechar, onConfirmar, enviando, senhaAdmin 
               <button key={p} onClick={() => { setPagamento(p); setValorRecebido('') }} style={{
                 padding: '0.6rem 0', borderRadius: '10px', cursor: 'pointer',
                 fontSize: '0.72rem', fontWeight: 700, border: 'none',
-                background: pagamento === p ? `linear-gradient(145deg, ${C.red}, ${C.redDark})` : 'rgba(255,255,255,0.07)',
+                background: pagamento === p ? `linear-gradient(145deg, ${C.red}, ${C.redDark})` : 'rgba(255,235,235,0.70)',
                 color: pagamento === p ? '#fff' : C.muted, textTransform: 'capitalize',
               }}>
                 {p === 'dinheiro' ? 'Dinheiro' : p === 'debito' ? 'Debito' : p === 'credito' ? 'Credito' : 'PIX'}
@@ -1547,7 +1547,7 @@ function SheetFecharConta({ pedido, onFechar, onConfirmar, enviando, senhaAdmin 
               step="0.01"
               style={{
                 width: '100%', padding: '0.7rem 0.875rem', borderRadius: '12px', fontSize: '0.88rem',
-                background: 'rgba(255,255,255,0.07)', border: `1px solid ${C.border}`,
+                background: 'rgba(255,235,235,0.70)', border: `1px solid ${C.border}`,
                 color: C.text, outline: 'none', boxSizing: 'border-box',
               }}
             />
@@ -1584,7 +1584,7 @@ function SheetFecharConta({ pedido, onFechar, onConfirmar, enviando, senhaAdmin 
             cursor: enviando || trocoNeg ? 'not-allowed' : 'pointer',
             fontSize: '1rem', fontWeight: 800, border: 'none',
             background: trocoNeg || enviando
-              ? 'rgba(255,255,255,0.08)'
+              ? 'rgba(255,235,235,0.75)'
               : `linear-gradient(145deg, ${C.success}, #009940)`,
             color: trocoNeg || enviando ? C.muted : '#fff',
             boxShadow: !trocoNeg && !enviando ? '0 6px 20px rgba(0,200,80,0.3)' : 'none',
@@ -1740,7 +1740,7 @@ export default function Caixa() {
       }}>
         <div style={{
           width: '100%', maxWidth: '340px',
-          background: 'rgba(255,255,255,0.06)', border: `1px solid ${C.border}`,
+          background: 'rgba(255,235,235,0.70)', border: `1px solid ${C.border}`,
           borderRadius: '24px', padding: '2rem',
           backdropFilter: 'blur(20px)', textAlign: 'center',
           boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
@@ -1759,7 +1759,7 @@ export default function Caixa() {
             placeholder="Senha de acesso"
             style={{
               width: '100%', padding: '0.875rem 1rem', borderRadius: '14px', fontSize: '1rem',
-              background: 'rgba(255,255,255,0.07)', border: `1px solid ${errLogin ? C.danger : C.border}`,
+              background: 'rgba(255,235,235,0.70)', border: `1px solid ${errLogin ? C.danger : C.border}`,
               color: C.text, outline: 'none', marginBottom: '0.75rem', boxSizing: 'border-box',
             }}
           />
@@ -1779,7 +1779,12 @@ export default function Caixa() {
 
   // ── App ─────────────────────────────────────────────────────────
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <div id="caixa-root-wrapper" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <style>{`
+        #caixa-root-wrapper, #caixa-root-wrapper * {
+          font-weight: 900 !important;
+        }
+      `}</style>
 
       {/* Toast */}
       {toast && (
@@ -1800,7 +1805,7 @@ export default function Caixa() {
       {/* Top bar */}
       <header style={{
         position: 'sticky', top: 0, zIndex: 100,
-        background: 'rgba(20,0,0,0.92)',
+        background: 'rgba(255,240,240,0.95)',
         backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
         borderBottom: `1px solid ${C.border}`,
         padding: '0.75rem 1.25rem',
@@ -1879,7 +1884,7 @@ export default function Caixa() {
       {/* Bottom navigation */}
       <nav style={{
         position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 100,
-        background: 'rgba(20,0,0,0.96)',
+        background: 'rgba(255,240,240,0.97)',
         backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
         borderTop: `1px solid ${C.border}`,
         display: 'grid', gridTemplateColumns: '1fr 1fr 1fr',
@@ -1904,7 +1909,7 @@ export default function Caixa() {
                 borderTop: ativo ? `2px solid ${C.red}` : '2px solid transparent',
               }}
             >
-              <item.icon size={22} color={ativo ? C.red : 'rgba(255,255,255,0.4)'} />
+              <item.icon size={22} color={ativo ? C.red : 'rgba(100,0,0,0.55)'} />
               <span style={{ fontSize: '0.7rem', fontWeight: ativo ? 800 : 500 }}>{item.label}</span>
               {item.badge > 0 && (
                 <span style={{

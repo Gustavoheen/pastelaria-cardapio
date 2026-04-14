@@ -17,19 +17,19 @@ import { TIPOS_PASTEL, PASTEIS_DOCES, categorias, SABORES_SALGADOS, SABORES_DOCE
 
 // ── Paleta ────────────────────────────────────────────────────
 const C = {
-  bg:         'rgba(18,2,2,0.92)',
-  card:       'rgba(255,255,255,0.07)',
-  cardBorder: 'rgba(255,255,255,0.13)',
-  red:        '#E53935',
-  redDark:    '#B71C1C',
-  gold:       '#F5C800',
-  text:       '#FFFFFF',
-  muted:      'rgba(255,255,255,0.55)',
-  success:    '#00e676',
-  warning:    '#FFD54F',
-  danger:     '#FF5252',
-  chartLine:  '#E53935',
-  chartArea:  'rgba(229,57,53,0.18)',
+  bg:         'rgba(255,235,235,0.88)',
+  card:       'rgba(255,255,255,0.82)',
+  cardBorder: 'rgba(180,0,0,0.22)',
+  red:        '#C62828',
+  redDark:    '#8B0000',
+  gold:       '#92400E',
+  text:       '#1A0000',
+  muted:      'rgba(100,0,0,0.65)',
+  success:    '#166534',
+  warning:    '#92400E',
+  danger:     '#991B1B',
+  chartLine:  '#C62828',
+  chartArea:  'rgba(198,40,40,0.15)',
 }
 
 // ── STATUS FLOW ───────────────────────────────────────────────
@@ -126,7 +126,7 @@ function CustomTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null
   return (
     <div style={{
-      background: 'rgba(20,0,0,0.92)', border: '1px solid rgba(229,57,53,0.3)',
+      background: 'rgba(255,235,235,0.92)', border: '1px solid rgba(229,57,53,0.3)',
       borderRadius: '10px', padding: '8px 12px', backdropFilter: 'blur(12px)',
     }}>
       <p style={{ color: C.muted, fontSize: '0.75rem', margin: '0 0 2px' }}>{label}</p>
@@ -143,7 +143,7 @@ function CustomTooltipCount({ active, payload, label }) {
   if (!active || !payload?.length) return null
   return (
     <div style={{
-      background: 'rgba(20,0,0,0.92)', border: '1px solid rgba(229,57,53,0.3)',
+      background: 'rgba(255,235,235,0.92)', border: '1px solid rgba(229,57,53,0.3)',
       borderRadius: '10px', padding: '8px 12px', backdropFilter: 'blur(12px)',
     }}>
       <p style={{ color: C.muted, fontSize: '0.75rem', margin: '0 0 2px' }}>{label}</p>
@@ -177,7 +177,7 @@ function BadgePagamento({ pag }) {
     credito:  { bg: 'rgba(156,39,176,0.15)', border: 'rgba(156,39,176,0.4)', cor: '#9C27B0', label: 'Crédito' },
   }
   const key = (pag || '').toLowerCase().replace(/\s/g, '')
-  const s = map[key] || { bg: 'rgba(255,255,255,0.08)', border: C.cardBorder, cor: C.muted, label: pag?.toUpperCase() || '—' }
+  const s = map[key] || { bg: 'rgba(255,235,235,0.75)', border: C.cardBorder, cor: C.muted, label: pag?.toUpperCase() || '—' }
   return (
     <span style={{
       background: s.bg, border: `1px solid ${s.border}`, color: s.cor,
@@ -195,7 +195,7 @@ function PrintArea({ pedido }) {
   const hora = fmtHora(pedido.created_at)
   const data = fmtData(pedido.created_at)
   return (
-    <div id="print-area" style={{ fontFamily: 'Courier New, monospace', fontSize: '11px', width: '80mm', color: '#000', background: '#fff', padding: '8px' }}>
+    <div id="print-area" style={{ display: 'none', fontFamily: 'Courier New, monospace', fontSize: '11px', width: '80mm', color: '#000', background: '#fff', padding: '8px' }}>
       <div style={{ textAlign: 'center', fontWeight: 900, fontSize: '13px' }}>PASTEL DO CARIOCA</div>
       <div style={{ textAlign: 'center', fontSize: '10px', marginBottom: '4px' }}>Pasteis Fresquinhos!</div>
       <div>{'━'.repeat(28)}</div>
@@ -236,7 +236,7 @@ function PrintArea({ pedido }) {
 function KpiCard({ icon: Icon, label, valor, sub, corSub }) {
   return (
     <div style={{
-      background: 'rgba(255,255,255,0.07)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
+      background: 'rgba(255,235,235,0.70)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
       border: '1px solid rgba(255,255,255,0.12)', borderRadius: '16px', padding: '1.25rem',
       boxShadow: '0 4px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.08)',
       display: 'flex', flexDirection: 'column', gap: '0.5rem',
@@ -249,9 +249,9 @@ function KpiCard({ icon: Icon, label, valor, sub, corSub }) {
         }}>
           <Icon size={16} color="#FF7777" />
         </div>
-        <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.73rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{label}</span>
+        <span style={{ color: 'rgba(80,0,0,0.80)', fontSize: '0.73rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{label}</span>
       </div>
-      <div style={{ color: '#fff', fontFamily: 'Bebas Neue, sans-serif', fontSize: '1.85rem', letterSpacing: '1px', lineHeight: 1 }}>
+      <div style={{ color: '#1A0000', fontFamily: 'Bebas Neue, sans-serif', fontSize: '1.85rem', letterSpacing: '1px', lineHeight: 1 }}>
         {valor}
       </div>
       {sub && <div style={{ color: corSub || C.muted, fontSize: '0.73rem', fontWeight: 600 }}>{sub}</div>}
@@ -488,7 +488,7 @@ function PaginaDashboard({ pedidos, onVerPedidos, onExcluir, onSalvarPedido, car
               style={{
                 padding: '4px 12px', borderRadius: '20px', border: 'none', cursor: 'pointer',
                 fontSize: '0.75rem', fontWeight: 700,
-                background: periodoFluxo === p ? `linear-gradient(145deg, ${C.red}, ${C.redDark})` : 'rgba(255,255,255,0.08)',
+                background: periodoFluxo === p ? `linear-gradient(145deg, ${C.red}, ${C.redDark})` : 'rgba(255,235,235,0.75)',
                 color: periodoFluxo === p ? '#fff' : C.muted,
               }}
             >{label}</button>
@@ -499,7 +499,7 @@ function PaginaDashboard({ pedidos, onVerPedidos, onExcluir, onSalvarPedido, car
             onChange={e => mudarDataCustomFluxo(e.target.value)}
             style={{
               padding: '4px 8px', borderRadius: '8px', fontSize: '0.75rem',
-              background: periodoFluxo === 'custom' ? 'rgba(229,57,53,0.15)' : 'rgba(255,255,255,0.06)',
+              background: periodoFluxo === 'custom' ? 'rgba(229,57,53,0.15)' : 'rgba(255,235,235,0.70)',
               border: `1px solid ${periodoFluxo === 'custom' ? 'rgba(229,57,53,0.4)' : C.cardBorder}`,
               color: C.text, outline: 'none', cursor: 'pointer',
             }}
@@ -510,11 +510,11 @@ function PaginaDashboard({ pedidos, onVerPedidos, onExcluir, onSalvarPedido, car
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
           {Object.entries(porPag).map(([pag, val]) => (
             <div key={pag} style={{
-              background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
+              background: 'rgba(255,235,235,0.70)', border: '1px solid rgba(255,255,255,0.1)',
               borderRadius: '10px', padding: '0.5rem 0.875rem', textAlign: 'center',
             }}>
-              <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase' }}>{pag}</div>
-              <div style={{ color: '#fff', fontSize: '1rem', fontWeight: 900 }}>{fmtMoeda(val)}</div>
+              <div style={{ color: 'rgba(100,0,0,0.70)', fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase' }}>{pag}</div>
+              <div style={{ color: '#1A0000', fontSize: '1rem', fontWeight: 900 }}>{fmtMoeda(val)}</div>
             </div>
           ))}
         </div>
@@ -528,7 +528,7 @@ function PaginaDashboard({ pedidos, onVerPedidos, onExcluir, onSalvarPedido, car
               <thead>
                 <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
                   {['Hora', 'Origem', '#', 'Cliente', 'Itens', 'Pagamento', 'Valor', 'Desconto', 'Ações'].map(h => (
-                    <th key={h} style={{ padding: '0.55rem 0.75rem', color: 'rgba(255,255,255,0.5)', fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'left', whiteSpace: 'nowrap', position: 'sticky', top: 0, background: 'rgba(20,5,5,0.95)', zIndex: 1 }}>
+                    <th key={h} style={{ padding: '0.55rem 0.75rem', color: 'rgba(100,0,0,0.55)', fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'left', whiteSpace: 'nowrap', position: 'sticky', top: 0, background: 'rgba(255,240,240,0.95)', zIndex: 1 }}>
                       {h}
                     </th>
                   ))}
@@ -556,13 +556,13 @@ function PaginaDashboard({ pedidos, onVerPedidos, onExcluir, onSalvarPedido, car
                             {ehBalcao ? 'Balcão' : 'Site'}
                           </span>
                         </td>
-                        <td style={{ padding: '0.5rem 0.75rem', color: 'rgba(255,255,255,0.5)', fontSize: '0.78rem' }}>
+                        <td style={{ padding: '0.5rem 0.75rem', color: 'rgba(100,0,0,0.55)', fontSize: '0.78rem' }}>
                           {v.numero}
                         </td>
-                        <td style={{ padding: '0.5rem 0.75rem', color: '#fff', fontSize: '0.82rem', fontWeight: 600, maxWidth: '140px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <td style={{ padding: '0.5rem 0.75rem', color: '#1A0000', fontSize: '0.82rem', fontWeight: 600, maxWidth: '140px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {v.nome}
                         </td>
-                        <td style={{ padding: '0.5rem 0.75rem', color: 'rgba(255,255,255,0.7)', fontSize: '0.78rem', maxWidth: '220px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <td style={{ padding: '0.5rem 0.75rem', color: 'rgba(80,0,0,0.80)', fontSize: '0.78rem', maxWidth: '220px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {resumoV}
                         </td>
                         <td style={{ padding: '0.5rem 0.75rem' }}>
@@ -587,7 +587,7 @@ function PaginaDashboard({ pedidos, onVerPedidos, onExcluir, onSalvarPedido, car
                               onClick={() => onImprimir && onImprimir(v)}
                               title="Imprimir comprovante"
                               style={{
-                                background: 'rgba(255,255,255,0.07)', border: `1px solid ${C.cardBorder}`,
+                                background: 'rgba(255,235,235,0.70)', border: `1px solid ${C.cardBorder}`,
                                 borderRadius: '8px', width: '30px', height: '28px',
                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                                 cursor: 'pointer', color: C.text,
@@ -632,7 +632,7 @@ function PaginaDashboard({ pedidos, onVerPedidos, onExcluir, onSalvarPedido, car
                           <td colSpan={8} style={{ padding: '0 0.75rem 0.75rem', background: 'rgba(245,200,0,0.04)', borderBottom: '1px solid rgba(245,200,0,0.15)' }}>
                             <div style={{ padding: '0.75rem', borderRadius: '12px', background: 'rgba(0,0,0,0.25)', border: '1px solid rgba(255,255,255,0.08)' }}>
                               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-                                <span style={{ color: '#fff', fontWeight: 800, fontSize: '0.85rem' }}>Editando venda #{v.numero}</span>
+                                <span style={{ color: '#1A0000', fontWeight: 800, fontSize: '0.85rem' }}>Editando venda #{v.numero}</span>
                                 <button
                                   onClick={adicionarItemManual}
                                   style={{
@@ -654,12 +654,12 @@ function PaginaDashboard({ pedidos, onVerPedidos, onExcluir, onSalvarPedido, car
                                     padding: '6px 10px', borderRadius: '8px',
                                     background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)',
                                   }}>
-                                    <span style={{ color: '#fff', fontSize: '0.8rem', flex: 1 }}>{it.nome}</span>
+                                    <span style={{ color: '#1A0000', fontSize: '0.8rem', flex: 1 }}>{it.nome}</span>
                                     <span style={{ color: C.muted, fontSize: '0.75rem' }}>{fmtMoeda(it.preco || 0)}</span>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '2px', background: 'rgba(255,255,255,0.08)', borderRadius: '6px', padding: '1px 2px' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '2px', background: 'rgba(255,235,235,0.75)', borderRadius: '6px', padding: '1px 2px' }}>
                                       <button onClick={() => editarQtdItem(idx, -1)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#FF7777', fontSize: '0.9rem', fontWeight: 900, width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
-                                      <span style={{ color: '#fff', fontWeight: 900, fontSize: '0.82rem', minWidth: '18px', textAlign: 'center' }}>{it.qtd || 1}</span>
-                                      <button onClick={() => editarQtdItem(idx, 1)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#fff', fontSize: '0.9rem', fontWeight: 900, width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
+                                      <span style={{ color: '#1A0000', fontWeight: 900, fontSize: '0.82rem', minWidth: '18px', textAlign: 'center' }}>{it.qtd || 1}</span>
+                                      <button onClick={() => editarQtdItem(idx, 1)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#1A0000', fontSize: '0.9rem', fontWeight: 900, width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
                                     </div>
                                     <span style={{ color: C.gold, fontWeight: 800, fontSize: '0.8rem', minWidth: '55px', textAlign: 'right' }}>
                                       {fmtMoeda((it.preco || 0) * (it.qtd || 1))}
@@ -681,8 +681,8 @@ function PaginaDashboard({ pedidos, onVerPedidos, onExcluir, onSalvarPedido, car
                                     style={{
                                       padding: '4px 12px', borderRadius: '8px', fontSize: '0.73rem', fontWeight: 700,
                                       cursor: 'pointer',
-                                      background: editPag === f ? 'rgba(245,200,0,0.2)' : 'rgba(255,255,255,0.06)',
-                                      border: `1px solid ${editPag === f ? 'rgba(245,200,0,0.4)' : 'rgba(255,255,255,0.1)'}`,
+                                      background: editPag === f ? 'rgba(245,200,0,0.2)' : 'rgba(255,235,235,0.70)',
+                                      border: `1px solid ${editPag === f ? 'rgba(245,200,0,0.4)' : 'rgba(255,235,235,0.78)'}`,
                                       color: editPag === f ? C.gold : 'rgba(255,255,255,0.7)',
                                     }}
                                   >
@@ -699,8 +699,8 @@ function PaginaDashboard({ pedidos, onVerPedidos, onExcluir, onSalvarPedido, car
                                 <div style={{ display: 'flex', gap: '8px' }}>
                                   <button onClick={fecharEdicao} style={{
                                     padding: '6px 16px', borderRadius: '8px', fontSize: '0.78rem', fontWeight: 700,
-                                    background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)',
-                                    color: '#fff', cursor: 'pointer',
+                                    background: 'rgba(255,235,235,0.75)', border: '1px solid rgba(255,255,255,0.15)',
+                                    color: '#1A0000', cursor: 'pointer',
                                   }}>
                                     Cancelar
                                   </button>
@@ -777,7 +777,7 @@ function PaginaDashboard({ pedidos, onVerPedidos, onExcluir, onSalvarPedido, car
                       onChange={e => salvarValorInicial(e.target.value)}
                       placeholder="0,00"
                       min="0" step="0.01"
-                      style={{ width: '100%', padding: '0.5rem 0.7rem', borderRadius: 10, background: 'rgba(255,255,255,0.06)', border: `1px solid ${C.cardBorder}`, color: C.text, fontSize: '0.95rem', fontWeight: 700, outline: 'none' }}
+                      style={{ width: '100%', padding: '0.5rem 0.7rem', borderRadius: 10, background: 'rgba(255,235,235,0.70)', border: `1px solid ${C.cardBorder}`, color: C.text, fontSize: '0.95rem', fontWeight: 700, outline: 'none' }}
                     />
                   </div>
                 </div>
@@ -793,7 +793,7 @@ function PaginaDashboard({ pedidos, onVerPedidos, onExcluir, onSalvarPedido, car
                       onChange={e => salvarValorFinal(e.target.value)}
                       placeholder="0,00"
                       min="0" step="0.01"
-                      style={{ width: '100%', padding: '0.5rem 0.7rem', borderRadius: 10, background: 'rgba(255,255,255,0.06)', border: `1px solid ${C.cardBorder}`, color: C.text, fontSize: '0.95rem', fontWeight: 700, outline: 'none' }}
+                      style={{ width: '100%', padding: '0.5rem 0.7rem', borderRadius: 10, background: 'rgba(255,235,235,0.70)', border: `1px solid ${C.cardBorder}`, color: C.text, fontSize: '0.95rem', fontWeight: 700, outline: 'none' }}
                     />
                   </div>
                 </div>
@@ -824,11 +824,11 @@ function PaginaDashboard({ pedidos, onVerPedidos, onExcluir, onSalvarPedido, car
 
             {/* Totais */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
-              <div style={{ padding: '0.75rem', borderRadius: 10, background: 'rgba(255,255,255,0.04)', border: `1px solid ${C.cardBorder}`, textAlign: 'center' }}>
+              <div style={{ padding: '0.75rem', borderRadius: 10, background: 'rgba(255,235,235,0.55)', border: `1px solid ${C.cardBorder}`, textAlign: 'center' }}>
                 <div style={{ color: C.muted, fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: 4 }}>Balcão</div>
                 <div style={{ color: C.gold, fontWeight: 900, fontSize: '1rem' }}>{fmtMoeda(caixaFechado ? caixaFechado.totalBalcao : totalBalcao)}</div>
               </div>
-              <div style={{ padding: '0.75rem', borderRadius: 10, background: 'rgba(255,255,255,0.04)', border: `1px solid ${C.cardBorder}`, textAlign: 'center' }}>
+              <div style={{ padding: '0.75rem', borderRadius: 10, background: 'rgba(255,235,235,0.55)', border: `1px solid ${C.cardBorder}`, textAlign: 'center' }}>
                 <div style={{ color: C.muted, fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: 4 }}>Site / App</div>
                 <div style={{ color: '#FF7777', fontWeight: 900, fontSize: '1rem' }}>{fmtMoeda(caixaFechado ? caixaFechado.totalSite : totalSite)}</div>
               </div>
@@ -994,7 +994,7 @@ function PaginaDashboard({ pedidos, onVerPedidos, onExcluir, onSalvarPedido, car
                   <Pie data={dadosPag} cx="50%" cy="50%" innerRadius={45} outerRadius={72} dataKey="value" paddingAngle={3}>
                     {dadosPag.map((entry, i) => <Cell key={i} fill={entry.cor} />)}
                   </Pie>
-                  <Tooltip formatter={(v) => fmtMoeda(v)} contentStyle={{ background: 'rgba(20,0,0,0.92)', border: '1px solid rgba(229,57,53,0.3)', borderRadius: '10px', color: C.gold }} />
+                  <Tooltip formatter={(v) => fmtMoeda(v)} contentStyle={{ background: 'rgba(255,240,240,0.97)', border: '1px solid rgba(198,40,40,0.3)', borderRadius: '10px', color: '#1A0000' }} />
                 </PieChart>
               </ResponsiveContainer>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.5rem', justifyContent: 'center' }}>
@@ -1204,7 +1204,7 @@ function PainelDetalhe({ pedido, onStatus, onImprimir, onExcluir, onFechar }) {
               </span>
             </div>
             {item.sabores?.length > 0 && (
-              <div style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.72rem', marginTop: '2px' }}>
+              <div style={{ color: 'rgba(100,0,0,0.65)', fontSize: '0.72rem', marginTop: '2px' }}>
                 Sabores: {item.sabores.join(', ')}
               </div>
             )}
@@ -1228,7 +1228,7 @@ function PainelDetalhe({ pedido, onStatus, onImprimir, onExcluir, onFechar }) {
             style={{
               display: 'flex', alignItems: 'center', gap: '4px',
               padding: '0.6rem 1rem', borderRadius: '10px', cursor: 'pointer', fontSize: '0.82rem',
-              background: 'rgba(255,255,255,0.06)', border: `1px solid ${C.cardBorder}`, color: C.muted,
+              background: 'rgba(255,235,235,0.70)', border: `1px solid ${C.cardBorder}`, color: C.muted,
             }}
           >
             <ChevronLeft size={14} /> Retroceder
@@ -1253,7 +1253,7 @@ function PainelDetalhe({ pedido, onStatus, onImprimir, onExcluir, onFechar }) {
           style={{
             display: 'flex', alignItems: 'center', gap: '4px',
             padding: '0.6rem 1rem', borderRadius: '10px', cursor: 'pointer', fontSize: '0.82rem',
-            background: 'rgba(255,255,255,0.06)', border: `1px solid ${C.cardBorder}`, color: C.text,
+            background: 'rgba(255,235,235,0.70)', border: `1px solid ${C.cardBorder}`, color: C.text,
           }}
         >
           <Printer size={14} /> Imprimir
@@ -1312,13 +1312,13 @@ function CardPedido({ pedido, expandido, onToggle, onStatus, onImprimir, onExclu
           <div style={{ color: C.gold, fontSize: '1.15rem', fontFamily: 'Bebas Neue, sans-serif', letterSpacing: '1px' }}>
             {fmtHora(pedido.created_at)}
           </div>
-          <div style={{ color: 'rgba(255,255,255,0.65)', fontSize: '1rem', fontWeight: 700 }}>#{pedido.numero}</div>
+          <div style={{ color: 'rgba(100,0,0,0.75)', fontSize: '1rem', fontWeight: 700 }}>#{pedido.numero}</div>
         </div>
         <div style={{ flex: 1, minWidth: '120px', overflow: 'hidden' }}>
           <div style={{ color: C.text, fontWeight: 700, fontSize: '1.25rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {pedido.nome}
           </div>
-          <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: '1.05rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <div style={{ color: 'rgba(80,0,0,0.80)', fontSize: '1.05rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {resumo}
           </div>
         </div>
@@ -1350,7 +1350,7 @@ function CardPedido({ pedido, expandido, onToggle, onStatus, onImprimir, onExclu
                 <div>
                   <span style={{ color: C.text, fontWeight: 700, fontSize: '1.15rem' }}>{item.qtd || 1}x {item.nome}</span>
                   {item.sabores?.length > 0 && (
-                    <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: '1.1rem', fontWeight: 600, marginTop: '3px' }}>Sabores: {item.sabores.join(', ')}</div>
+                    <div style={{ color: 'rgba(80,0,0,0.80)', fontSize: '1.1rem', fontWeight: 600, marginTop: '3px' }}>Sabores: {item.sabores.join(', ')}</div>
                   )}
                   {item.adicionais?.length > 0 && (
                     <div style={{ color: 'rgba(245,200,0,0.85)', fontSize: '1.05rem', fontWeight: 600, marginTop: '2px' }}>+ {item.adicionais.join(', ')}</div>
@@ -1369,11 +1369,11 @@ function CardPedido({ pedido, expandido, onToggle, onStatus, onImprimir, onExclu
           {pedido.tipo_entrega === 'entrega' && pedido.endereco && (
             <div style={{ padding: '0.625rem 1.125rem', borderTop: `1px solid ${C.cardBorder}`, background: 'rgba(245,200,0,0.05)' }}>
               <span style={{ color: C.gold, fontSize: '1rem', fontWeight: 700 }}>🛵 Entrega:</span>
-              <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.95rem', marginLeft: '6px' }}>{pedido.endereco}</span>
+              <span style={{ color: 'rgba(80,0,0,0.80)', fontSize: '0.95rem', marginLeft: '6px' }}>{pedido.endereco}</span>
             </div>
           )}
           {pedido.observacao && (
-            <div style={{ padding: '0.625rem 1.125rem', borderTop: `1px solid ${C.cardBorder}`, background: 'rgba(255,255,255,0.02)' }}>
+            <div style={{ padding: '0.625rem 1.125rem', borderTop: `1px solid ${C.cardBorder}`, background: 'rgba(255,235,235,0.40)' }}>
               <span style={{ color: C.muted, fontSize: '0.95rem', fontStyle: 'italic' }}>📝 {pedido.observacao}</span>
             </div>
           )}
@@ -1397,7 +1397,7 @@ function CardPedido({ pedido, expandido, onToggle, onStatus, onImprimir, onExclu
 
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', padding: '0.75rem 1.125rem', borderTop: `1px solid ${C.cardBorder}`, background: 'rgba(0,0,0,0.2)' }}>
             {info.anterior && (
-              <button onClick={() => onStatus(pedido.id, info.anterior)} style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '0.625rem 1rem', borderRadius: '10px', cursor: 'pointer', fontSize: '0.92rem', background: 'rgba(255,255,255,0.06)', border: `1px solid ${C.cardBorder}`, color: C.muted }}>
+              <button onClick={() => onStatus(pedido.id, info.anterior)} style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '0.625rem 1rem', borderRadius: '10px', cursor: 'pointer', fontSize: '0.92rem', background: 'rgba(255,235,235,0.70)', border: `1px solid ${C.cardBorder}`, color: C.muted }}>
                 <ChevronLeft size={15} /> Retroceder
               </button>
             )}
@@ -1438,7 +1438,7 @@ function CardPedido({ pedido, expandido, onToggle, onStatus, onImprimir, onExclu
                 💬 Enviar msg
               </button>
             )}
-            <button onClick={() => onImprimir(pedido)} style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '0.625rem 1rem', borderRadius: '10px', cursor: 'pointer', fontSize: '0.92rem', background: 'rgba(255,255,255,0.06)', border: `1px solid ${C.cardBorder}`, color: C.text }}>
+            <button onClick={() => onImprimir(pedido)} style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '0.625rem 1rem', borderRadius: '10px', cursor: 'pointer', fontSize: '0.92rem', background: 'rgba(255,235,235,0.70)', border: `1px solid ${C.cardBorder}`, color: C.text }}>
               <Printer size={15} /> Imprimir
             </button>
             <button onClick={() => onExcluir(pedido.id)} style={{ display: 'flex', alignItems: 'center', padding: '0.625rem 0.75rem', borderRadius: '10px', cursor: 'pointer', background: 'rgba(200,0,0,0.12)', border: '1px solid rgba(200,0,0,0.3)', color: '#ff7777' }}>
@@ -1548,7 +1548,7 @@ function PaginaPedidos({ pedidos, novosIds, onStatus, onImprimir, onExcluir, onA
             style={{
               display: 'flex', alignItems: 'center', gap: '5px',
               padding: '0.4rem 0.875rem', borderRadius: '20px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 700,
-              background: periodo === btn.val ? '#F5C800' : 'rgba(255,255,255,0.06)',
+              background: periodo === btn.val ? '#F5C800' : 'rgba(255,235,235,0.70)',
               border: periodo === btn.val ? 'none' : `1px solid ${C.cardBorder}`,
               color: periodo === btn.val ? '#1a1a2e' : C.muted, transition: 'all 0.15s',
             }}
@@ -1564,7 +1564,7 @@ function PaginaPedidos({ pedidos, novosIds, onStatus, onImprimir, onExcluir, onA
             onChange={e => mudarDataCustom(e.target.value)}
             style={{
               padding: '0.4rem 0.75rem', borderRadius: '20px', fontSize: '0.78rem', fontWeight: 600,
-              background: periodo === 'custom' ? '#F5C800' : 'rgba(255,255,255,0.06)',
+              background: periodo === 'custom' ? '#F5C800' : 'rgba(255,235,235,0.70)',
               border: periodo === 'custom' ? 'none' : `1px solid ${C.cardBorder}`,
               color: periodo === 'custom' ? '#1a1a2e' : C.muted,
               outline: 'none', cursor: 'pointer',
@@ -1582,20 +1582,20 @@ function PaginaPedidos({ pedidos, novosIds, onStatus, onImprimir, onExcluir, onA
             style={{
               display: 'flex', alignItems: 'center', gap: '5px',
               padding: '0.4rem 0.875rem', borderRadius: '20px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 700,
-              background: filtro === pill.val ? C.red : 'rgba(255,255,255,0.06)',
+              background: filtro === pill.val ? C.red : 'rgba(255,235,235,0.70)',
               border: filtro === pill.val ? 'none' : `1px solid ${C.cardBorder}`,
               color: filtro === pill.val ? '#fff' : C.muted, transition: 'all 0.15s',
             }}
           >
             {pill.label}
-            <span style={{ background: filtro === pill.val ? 'rgba(255,255,255,0.25)' : (pill.cor ? pill.cor + '28' : 'rgba(255,255,255,0.1)'), color: filtro === pill.val ? '#fff' : (pill.cor || C.muted), borderRadius: '999px', fontSize: '0.65rem', padding: '1px 6px', fontWeight: 900 }}>
+            <span style={{ background: filtro === pill.val ? 'rgba(255,255,255,0.25)' : (pill.cor ? pill.cor + '28' : 'rgba(255,235,235,0.78)'), color: filtro === pill.val ? '#fff' : (pill.cor || C.muted), borderRadius: '999px', fontSize: '0.65rem', padding: '1px 6px', fontWeight: 900 }}>
               {pill.cnt}
             </span>
           </button>
         ))}
         <button
           onClick={onAtualizar}
-          style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '4px', padding: '0.4rem 0.875rem', borderRadius: '20px', cursor: 'pointer', fontSize: '0.78rem', background: 'rgba(255,255,255,0.06)', border: `1px solid ${C.cardBorder}`, color: C.muted }}
+          style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '4px', padding: '0.4rem 0.875rem', borderRadius: '20px', cursor: 'pointer', fontSize: '0.78rem', background: 'rgba(255,235,235,0.70)', border: `1px solid ${C.cardBorder}`, color: C.muted }}
         >
           <RefreshCw size={13} /> Atualizar
         </button>
@@ -1606,12 +1606,12 @@ function PaginaPedidos({ pedidos, novosIds, onStatus, onImprimir, onExcluir, onA
 
         {/* ── PEDIDOS SITE ── */}
         <div style={{
-          background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)',
+          background: 'rgba(255,235,235,0.55)', border: '1px solid rgba(255,255,255,0.1)',
           borderRadius: '16px', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem',
           maxHeight: '80vh', overflowY: 'auto',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
-            <h3 style={{ margin: 0, color: '#fff', fontSize: '1rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <h3 style={{ margin: 0, color: '#1A0000', fontSize: '1rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px' }}>
               🌐 Pedidos Site
               <span style={{ background: 'rgba(229,57,53,0.2)', color: '#FF7777', borderRadius: '999px', fontSize: '0.7rem', padding: '2px 8px', fontWeight: 900 }}>
                 {filtrados.length}
@@ -1649,7 +1649,7 @@ function PaginaPedidos({ pedidos, novosIds, onStatus, onImprimir, onExcluir, onA
           maxHeight: '80vh', overflowY: 'auto',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
-            <h3 style={{ margin: 0, color: '#fff', fontSize: '1rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <h3 style={{ margin: 0, color: '#1A0000', fontSize: '1rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px' }}>
               🏪 Vendas Balcão
               <span style={{ background: 'rgba(245,200,0,0.15)', color: C.gold, borderRadius: '999px', fontSize: '0.7rem', padding: '2px 8px', fontWeight: 900 }}>
                 {filtradosBalcao.length}
@@ -1798,14 +1798,14 @@ function PaginaCardapio({ config, onSalvar }) {
   }
 
   const cardStyle = {
-    background: 'rgba(255,255,255,0.06)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
+    background: 'rgba(255,235,235,0.70)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
     border: '1px solid rgba(255,255,255,0.12)', borderRadius: '16px', padding: '1.25rem',
     boxShadow: '0 4px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06)',
   }
 
   const inputStyle = {
     width: '100%', padding: '0.55rem 0.875rem', borderRadius: '10px', fontSize: '0.88rem',
-    background: 'rgba(255,255,255,0.06)', border: `1px solid ${C.cardBorder}`,
+    background: 'rgba(255,235,235,0.70)', border: `1px solid ${C.cardBorder}`,
     color: C.text, outline: 'none', boxSizing: 'border-box',
   }
 
@@ -2004,7 +2004,7 @@ function PaginaCardapio({ config, onSalvar }) {
             return (
               <div key={beb.id} style={{
                 padding: '0.75rem', borderRadius: '12px',
-                background: 'rgba(255,255,255,0.04)', border: `1px solid ${C.cardBorder}`,
+                background: 'rgba(255,235,235,0.55)', border: `1px solid ${C.cardBorder}`,
               }}>
                 <div style={{ color: C.text, fontWeight: 700, fontSize: '0.84rem', marginBottom: '0.5rem' }}>
                   {beb.nome}
@@ -2263,7 +2263,7 @@ function PaginaCardapio({ config, onSalvar }) {
                 }}>
                   <span style={{ fontSize: '1.1rem' }}>🎉</span>
                   <div style={{ flex: 1 }}>
-                    <span style={{ color: '#fff', fontWeight: 700, fontSize: '0.82rem' }}>{combo.nome}</span>
+                    <span style={{ color: '#1A0000', fontWeight: 700, fontSize: '0.82rem' }}>{combo.nome}</span>
                     {combo.descricao && <span style={{ color: C.muted, fontSize: '0.72rem', marginLeft: '6px' }}>{combo.descricao}</span>}
                   </div>
                   <span style={{ color: '#00c853', fontWeight: 900, fontSize: '0.85rem' }}>{fmtMoeda(combo.preco)}</span>
@@ -2368,12 +2368,12 @@ function PaginaClientes() {
 
   const inputSt = {
     padding: '0.5rem 0.75rem', borderRadius: '8px', fontSize: '0.84rem',
-    background: 'rgba(255,255,255,0.06)', border: `1px solid ${C.cardBorder}`,
+    background: 'rgba(255,235,235,0.70)', border: `1px solid ${C.cardBorder}`,
     color: C.text, outline: 'none', boxSizing: 'border-box',
   }
 
   const cardStyle = {
-    background: 'rgba(255,255,255,0.06)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
+    background: 'rgba(255,235,235,0.70)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
     border: '1px solid rgba(255,255,255,0.12)', borderRadius: '16px', padding: '1.25rem',
     boxShadow: '0 4px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06)',
   }
@@ -2393,7 +2393,7 @@ function PaginaClientes() {
           value={busca}
           onChange={e => setBusca(e.target.value)}
           placeholder="Buscar por nome, CPF ou telefone..."
-          style={{ flex: 1, padding: '0.55rem 0.875rem', borderRadius: '10px', fontSize: '0.88rem', background: 'rgba(255,255,255,0.06)', border: `1px solid ${C.cardBorder}`, color: C.text, outline: 'none' }}
+          style={{ flex: 1, padding: '0.55rem 0.875rem', borderRadius: '10px', fontSize: '0.88rem', background: 'rgba(255,235,235,0.70)', border: `1px solid ${C.cardBorder}`, color: C.text, outline: 'none' }}
         />
         <button
           onClick={() => setNovoForm(v => !v)}
@@ -2458,7 +2458,7 @@ function PaginaClientes() {
             disabled={!formNome.trim() || salvandoCliente}
             style={{
               padding: '0.5rem 1.25rem', borderRadius: '10px', cursor: 'pointer', fontWeight: 700, fontSize: '0.85rem', border: 'none',
-              background: formNome.trim() ? `linear-gradient(145deg, ${C.red}, ${C.redDark})` : 'rgba(255,255,255,0.08)',
+              background: formNome.trim() ? `linear-gradient(145deg, ${C.red}, ${C.redDark})` : 'rgba(255,235,235,0.75)',
               color: formNome.trim() ? '#fff' : C.muted,
             }}
           >
@@ -2521,7 +2521,7 @@ function PaginaClientes() {
                         <div>
                           <div style={{ color: C.text, fontSize: '0.78rem', fontWeight: 700, marginBottom: '4px' }}>Endereços</div>
                           {c.enderecos.map((end, idx) => (
-                            <div key={idx} style={{ padding: '0.4rem 0.75rem', borderRadius: '8px', background: 'rgba(255,255,255,0.04)', border: `1px solid ${C.cardBorder}`, fontSize: '0.78rem', color: 'rgba(255,255,255,0.7)', marginBottom: '4px' }}>
+                            <div key={idx} style={{ padding: '0.4rem 0.75rem', borderRadius: '8px', background: 'rgba(255,235,235,0.55)', border: `1px solid ${C.cardBorder}`, fontSize: '0.78rem', color: 'rgba(80,0,0,0.80)', marginBottom: '4px' }}>
                               📍 {end.rua}, {end.numero}{end.complemento ? ` - ${end.complemento}` : ''} — {end.bairro}
                             </div>
                           ))}
@@ -2727,11 +2727,11 @@ function PaginaCaderneta() {
 
   const inputSt = {
     padding: '0.5rem 0.75rem', borderRadius: '8px', fontSize: '0.84rem',
-    background: 'rgba(255,255,255,0.06)', border: `1px solid ${C.cardBorder}`,
+    background: 'rgba(255,235,235,0.70)', border: `1px solid ${C.cardBorder}`,
     color: C.text, outline: 'none', boxSizing: 'border-box',
   }
   const cardStyle = {
-    background: 'rgba(255,255,255,0.06)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
+    background: 'rgba(255,235,235,0.70)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
     border: '1px solid rgba(255,255,255,0.12)', borderRadius: '16px', padding: '1.25rem',
     boxShadow: '0 4px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06)',
   }
@@ -2753,7 +2753,7 @@ function PaginaCaderneta() {
           value={busca}
           onChange={e => setBusca(e.target.value)}
           placeholder="Buscar cliente na caderneta..."
-          style={{ flex: 1, padding: '0.55rem 0.875rem', borderRadius: '10px', fontSize: '0.88rem', background: 'rgba(255,255,255,0.06)', border: `1px solid ${C.cardBorder}`, color: C.text, outline: 'none' }}
+          style={{ flex: 1, padding: '0.55rem 0.875rem', borderRadius: '10px', fontSize: '0.88rem', background: 'rgba(255,235,235,0.70)', border: `1px solid ${C.cardBorder}`, color: C.text, outline: 'none' }}
         />
         <button
           onClick={() => { setModalNovoLanc(true); setNovoLancBusca(''); setNovoLancCliente(null); setEntDescricao(''); setEntValor(''); setEntVencimento('') }}
@@ -2768,7 +2768,7 @@ function PaginaCaderneta() {
         <div style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}
           onClick={e => { if (e.target === e.currentTarget) setModalNovoLanc(false) }}
         >
-          <div style={{ background: 'rgba(20,4,4,0.98)', border: `1px solid ${C.cardBorder}`, borderRadius: '16px', padding: '1.5rem', width: '100%', maxWidth: '480px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div style={{ background: 'rgba(255,240,240,0.97)', border: `1px solid ${C.cardBorder}`, borderRadius: '16px', padding: '1.5rem', width: '100%', maxWidth: '480px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <span style={{ color: C.text, fontWeight: 800, fontSize: '0.95rem' }}>📒 Novo lançamento na caderneta</span>
               <button onClick={() => setModalNovoLanc(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: C.muted, fontSize: '1.1rem' }}>✕</button>
@@ -2784,7 +2784,7 @@ function PaginaCaderneta() {
                   onChange={e => setNovoLancBusca(e.target.value)}
                   placeholder="Digite o nome ou CPF..."
                   autoFocus
-                  style={{ width: '100%', padding: '0.6rem 0.875rem', borderRadius: '10px', fontSize: '0.88rem', background: 'rgba(255,255,255,0.06)', border: `1px solid ${C.cardBorder}`, color: C.text, outline: 'none', boxSizing: 'border-box' }}
+                  style={{ width: '100%', padding: '0.6rem 0.875rem', borderRadius: '10px', fontSize: '0.88rem', background: 'rgba(255,235,235,0.70)', border: `1px solid ${C.cardBorder}`, color: C.text, outline: 'none', boxSizing: 'border-box' }}
                 />
                 {novoLancBusca.trim().length >= 1 && (() => {
                   const q = novoLancBusca.trim().toLowerCase()
@@ -2795,7 +2795,7 @@ function PaginaCaderneta() {
                     <div style={{ marginTop: '6px', color: C.muted, fontSize: '0.8rem', fontStyle: 'italic' }}>Nenhum cliente encontrado.</div>
                   )
                   return (
-                    <div style={{ position: 'absolute', left: 0, right: 0, top: '100%', zIndex: 10, background: 'rgba(20,4,4,0.99)', border: `1px solid ${C.cardBorder}`, borderRadius: '10px', overflow: 'hidden', marginTop: '4px', boxShadow: '0 8px 24px rgba(0,0,0,0.6)' }}>
+                    <div style={{ position: 'absolute', left: 0, right: 0, top: '100%', zIndex: 10, background: 'rgba(255,240,240,0.97)', border: `1px solid ${C.cardBorder}`, borderRadius: '10px', overflow: 'hidden', marginTop: '4px', boxShadow: '0 8px 24px rgba(0,0,0,0.6)' }}>
                       {matches.map(c => (
                         <button key={c.id} onClick={() => { setNovoLancCliente(c); setNovoLancBusca('') }}
                           style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', padding: '0.625rem 0.875rem', background: 'none', border: 'none', borderBottom: `1px solid ${C.cardBorder}`, cursor: 'pointer', textAlign: 'left' }}
@@ -2831,7 +2831,7 @@ function PaginaCaderneta() {
             {/* Campos do lançamento */}
             {novoLancCliente && (
               <FormLancamento
-                C={C} inputSt={{ padding: '0.6rem 0.875rem', borderRadius: '10px', fontSize: '0.88rem', background: 'rgba(255,255,255,0.06)', border: `1px solid ${C.cardBorder}`, color: C.text, outline: 'none', boxSizing: 'border-box' }}
+                C={C} inputSt={{ padding: '0.6rem 0.875rem', borderRadius: '10px', fontSize: '0.88rem', background: 'rgba(255,235,235,0.70)', border: `1px solid ${C.cardBorder}`, color: C.text, outline: 'none', boxSizing: 'border-box' }}
                 modoLanc={modoLanc} setModoLanc={setModoLanc}
                 descBusca={descBusca} setDescBusca={setDescBusca}
                 produtosCardapio={produtosCardapio}
@@ -2892,11 +2892,11 @@ function PaginaCaderneta() {
                       {(c.nome || '?').charAt(0).toUpperCase()}
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ color: '#fff', fontWeight: 700, fontSize: '1rem' }}>
+                      <div style={{ color: '#1A0000', fontWeight: 700, fontSize: '1rem' }}>
                         {c.nome}
                         {vencidosCliente.length > 0 && <span style={{ marginLeft: 6, color: '#ff8080', fontSize: '0.82rem', fontWeight: 800 }}>⚠️ {vencidosCliente.length} vencido{vencidosCliente.length > 1 ? 's' : ''}</span>}
                       </div>
-                      <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.82rem', marginTop: '2px' }}>
+                      <div style={{ color: 'rgba(100,0,0,0.55)', fontSize: '0.82rem', marginTop: '2px' }}>
                         {(c.telefone || '').replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3')}
                         {c.cpf ? ` · CPF ${c.cpf}` : ''}
                       </div>
@@ -2994,7 +2994,7 @@ function FormLancamento({ C, inputSt, modoLanc, setModoLanc, descBusca, setDescB
 
   const wrapStyle = fullWidth
     ? { display: 'flex', flexDirection: 'column', gap: '0.625rem' }
-    : { padding: '0.75rem', borderRadius: '10px', marginBottom: '0.5rem', background: 'rgba(255,255,255,0.04)', border: `1px solid ${C.cardBorder}`, display: 'flex', flexDirection: 'column', gap: '0.625rem' }
+    : { padding: '0.75rem', borderRadius: '10px', marginBottom: '0.5rem', background: 'rgba(255,235,235,0.55)', border: `1px solid ${C.cardBorder}`, display: 'flex', flexDirection: 'column', gap: '0.625rem' }
 
   return (
     <div style={wrapStyle}>
@@ -3034,7 +3034,7 @@ function FormLancamento({ C, inputSt, modoLanc, setModoLanc, descBusca, setDescB
                 style={{ ...inputSt, width: '100%' }}
               />
               {sugestoes.length > 0 && (
-                <div style={{ position: 'absolute', left: 0, right: 0, top: '100%', zIndex: 30, background: 'rgba(20,4,4,0.99)', border: `1px solid ${C.cardBorder}`, borderRadius: '10px', overflow: 'hidden', marginTop: '4px', boxShadow: '0 8px 24px rgba(0,0,0,0.6)' }}>
+                <div style={{ position: 'absolute', left: 0, right: 0, top: '100%', zIndex: 30, background: 'rgba(255,240,240,0.97)', border: `1px solid ${C.cardBorder}`, borderRadius: '10px', overflow: 'hidden', marginTop: '4px', boxShadow: '0 8px 24px rgba(0,0,0,0.6)' }}>
                   {sugestoes.map((p, i) => (
                     <button key={i}
                       onClick={() => { setEntDescricao(p.nome); setEntValor(String(p.preco)); setDescBusca('') }}
@@ -3075,7 +3075,7 @@ function FormLancamento({ C, inputSt, modoLanc, setModoLanc, descBusca, setDescB
         <button
           onClick={onSalvar}
           disabled={!podeSubmit || salvandoEntrada}
-          style={{ padding: '0.5rem 1.1rem', borderRadius: '8px', cursor: 'pointer', fontWeight: 700, fontSize: '0.85rem', border: 'none', background: podeSubmit ? `linear-gradient(145deg, ${C.red}, ${C.redDark})` : 'rgba(255,255,255,0.08)', color: podeSubmit ? '#fff' : C.muted, alignSelf: 'flex-end' }}
+          style={{ padding: '0.5rem 1.1rem', borderRadius: '8px', cursor: 'pointer', fontWeight: 700, fontSize: '0.85rem', border: 'none', background: podeSubmit ? `linear-gradient(145deg, ${C.red}, ${C.redDark})` : 'rgba(255,235,235,0.75)', color: podeSubmit ? '#fff' : C.muted, alignSelf: 'flex-end' }}
         >{salvandoEntrada ? 'Salvando...' : 'Salvar'}</button>
       </div>
     </div>
@@ -3108,13 +3108,13 @@ function EntradaCadernetaRow({ e, hoje, C, inputSt, editandoVencimento, vencimen
           <div style={{ color: e.pago ? 'rgba(255,255,255,0.5)' : '#fff', fontSize: '0.95rem', fontWeight: 700, textDecoration: e.pago ? 'line-through' : 'none', lineHeight: 1.3 }}>
             {e.descricao || 'Lançamento'}
           </div>
-          <div style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.82rem', display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '3px' }}>
+          <div style={{ color: 'rgba(100,0,0,0.65)', fontSize: '0.82rem', display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '3px' }}>
             <span>{e.data || new Date(e.created_at).toLocaleDateString('pt-BR')}</span>
             {e.vencimento
               ? <span style={{ color: vencido ? '#ff8080' : 'rgba(255,255,255,0.55)' }}>📅 vence {new Date(e.vencimento + 'T12:00:00').toLocaleDateString('pt-BR')}</span>
               : !e.pago && (
                   <button onClick={() => { setEditandoVencimento(e.id); setVencimentoInput('') }}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.7)', fontSize: '0.82rem', padding: 0, textDecoration: 'underline', touchAction: 'manipulation' }}>+ vencimento</button>
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(80,0,0,0.80)', fontSize: '0.82rem', padding: 0, textDecoration: 'underline', touchAction: 'manipulation' }}>+ vencimento</button>
                 )
             }
           </div>
@@ -3126,13 +3126,13 @@ function EntradaCadernetaRow({ e, hoje, C, inputSt, editandoVencimento, vencimen
           {!e.pago && e.vencimento && (
             <button onClick={() => { setEditandoVencimento(editandoVencimento === e.id ? null : e.id); setVencimentoInput(e.vencimento || '') }}
               title="Editar vencimento"
-              style={{ width: '40px', height: '40px', borderRadius: '8px', cursor: 'pointer', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', touchAction: 'manipulation' }}
+              style={{ width: '40px', height: '40px', borderRadius: '8px', cursor: 'pointer', background: 'rgba(255,235,235,0.78)', border: '1px solid rgba(255,255,255,0.2)', color: '#1A0000', display: 'flex', alignItems: 'center', justifyContent: 'center', touchAction: 'manipulation' }}
             ><Calendar size={15} /></button>
           )}
           {/* Abater parcial */}
           {!e.pago && (
             <button onClick={() => { setModoAbate(v => !v); setAbateValor('') }} title="Abater pagamento parcial"
-              style={{ width: '40px', height: '40px', borderRadius: '8px', cursor: 'pointer', background: modoAbate ? 'rgba(100,100,255,0.25)' : 'rgba(255,255,255,0.1)', border: `1px solid ${modoAbate ? 'rgba(100,100,255,0.5)' : 'rgba(255,255,255,0.2)'}`, color: modoAbate ? '#aaaaff' : '#fff', fontSize: '1rem', fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center', touchAction: 'manipulation' }}
+              style={{ width: '40px', height: '40px', borderRadius: '8px', cursor: 'pointer', background: modoAbate ? 'rgba(100,100,255,0.25)' : 'rgba(255,235,235,0.78)', border: `1px solid ${modoAbate ? 'rgba(100,100,255,0.5)' : 'rgba(255,255,255,0.2)'}`, color: modoAbate ? '#aaaaff' : '#fff', fontSize: '1rem', fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center', touchAction: 'manipulation' }}
             >$</button>
           )}
           {/* Quitar tudo */}
@@ -3149,7 +3149,7 @@ function EntradaCadernetaRow({ e, hoje, C, inputSt, editandoVencimento, vencimen
       {/* Abatimento parcial */}
       {modoAbate && (
         <div style={{ display: 'flex', gap: '6px', alignItems: 'center', background: 'rgba(100,100,255,0.08)', borderRadius: '8px', padding: '0.6rem 0.75rem' }}>
-          <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>Pagou:</span>
+          <span style={{ color: 'rgba(80,0,0,0.80)', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>Pagou:</span>
           <input
             type="number" value={abateValor} onChange={ev => setAbateValor(ev.target.value)}
             placeholder={`máx ${fmtMoeda(e.valor)}`} min="0.01" step="0.01" max={e.valor}
@@ -3157,7 +3157,7 @@ function EntradaCadernetaRow({ e, hoje, C, inputSt, editandoVencimento, vencimen
             autoFocus
           />
           {parseFloat(abateValor) > 0 && parseFloat(abateValor) < Number(e.valor) && (
-            <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.82rem', whiteSpace: 'nowrap' }}>
+            <span style={{ color: 'rgba(100,0,0,0.70)', fontSize: '0.82rem', whiteSpace: 'nowrap' }}>
               resta {fmtMoeda(Number(e.valor) - parseFloat(abateValor))}
             </span>
           )}
@@ -3166,7 +3166,7 @@ function EntradaCadernetaRow({ e, hoje, C, inputSt, editandoVencimento, vencimen
             style={{ padding: '0.5rem 0.875rem', borderRadius: '8px', cursor: 'pointer', fontWeight: 700, fontSize: '0.88rem', border: 'none', background: `linear-gradient(145deg, ${C.red}, ${C.redDark})`, color: '#fff', whiteSpace: 'nowrap', touchAction: 'manipulation' }}
           >Abater</button>
           <button onClick={() => { setModoAbate(false); setAbateValor('') }}
-            style={{ padding: '0.5rem 0.625rem', borderRadius: '8px', cursor: 'pointer', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', color: '#fff', fontSize: '0.9rem', touchAction: 'manipulation' }}
+            style={{ padding: '0.5rem 0.625rem', borderRadius: '8px', cursor: 'pointer', background: 'rgba(255,235,235,0.75)', border: '1px solid rgba(255,255,255,0.15)', color: '#1A0000', fontSize: '0.9rem', touchAction: 'manipulation' }}
           >✕</button>
         </div>
       )}
@@ -3176,7 +3176,7 @@ function EntradaCadernetaRow({ e, hoje, C, inputSt, editandoVencimento, vencimen
         <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
           <input type="date" value={vencimentoInput} onChange={ev => setVencimentoInput(ev.target.value)} style={{ ...inputSt, flex: 1, colorScheme: 'dark' }} />
           <button onClick={() => salvarVencimento(e.id)} style={{ padding: '0.5rem 0.875rem', borderRadius: '8px', cursor: 'pointer', fontWeight: 700, fontSize: '0.88rem', border: 'none', background: `linear-gradient(145deg, ${C.red}, ${C.redDark})`, color: '#fff', touchAction: 'manipulation' }}>Salvar</button>
-          <button onClick={() => { setEditandoVencimento(null); setVencimentoInput('') }} style={{ padding: '0.5rem 0.625rem', borderRadius: '8px', cursor: 'pointer', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', color: '#fff', fontSize: '0.9rem', touchAction: 'manipulation' }}>✕</button>
+          <button onClick={() => { setEditandoVencimento(null); setVencimentoInput('') }} style={{ padding: '0.5rem 0.625rem', borderRadius: '8px', cursor: 'pointer', background: 'rgba(255,235,235,0.75)', border: '1px solid rgba(255,255,255,0.15)', color: '#1A0000', fontSize: '0.9rem', touchAction: 'manipulation' }}>✕</button>
         </div>
       )}
     </div>
@@ -3241,7 +3241,7 @@ function PaginaCatalogo() {
 
   const inputStyle = {
     padding: '0.65rem 0.9rem', borderRadius: 10,
-    background: 'rgba(255,255,255,0.06)', border: `1px solid ${C.cardBorder}`,
+    background: 'rgba(255,235,235,0.70)', border: `1px solid ${C.cardBorder}`,
     color: C.text, fontSize: '0.9rem', outline: 'none',
   }
 
@@ -3334,7 +3334,7 @@ function PaginaCatalogo() {
                     </button>
                     <button
                       onClick={() => setEditandoId(null)}
-                      style={{ background: 'rgba(255,255,255,0.07)', border: 'none', borderRadius: 8, color: C.muted, cursor: 'pointer', padding: '6px 10px', fontSize: '0.85rem' }}
+                      style={{ background: 'rgba(255,235,235,0.70)', border: 'none', borderRadius: 8, color: C.muted, cursor: 'pointer', padding: '6px 10px', fontSize: '0.85rem' }}
                     >
                       Cancelar
                     </button>
@@ -3516,7 +3516,7 @@ function PaginaEstoque() {
 
   const inputStyle = {
     width: '100%', padding: '0.55rem 0.875rem', borderRadius: '10px', fontSize: '0.88rem',
-    background: 'rgba(255,255,255,0.06)', border: `1px solid ${C.cardBorder}`,
+    background: 'rgba(255,235,235,0.70)', border: `1px solid ${C.cardBorder}`,
     color: C.text, outline: 'none', boxSizing: 'border-box',
   }
 
@@ -3609,14 +3609,14 @@ function PaginaEstoque() {
                       }}
                     >
                       <td style={{ padding: '0.6rem 0.875rem' }}>
-                        <div style={{ color: '#fff', fontWeight: 700, fontSize: '0.84rem' }}>{item.nome}</div>
+                        <div style={{ color: '#1A0000', fontWeight: 700, fontSize: '0.84rem' }}>{item.nome}</div>
                         {item.produto_id && (
                           <div style={{ color: 'rgba(245,200,0,0.55)', fontSize: '0.67rem' }}>
                             {todosProdutos.find(p => p.id === item.produto_id)?.label || item.produto_id}
                           </div>
                         )}
                       </td>
-                      <td style={{ padding: '0.6rem 0.875rem', color: 'rgba(255,255,255,0.8)', fontSize: '0.78rem' }}>{item.categoria}</td>
+                      <td style={{ padding: '0.6rem 0.875rem', color: 'rgba(50,0,0,0.88)', fontSize: '0.78rem' }}>{item.categoria}</td>
                       <td style={{ padding: '0.6rem 0.875rem' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                           <button
@@ -3631,8 +3631,8 @@ function PaginaEstoque() {
                         </div>
                       </td>
                       <td style={{ padding: '0.6rem 0.875rem', color: C.gold, fontSize: '0.82rem', fontWeight: 700 }}>{item.preco_custo ? fmtMoeda(item.preco_custo) : '—'}</td>
-                      <td style={{ padding: '0.6rem 0.875rem', color: 'rgba(255,255,255,0.8)', fontSize: '0.78rem' }}>{item.unidade}</td>
-                      <td style={{ padding: '0.6rem 0.875rem', color: 'rgba(255,255,255,0.8)', fontSize: '0.78rem' }}>{item.alerta_minimo}</td>
+                      <td style={{ padding: '0.6rem 0.875rem', color: 'rgba(50,0,0,0.88)', fontSize: '0.78rem' }}>{item.unidade}</td>
+                      <td style={{ padding: '0.6rem 0.875rem', color: 'rgba(50,0,0,0.88)', fontSize: '0.78rem' }}>{item.alerta_minimo}</td>
                       <td style={{ padding: '0.6rem 0.875rem' }}>
                         <span style={{
                           background: statusCor + '20', color: statusCor,
@@ -3646,7 +3646,7 @@ function PaginaEstoque() {
                         <div style={{ display: 'flex', gap: '4px' }}>
                           <button
                             onClick={() => abrirEditar(item)}
-                            style={{ width: '28px', height: '28px', background: 'rgba(255,255,255,0.06)', border: `1px solid ${C.cardBorder}`, borderRadius: '6px', cursor: 'pointer', color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                            style={{ width: '28px', height: '28px', background: 'rgba(255,235,235,0.70)', border: `1px solid ${C.cardBorder}`, borderRadius: '6px', cursor: 'pointer', color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                           >
                             <Pencil size={12} />
                           </button>
@@ -3736,7 +3736,7 @@ function PaginaEstoque() {
                 onClick={fecharModal}
                 style={{
                   padding: '0.75rem 1.25rem', borderRadius: '12px', cursor: 'pointer',
-                  background: 'rgba(255,255,255,0.06)', border: `1px solid ${C.cardBorder}`,
+                  background: 'rgba(255,235,235,0.70)', border: `1px solid ${C.cardBorder}`,
                   color: C.muted, fontSize: '0.9rem',
                 }}
               >
@@ -3846,7 +3846,7 @@ function PaginaRelatorios({ pedidosTodos }) {
   ]
 
   const cardStyle = {
-    background: 'rgba(255,255,255,0.06)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
+    background: 'rgba(255,235,235,0.70)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
     border: '1px solid rgba(255,255,255,0.12)', borderRadius: '16px', padding: '1.25rem',
     boxShadow: '0 4px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06)',
   }
@@ -3862,7 +3862,7 @@ function PaginaRelatorios({ pedidosTodos }) {
             onClick={() => setPeriodo(p.val)}
             style={{
               padding: '0.4rem 0.875rem', borderRadius: '20px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 700,
-              background: periodo === p.val ? C.red : 'rgba(255,255,255,0.06)',
+              background: periodo === p.val ? C.red : 'rgba(255,235,235,0.70)',
               border: periodo === p.val ? 'none' : `1px solid ${C.cardBorder}`,
               color: periodo === p.val ? '#fff' : C.muted, transition: 'all 0.15s',
             }}
@@ -3893,7 +3893,7 @@ function PaginaRelatorios({ pedidosTodos }) {
                 onChange={e => set(e.target.value)}
                 style={{
                   padding: '0.5rem 0.75rem', borderRadius: '10px', fontSize: '0.85rem',
-                  background: 'rgba(255,255,255,0.06)', border: `1px solid ${C.cardBorder}`,
+                  background: 'rgba(255,235,235,0.70)', border: `1px solid ${C.cardBorder}`,
                   color: C.text, outline: 'none',
                 }}
               />
@@ -3988,7 +3988,7 @@ function PaginaRelatorios({ pedidosTodos }) {
             <p style={{ color: C.muted, fontSize: '0.82rem' }}>Sem dados</p>
           ) : topProdutos.map(([nome, qtd]) => (
             <div key={nome} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '6px' }}>
-              <span style={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.82rem', flex: 1 }}>{nome}</span>
+              <span style={{ color: 'rgba(80,0,0,0.85)', fontSize: '0.82rem', flex: 1 }}>{nome}</span>
               <div style={{
                 height: '6px', borderRadius: '3px', background: C.red + '40',
                 flex: 2, overflow: 'hidden',
@@ -4236,7 +4236,7 @@ function PaginaWhatsApp() {
                         padding: '0.75rem 0.5rem', borderRadius: '12px', textAlign: 'center',
                         cursor: salvandoBot ? 'wait' : 'pointer',
                         background: ativo ? `${m.cor}18` : 'rgba(255,255,255,0.04)',
-                        border: `2px solid ${ativo ? m.cor : 'rgba(255,255,255,0.08)'}`,
+                        border: `2px solid ${ativo ? m.cor : 'rgba(255,235,235,0.75)'}`,
                         opacity: salvandoBot ? 0.5 : 1,
                         transition: 'all 0.2s',
                       }}
@@ -4343,8 +4343,8 @@ function PaginaWhatsApp() {
             onChange={e => setMsgTelefone(e.target.value)}
             style={{
               flex: '0 0 180px', padding: '0.55rem 0.75rem', borderRadius: '10px',
-              background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)',
-              color: '#fff', fontSize: '0.85rem', outline: 'none',
+              background: 'rgba(255,235,235,0.70)', border: '1px solid rgba(255,255,255,0.12)',
+              color: '#1A0000', fontSize: '0.85rem', outline: 'none',
             }}
           />
           <input
@@ -4355,8 +4355,8 @@ function PaginaWhatsApp() {
             onKeyDown={e => e.key === 'Enter' && enviarMsgManual()}
             style={{
               flex: 1, minWidth: '200px', padding: '0.55rem 0.75rem', borderRadius: '10px',
-              background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)',
-              color: '#fff', fontSize: '0.85rem', outline: 'none',
+              background: 'rgba(255,235,235,0.70)', border: '1px solid rgba(255,255,255,0.12)',
+              color: '#1A0000', fontSize: '0.85rem', outline: 'none',
             }}
           />
           <button
@@ -4394,9 +4394,9 @@ function PaginaWhatsApp() {
                 <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
                   {['Contato', 'Telefone', 'Estado', 'Modo', 'Última atividade', 'Ações'].map(h => (
                     <th key={h} style={{
-                      padding: '0.55rem 0.75rem', color: 'rgba(255,255,255,0.5)', fontSize: '0.7rem',
+                      padding: '0.55rem 0.75rem', color: 'rgba(100,0,0,0.55)', fontSize: '0.7rem',
                       fontWeight: 700, textTransform: 'uppercase', textAlign: 'left', whiteSpace: 'nowrap',
-                      position: 'sticky', top: 0, background: 'rgba(20,5,5,0.95)', zIndex: 1,
+                      position: 'sticky', top: 0, background: 'rgba(255,240,240,0.95)', zIndex: 1,
                     }}>{h}</th>
                   ))}
                 </tr>
@@ -4407,7 +4407,7 @@ function PaginaWhatsApp() {
                   const atualizacao = s.updated_at ? new Date(s.updated_at).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '-'
                   return (
                     <tr key={s.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                      <td style={{ padding: '0.5rem 0.75rem', color: '#fff', fontSize: '0.82rem', fontWeight: 600 }}>
+                      <td style={{ padding: '0.5rem 0.75rem', color: '#1A0000', fontSize: '0.82rem', fontWeight: 600 }}>
                         {s.nome_contato || '-'}
                       </td>
                       <td style={{ padding: '0.5rem 0.75rem', color: C.muted, fontSize: '0.78rem', fontFamily: 'monospace' }}>
@@ -4504,7 +4504,7 @@ function PaginaWhatsApp() {
           ].map((item, i) => (
             <div key={i} style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start', padding: '0.4rem 0' }}>
               <span style={{ fontSize: '1rem', flexShrink: 0 }}>{item.icon}</span>
-              <span style={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.82rem' }}>{item.text}</span>
+              <span style={{ color: 'rgba(80,0,0,0.85)', fontSize: '0.82rem' }}>{item.text}</span>
             </div>
           ))}
         </div>
@@ -4638,7 +4638,7 @@ function PaginaConfiguracoes({ autoprint, onToggleAutoprint, onTestarImpressao, 
 
   const inputStyle = {
     width: '100%', padding: '0.55rem 0.875rem', borderRadius: '10px', fontSize: '0.88rem',
-    background: 'rgba(255,255,255,0.06)', border: `1px solid ${C.cardBorder}`,
+    background: 'rgba(255,235,235,0.70)', border: `1px solid ${C.cardBorder}`,
     color: C.text, outline: 'none', boxSizing: 'border-box',
   }
 
@@ -4714,7 +4714,7 @@ function PaginaConfiguracoes({ autoprint, onToggleAutoprint, onTestarImpressao, 
                   style={{
                     padding: '0.55rem 0.875rem', borderRadius: '10px', cursor: 'pointer',
                     fontSize: '0.82rem', fontWeight: 700, border: 'none',
-                    background: ativo ? `linear-gradient(145deg, ${C.red}, ${C.redDark})` : 'rgba(255,255,255,0.06)',
+                    background: ativo ? `linear-gradient(145deg, ${C.red}, ${C.redDark})` : 'rgba(255,235,235,0.70)',
                     color: ativo ? '#fff' : C.muted,
                     transition: 'all 0.12s',
                   }}
@@ -4774,7 +4774,7 @@ function PaginaConfiguracoes({ autoprint, onToggleAutoprint, onTestarImpressao, 
             onClick={() => setF('entrega_ativa', !form.entrega_ativa)}
             style={{
               width: '52px', height: '28px', borderRadius: '14px', cursor: 'pointer',
-              background: form.entrega_ativa ? C.success : 'rgba(255,255,255,0.12)',
+              background: form.entrega_ativa ? C.success : 'rgba(255,235,235,0.80)',
               border: 'none', position: 'relative', transition: 'background 0.2s',
             }}
           >
@@ -4909,7 +4909,7 @@ function PaginaConfiguracoes({ autoprint, onToggleAutoprint, onTestarImpressao, 
               disabled={qzCarregando}
               style={{
                 padding: '4px 10px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.72rem', fontWeight: 700,
-                background: 'rgba(255,255,255,0.06)', border: `1px solid ${C.cardBorder}`, color: C.muted,
+                background: 'rgba(255,235,235,0.70)', border: `1px solid ${C.cardBorder}`, color: C.muted,
                 display: 'flex', alignItems: 'center', gap: '4px',
               }}
             >
@@ -4932,7 +4932,7 @@ function PaginaConfiguracoes({ autoprint, onToggleAutoprint, onTestarImpressao, 
                 onChange={e => { setQzSelecionada(e.target.value); salvarNomeImpressora(e.target.value); iniciarKeepAlive(e.target.value) }}
                 style={{
                   width: '100%', padding: '0.55rem 0.875rem', borderRadius: '10px', fontSize: '0.85rem',
-                  background: 'rgba(255,255,255,0.06)', border: `1px solid ${C.cardBorder}`,
+                  background: 'rgba(255,235,235,0.70)', border: `1px solid ${C.cardBorder}`,
                   color: C.text, outline: 'none', cursor: 'pointer',
                 }}
               >
@@ -4962,7 +4962,7 @@ function PaginaConfiguracoes({ autoprint, onToggleAutoprint, onTestarImpressao, 
           style={{
             display: 'flex', alignItems: 'center', gap: '6px',
             padding: '0.6rem 1.25rem', borderRadius: '10px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 700,
-            background: 'rgba(255,255,255,0.06)', border: `1px solid ${C.cardBorder}`, color: C.text,
+            background: 'rgba(255,235,235,0.70)', border: `1px solid ${C.cardBorder}`, color: C.text,
           }}
         >
           <Printer size={14} /> Testar impressao
@@ -5056,7 +5056,7 @@ function ModalSaboresBalcao({ tipo, onFechar, onAdicionar }) {
 
   const inputStyle = {
     width: '100%', padding: '0.5rem 0.75rem', borderRadius: '10px', fontSize: '0.85rem',
-    background: 'rgba(255,255,255,0.06)', border: `1px solid ${C.cardBorder}`,
+    background: 'rgba(255,235,235,0.70)', border: `1px solid ${C.cardBorder}`,
     color: C.text, outline: 'none', boxSizing: 'border-box',
   }
 
@@ -5528,14 +5528,14 @@ function PaginaBalcao({ onPedidoCriado, onCaderneta, mesaAdicionando, onCancelar
   }
 
   const cardStyle = {
-    background: 'rgba(255,255,255,0.06)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
+    background: 'rgba(255,235,235,0.70)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
     border: '1px solid rgba(255,255,255,0.12)', borderRadius: '16px', padding: '1.25rem',
     boxShadow: '0 4px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06)',
   }
 
   const inputStyle = {
     padding: '0.55rem 0.875rem', borderRadius: '10px', fontSize: '0.85rem',
-    background: 'rgba(255,255,255,0.06)', border: `1px solid ${C.cardBorder}`,
+    background: 'rgba(255,235,235,0.70)', border: `1px solid ${C.cardBorder}`,
     color: C.text, outline: 'none', boxSizing: 'border-box',
   }
 
@@ -5563,7 +5563,7 @@ function PaginaBalcao({ onPedidoCriado, onCaderneta, mesaAdicionando, onCancelar
               fontSize: '0.95rem', fontWeight: 800, border: 'none',
               background: modo === 'local'
                 ? 'linear-gradient(145deg, #0066cc, #004499)'
-                : 'rgba(255,255,255,0.06)',
+                : 'rgba(255,235,235,0.70)',
               color: modo === 'local' ? '#fff' : C.muted,
               boxShadow: modo === 'local' ? '0 4px 16px rgba(0,102,204,0.4)' : 'none',
               transition: 'all 0.15s',
@@ -5579,7 +5579,7 @@ function PaginaBalcao({ onPedidoCriado, onCaderneta, mesaAdicionando, onCancelar
               fontSize: '0.95rem', fontWeight: 800, border: 'none',
               background: modo === 'levar'
                 ? `linear-gradient(145deg, ${C.gold}, #d4a800)`
-                : 'rgba(255,255,255,0.06)',
+                : 'rgba(255,235,235,0.70)',
               color: modo === 'levar' ? '#1a1000' : C.muted,
               boxShadow: modo === 'levar' ? '0 4px 16px rgba(245,200,0,0.4)' : 'none',
               transition: 'all 0.15s',
@@ -5704,7 +5704,7 @@ function PaginaBalcao({ onPedidoCriado, onCaderneta, mesaAdicionando, onCancelar
                             onClick={handleRem}
                             style={{ width: '44px', height: '44px', background: 'rgba(200,0,0,0.2)', border: 'none', borderRadius: '10px', cursor: 'pointer', color: '#ff7777', fontSize: '1.3rem', fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                           >−</button>
-                          <span style={{ minWidth: '28px', textAlign: 'center', color: '#fff', fontWeight: 900, fontSize: '1rem' }}>{qtd}</span>
+                          <span style={{ minWidth: '28px', textAlign: 'center', color: '#1A0000', fontWeight: 900, fontSize: '1rem' }}>{qtd}</span>
                           <button
                             onClick={handleAdd}
                             style={{ width: '44px', height: '44px', background: 'rgba(0,200,80,0.15)', border: 'none', borderRadius: '10px', cursor: 'pointer', color: '#6aff9e', fontSize: '1.3rem', fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
@@ -5733,7 +5733,7 @@ function PaginaBalcao({ onPedidoCriado, onCaderneta, mesaAdicionando, onCancelar
                 key={tipo.id}
                 onClick={() => setTipoModal(tipo)}
                 style={{
-                  background: 'rgba(255,255,255,0.04)', border: `1px solid ${C.cardBorder}`,
+                  background: 'rgba(255,235,235,0.55)', border: `1px solid ${C.cardBorder}`,
                   borderRadius: '12px', padding: '0.875rem', cursor: 'pointer', textAlign: 'left',
                   transition: 'all 0.12s',
                 }}
@@ -5792,7 +5792,7 @@ function PaginaBalcao({ onPedidoCriado, onCaderneta, mesaAdicionando, onCancelar
                         onClick={() => removerDoce(doce.id)}
                         style={{ width: '40px', height: '40px', background: 'rgba(200,0,0,0.2)', border: 'none', borderRadius: '9px', cursor: 'pointer', color: '#ff7777', fontSize: '1.2rem', fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                       >−</button>
-                      <span style={{ minWidth: '28px', textAlign: 'center', color: '#fff', fontWeight: 900, fontSize: '1rem' }}>{qtd}</span>
+                      <span style={{ minWidth: '28px', textAlign: 'center', color: '#1A0000', fontWeight: 900, fontSize: '1rem' }}>{qtd}</span>
                       <button
                         onClick={() => adicionarDoce(doce)}
                         style={{ width: '40px', height: '40px', background: 'rgba(0,200,80,0.15)', border: 'none', borderRadius: '9px', cursor: 'pointer', color: '#6aff9e', fontSize: '1.2rem', fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
@@ -5836,8 +5836,8 @@ function PaginaBalcao({ onPedidoCriado, onCaderneta, mesaAdicionando, onCancelar
                           <div key={sabor} style={{
                             display: 'flex', alignItems: 'center', gap: '4px',
                             padding: '4px 8px', borderRadius: '8px',
-                            background: qtd > 0 ? 'rgba(229,57,53,0.15)' : 'rgba(255,255,255,0.06)',
-                            border: `1px solid ${qtd > 0 ? 'rgba(229,57,53,0.35)' : 'rgba(255,255,255,0.08)'}`,
+                            background: qtd > 0 ? 'rgba(229,57,53,0.15)' : 'rgba(255,235,235,0.70)',
+                            border: `1px solid ${qtd > 0 ? 'rgba(229,57,53,0.35)' : 'rgba(255,235,235,0.75)'}`,
                           }}>
                             <span style={{ color: qtd > 0 ? '#fff' : C.muted, fontSize: '0.72rem', fontWeight: 600 }}>{sabor}</span>
                             {qtd > 0 && (
@@ -5847,7 +5847,7 @@ function PaginaBalcao({ onPedidoCriado, onCaderneta, mesaAdicionando, onCancelar
                                   borderRadius: '7px', cursor: 'pointer', color: '#ff7777', fontSize: '1rem', fontWeight: 900,
                                   display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
                                 }}>−</button>
-                                <span style={{ color: '#fff', fontWeight: 900, fontSize: '0.85rem', minWidth: '18px', textAlign: 'center' }}>{qtd}</span>
+                                <span style={{ color: '#1A0000', fontWeight: 900, fontSize: '0.85rem', minWidth: '18px', textAlign: 'center' }}>{qtd}</span>
                               </>
                             )}
                             <button onClick={() => adicionarBebidaSabor(beb, sabor)} style={{
@@ -5898,7 +5898,7 @@ function PaginaBalcao({ onPedidoCriado, onCaderneta, mesaAdicionando, onCancelar
                         onClick={() => removerBebida(beb.id)}
                         style={{ width: '40px', height: '40px', background: 'rgba(200,0,0,0.2)', border: 'none', borderRadius: '9px', cursor: 'pointer', color: '#ff7777', fontSize: '1.2rem', fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                       >−</button>
-                      <span style={{ minWidth: '28px', textAlign: 'center', color: '#fff', fontWeight: 900, fontSize: '1rem' }}>{qtd}</span>
+                      <span style={{ minWidth: '28px', textAlign: 'center', color: '#1A0000', fontWeight: 900, fontSize: '1rem' }}>{qtd}</span>
                       <button
                         onClick={() => adicionarBebida(beb)}
                         style={{ width: '40px', height: '40px', background: 'rgba(0,200,80,0.15)', border: 'none', borderRadius: '9px', cursor: 'pointer', color: '#6aff9e', fontSize: '1.2rem', fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
@@ -5938,7 +5938,7 @@ function PaginaBalcao({ onPedidoCriado, onCaderneta, mesaAdicionando, onCancelar
                   key={item.id}
                   style={{
                     position: 'relative',
-                    background: 'rgba(255,255,255,0.04)', border: `1px solid ${C.cardBorder}`,
+                    background: 'rgba(255,235,235,0.55)', border: `1px solid ${C.cardBorder}`,
                     borderRadius: '12px', padding: '0.75rem',
                     cursor: modoEditarCatalogo ? 'default' : 'pointer',
                     transition: 'all 0.12s',
@@ -6038,7 +6038,7 @@ function PaginaBalcao({ onPedidoCriado, onCaderneta, mesaAdicionando, onCancelar
                 {mesaAdicionando.nome} · {fmtMoeda(mesaAdicionando.total)}
               </div>
             </div>
-            <button onClick={onCancelarMesa} style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '8px', color: '#fff', padding: '0.4rem 0.75rem', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 700, touchAction: 'manipulation' }}>
+            <button onClick={onCancelarMesa} style={{ background: 'rgba(255,235,235,0.75)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '8px', color: '#1A0000', padding: '0.4rem 0.75rem', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 700, touchAction: 'manipulation' }}>
               Cancelar
             </button>
           </div>
@@ -6195,7 +6195,7 @@ function PaginaBalcao({ onPedidoCriado, onCaderneta, mesaAdicionando, onCancelar
                     style={{
                       padding: '0.55rem', borderRadius: '10px', cursor: 'pointer',
                       fontSize: '0.82rem', fontWeight: 700, border: 'none',
-                      background: pagamento === p.id ? `linear-gradient(145deg, ${C.red}, ${C.redDark})` : 'rgba(255,255,255,0.06)',
+                      background: pagamento === p.id ? `linear-gradient(145deg, ${C.red}, ${C.redDark})` : 'rgba(255,235,235,0.70)',
                       color: pagamento === p.id ? '#fff' : C.muted,
                       transition: 'all 0.12s',
                     }}
@@ -6527,7 +6527,7 @@ function PaginaMesas({ pedidos, onAtualizar, onAdicionarItens }) {
                       style={{
                         padding: '0.5rem', borderRadius: '10px', cursor: 'pointer',
                         fontSize: '0.78rem', fontWeight: 700, border: 'none',
-                        background: pagamento === p.id ? `linear-gradient(145deg, ${C.red}, ${C.redDark})` : 'rgba(255,255,255,0.06)',
+                        background: pagamento === p.id ? `linear-gradient(145deg, ${C.red}, ${C.redDark})` : 'rgba(255,235,235,0.70)',
                         color: pagamento === p.id ? '#fff' : C.muted,
                       }}
                     >
@@ -6541,7 +6541,7 @@ function PaginaMesas({ pedidos, onAtualizar, onAdicionarItens }) {
                     style={{
                       flex: 1, padding: '0.625rem', borderRadius: '10px', cursor: 'pointer',
                       fontSize: '0.82rem', fontWeight: 700, border: `1px solid ${C.cardBorder}`,
-                      background: 'rgba(255,255,255,0.06)', color: C.muted,
+                      background: 'rgba(255,235,235,0.70)', color: C.muted,
                     }}
                   >
                     Cancelar
@@ -6638,7 +6638,7 @@ export function ModalCheckout({ pedido, onFechar, onConfirmar, enviando, senhaAd
   const trocoNeg = pagamento === 'dinheiro' && valorRec > 0 && valorRec < totalFinal
 
   const inputSt = { width: '100%', padding: '0.6rem 0.875rem', borderRadius: '10px', fontSize: '0.88rem',
-    background: 'rgba(255,255,255,0.06)', border: `1px solid ${C.cardBorder}`, color: C.text, outline: 'none', boxSizing: 'border-box' }
+    background: 'rgba(255,235,235,0.70)', border: `1px solid ${C.cardBorder}`, color: C.text, outline: 'none', boxSizing: 'border-box' }
 
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={onFechar}>
@@ -6653,7 +6653,7 @@ export function ModalCheckout({ pedido, onFechar, onConfirmar, enviando, senhaAd
         </div>
 
         {/* Itens */}
-        <div style={{ padding: '0.75rem', borderRadius: '12px', background: 'rgba(255,255,255,0.04)', border: `1px solid ${C.cardBorder}`, marginBottom: '1rem' }}>
+        <div style={{ padding: '0.75rem', borderRadius: '12px', background: 'rgba(255,235,235,0.55)', border: `1px solid ${C.cardBorder}`, marginBottom: '1rem' }}>
           <div style={{ color: C.text, fontWeight: 700, fontSize: '0.88rem', marginBottom: '4px' }}>{pedido.nome}</div>
           {itens.map((it, i) => (
             <div key={i} style={{ color: C.muted, fontSize: '0.78rem', lineHeight: 1.5 }}>
@@ -7090,7 +7090,7 @@ export default function Admin() {
             placeholder="Senha de acesso"
             style={{
               width: '100%', padding: '0.75rem 1rem', borderRadius: '14px', fontSize: '0.95rem',
-              background: 'rgba(255,255,255,0.07)', border: `1px solid ${errLogin ? C.danger : C.cardBorder}`,
+              background: 'rgba(255,235,235,0.70)', border: `1px solid ${errLogin ? C.danger : C.cardBorder}`,
               color: C.text, outline: 'none', marginBottom: '0.75rem', boxSizing: 'border-box',
             }}
           />
@@ -7117,7 +7117,12 @@ export default function Admin() {
   const larguraSidebar = sidebarAberta ? '240px' : '60px'
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', position: 'relative' }}>
+    <div id="admin-root-wrapper" style={{ minHeight: '100vh', display: 'flex', position: 'relative' }}>
+      <style>{`
+        #admin-root-wrapper, #admin-root-wrapper * {
+          font-weight: 900 !important;
+        }
+      `}</style>
 
       {/* Print area (invisivel em tela) */}
       {pedidoImprimir && <PrintArea pedido={pedidoImprimir} />}
@@ -7196,7 +7201,7 @@ export default function Admin() {
       <aside style={{
         position: 'fixed', top: 0, left: 0, bottom: 0, zIndex: 160,
         width: larguraSidebar,
-        background: 'rgba(15,2,2,0.95)',
+        background: 'rgba(140,0,0,0.92)',
         backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
         borderRight: '1px solid rgba(255,255,255,0.08)',
         display: 'flex', flexDirection: 'column',
@@ -7361,7 +7366,7 @@ export default function Admin() {
         {/* TOPBAR */}
         <header style={{
           position: 'sticky', top: 0, zIndex: 100,
-          background: 'rgba(10,2,2,0.6)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
+          background: 'rgba(255,235,235,0.88)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
           borderBottom: '1px solid rgba(255,255,255,0.1)',
           padding: '0.75rem 1.5rem',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem',
@@ -7401,7 +7406,7 @@ export default function Admin() {
             <div style={{
               display: 'flex', alignItems: 'center', gap: '4px',
               padding: '3px 10px', borderRadius: '20px',
-              background: autoprint ? 'rgba(0,200,80,0.12)' : 'rgba(255,255,255,0.06)',
+              background: autoprint ? 'rgba(0,200,80,0.12)' : 'rgba(255,235,235,0.70)',
               border: `1px solid ${autoprint ? 'rgba(0,200,80,0.25)' : C.cardBorder}`,
               cursor: 'pointer',
             }} onClick={toggleAutoprint}>
@@ -7478,8 +7483,9 @@ export default function Admin() {
         @keyframes bellShake { 0%,100% { transform: rotate(0deg); } 25% { transform: rotate(-15deg); } 75% { transform: rotate(15deg); } }
         @keyframes badgePulseRed { 0%,100% { box-shadow: 0 0 0 0 rgba(255,68,68,0.8); transform: scale(1); } 50% { box-shadow: 0 0 0 4px rgba(255,68,68,0); transform: scale(1.15); } }
         @media print {
-          body > * { display: none !important; }
-          #print-area { display: block !important; }
+          body * { visibility: hidden !important; }
+          #print-area { display: block !important; visibility: visible !important; position: fixed; top: 0; left: 0; width: 80mm; z-index: 99999; background: #fff !important; }
+          #print-area * { visibility: visible !important; }
         }
         * { box-sizing: border-box; }
         input[type=number]::-webkit-inner-spin-button,
