@@ -24,7 +24,7 @@ const C = {
   redDark:    '#8B0000',
   gold:       '#92400E',
   text:       '#1A0000',
-  muted:      'rgba(100,0,0,0.65)',
+  muted:      'rgba(15,0,0,0.55)',
   success:    '#166534',
   warning:    '#92400E',
   danger:     '#991B1B',
@@ -249,7 +249,7 @@ function KpiCard({ icon: Icon, label, valor, sub, corSub }) {
         }}>
           <Icon size={16} color="#FF7777" />
         </div>
-        <span style={{ color: 'rgba(80,0,0,0.80)', fontSize: '0.73rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{label}</span>
+        <span style={{ color: 'rgba(15,0,0,0.75)', fontSize: '0.73rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{label}</span>
       </div>
       <div style={{ color: '#1A0000', fontFamily: 'Bebas Neue, sans-serif', fontSize: '1.85rem', letterSpacing: '1px', lineHeight: 1 }}>
         {valor}
@@ -513,7 +513,7 @@ function PaginaDashboard({ pedidos, onVerPedidos, onExcluir, onSalvarPedido, car
               background: 'rgba(255,235,235,0.70)', border: '1px solid rgba(255,255,255,0.1)',
               borderRadius: '10px', padding: '0.5rem 0.875rem', textAlign: 'center',
             }}>
-              <div style={{ color: 'rgba(100,0,0,0.70)', fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase' }}>{pag}</div>
+              <div style={{ color: 'rgba(15,0,0,0.70)', fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase' }}>{pag}</div>
               <div style={{ color: '#1A0000', fontSize: '1rem', fontWeight: 900 }}>{fmtMoeda(val)}</div>
             </div>
           ))}
@@ -528,7 +528,7 @@ function PaginaDashboard({ pedidos, onVerPedidos, onExcluir, onSalvarPedido, car
               <thead>
                 <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
                   {['Hora', 'Origem', '#', 'Cliente', 'Itens', 'Pagamento', 'Valor', 'Desconto', 'Ações'].map(h => (
-                    <th key={h} style={{ padding: '0.55rem 0.75rem', color: 'rgba(100,0,0,0.55)', fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'left', whiteSpace: 'nowrap', position: 'sticky', top: 0, background: 'rgba(255,240,240,0.95)', zIndex: 1 }}>
+                    <th key={h} style={{ padding: '0.55rem 0.75rem', color: 'rgba(15,0,0,0.60)', fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'left', whiteSpace: 'nowrap', position: 'sticky', top: 0, background: 'rgba(255,240,240,0.95)', zIndex: 1 }}>
                       {h}
                     </th>
                   ))}
@@ -556,13 +556,13 @@ function PaginaDashboard({ pedidos, onVerPedidos, onExcluir, onSalvarPedido, car
                             {ehBalcao ? 'Balcão' : 'Site'}
                           </span>
                         </td>
-                        <td style={{ padding: '0.5rem 0.75rem', color: 'rgba(100,0,0,0.55)', fontSize: '0.78rem' }}>
+                        <td style={{ padding: '0.5rem 0.75rem', color: 'rgba(15,0,0,0.60)', fontSize: '0.78rem' }}>
                           {v.numero}
                         </td>
                         <td style={{ padding: '0.5rem 0.75rem', color: '#1A0000', fontSize: '0.82rem', fontWeight: 600, maxWidth: '140px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {v.nome}
                         </td>
-                        <td style={{ padding: '0.5rem 0.75rem', color: 'rgba(80,0,0,0.80)', fontSize: '0.78rem', maxWidth: '220px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <td style={{ padding: '0.5rem 0.75rem', color: 'rgba(15,0,0,0.75)', fontSize: '0.78rem', maxWidth: '220px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {resumoV}
                         </td>
                         <td style={{ padding: '0.5rem 0.75rem' }}>
@@ -1204,7 +1204,7 @@ function PainelDetalhe({ pedido, onStatus, onImprimir, onExcluir, onFechar }) {
               </span>
             </div>
             {item.sabores?.length > 0 && (
-              <div style={{ color: 'rgba(100,0,0,0.65)', fontSize: '0.72rem', marginTop: '2px' }}>
+              <div style={{ color: 'rgba(15,0,0,0.65)', fontSize: '0.72rem', marginTop: '2px' }}>
                 Sabores: {item.sabores.join(', ')}
               </div>
             )}
@@ -1312,13 +1312,13 @@ function CardPedido({ pedido, expandido, onToggle, onStatus, onImprimir, onExclu
           <div style={{ color: C.gold, fontSize: '1.15rem', fontFamily: 'Bebas Neue, sans-serif', letterSpacing: '1px' }}>
             {fmtHora(pedido.created_at)}
           </div>
-          <div style={{ color: 'rgba(100,0,0,0.75)', fontSize: '1rem', fontWeight: 700 }}>#{pedido.numero}</div>
+          <div style={{ color: 'rgba(15,0,0,0.75)', fontSize: '1rem', fontWeight: 700 }}>#{pedido.numero}</div>
         </div>
         <div style={{ flex: 1, minWidth: '120px', overflow: 'hidden' }}>
           <div style={{ color: C.text, fontWeight: 700, fontSize: '1.25rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {pedido.nome}
           </div>
-          <div style={{ color: 'rgba(80,0,0,0.80)', fontSize: '1.05rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <div style={{ color: 'rgba(15,0,0,0.75)', fontSize: '1.05rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {resumo}
           </div>
         </div>
@@ -1350,7 +1350,7 @@ function CardPedido({ pedido, expandido, onToggle, onStatus, onImprimir, onExclu
                 <div>
                   <span style={{ color: C.text, fontWeight: 700, fontSize: '1.15rem' }}>{item.qtd || 1}x {item.nome}</span>
                   {item.sabores?.length > 0 && (
-                    <div style={{ color: 'rgba(80,0,0,0.80)', fontSize: '1.1rem', fontWeight: 600, marginTop: '3px' }}>Sabores: {item.sabores.join(', ')}</div>
+                    <div style={{ color: 'rgba(15,0,0,0.75)', fontSize: '1.1rem', fontWeight: 600, marginTop: '3px' }}>Sabores: {item.sabores.join(', ')}</div>
                   )}
                   {item.adicionais?.length > 0 && (
                     <div style={{ color: 'rgba(245,200,0,0.85)', fontSize: '1.05rem', fontWeight: 600, marginTop: '2px' }}>+ {item.adicionais.join(', ')}</div>
@@ -1369,7 +1369,7 @@ function CardPedido({ pedido, expandido, onToggle, onStatus, onImprimir, onExclu
           {pedido.tipo_entrega === 'entrega' && pedido.endereco && (
             <div style={{ padding: '0.625rem 1.125rem', borderTop: `1px solid ${C.cardBorder}`, background: 'rgba(245,200,0,0.05)' }}>
               <span style={{ color: C.gold, fontSize: '1rem', fontWeight: 700 }}>🛵 Entrega:</span>
-              <span style={{ color: 'rgba(80,0,0,0.80)', fontSize: '0.95rem', marginLeft: '6px' }}>{pedido.endereco}</span>
+              <span style={{ color: 'rgba(15,0,0,0.75)', fontSize: '0.95rem', marginLeft: '6px' }}>{pedido.endereco}</span>
             </div>
           )}
           {pedido.observacao && (
@@ -2521,7 +2521,7 @@ function PaginaClientes() {
                         <div>
                           <div style={{ color: C.text, fontSize: '0.78rem', fontWeight: 700, marginBottom: '4px' }}>Endereços</div>
                           {c.enderecos.map((end, idx) => (
-                            <div key={idx} style={{ padding: '0.4rem 0.75rem', borderRadius: '8px', background: 'rgba(255,235,235,0.55)', border: `1px solid ${C.cardBorder}`, fontSize: '0.78rem', color: 'rgba(80,0,0,0.80)', marginBottom: '4px' }}>
+                            <div key={idx} style={{ padding: '0.4rem 0.75rem', borderRadius: '8px', background: 'rgba(255,235,235,0.55)', border: `1px solid ${C.cardBorder}`, fontSize: '0.78rem', color: 'rgba(15,0,0,0.75)', marginBottom: '4px' }}>
                               📍 {end.rua}, {end.numero}{end.complemento ? ` - ${end.complemento}` : ''} — {end.bairro}
                             </div>
                           ))}
@@ -2896,7 +2896,7 @@ function PaginaCaderneta() {
                         {c.nome}
                         {vencidosCliente.length > 0 && <span style={{ marginLeft: 6, color: '#ff8080', fontSize: '0.82rem', fontWeight: 800 }}>⚠️ {vencidosCliente.length} vencido{vencidosCliente.length > 1 ? 's' : ''}</span>}
                       </div>
-                      <div style={{ color: 'rgba(100,0,0,0.55)', fontSize: '0.82rem', marginTop: '2px' }}>
+                      <div style={{ color: 'rgba(15,0,0,0.60)', fontSize: '0.82rem', marginTop: '2px' }}>
                         {(c.telefone || '').replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3')}
                         {c.cpf ? ` · CPF ${c.cpf}` : ''}
                       </div>
@@ -3108,13 +3108,13 @@ function EntradaCadernetaRow({ e, hoje, C, inputSt, editandoVencimento, vencimen
           <div style={{ color: e.pago ? 'rgba(255,255,255,0.5)' : '#fff', fontSize: '0.95rem', fontWeight: 700, textDecoration: e.pago ? 'line-through' : 'none', lineHeight: 1.3 }}>
             {e.descricao || 'Lançamento'}
           </div>
-          <div style={{ color: 'rgba(100,0,0,0.65)', fontSize: '0.82rem', display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '3px' }}>
+          <div style={{ color: 'rgba(15,0,0,0.65)', fontSize: '0.82rem', display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '3px' }}>
             <span>{e.data || new Date(e.created_at).toLocaleDateString('pt-BR')}</span>
             {e.vencimento
               ? <span style={{ color: vencido ? '#ff8080' : 'rgba(255,255,255,0.55)' }}>📅 vence {new Date(e.vencimento + 'T12:00:00').toLocaleDateString('pt-BR')}</span>
               : !e.pago && (
                   <button onClick={() => { setEditandoVencimento(e.id); setVencimentoInput('') }}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(80,0,0,0.80)', fontSize: '0.82rem', padding: 0, textDecoration: 'underline', touchAction: 'manipulation' }}>+ vencimento</button>
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(15,0,0,0.75)', fontSize: '0.82rem', padding: 0, textDecoration: 'underline', touchAction: 'manipulation' }}>+ vencimento</button>
                 )
             }
           </div>
@@ -3149,7 +3149,7 @@ function EntradaCadernetaRow({ e, hoje, C, inputSt, editandoVencimento, vencimen
       {/* Abatimento parcial */}
       {modoAbate && (
         <div style={{ display: 'flex', gap: '6px', alignItems: 'center', background: 'rgba(100,100,255,0.08)', borderRadius: '8px', padding: '0.6rem 0.75rem' }}>
-          <span style={{ color: 'rgba(80,0,0,0.80)', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>Pagou:</span>
+          <span style={{ color: 'rgba(15,0,0,0.75)', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>Pagou:</span>
           <input
             type="number" value={abateValor} onChange={ev => setAbateValor(ev.target.value)}
             placeholder={`máx ${fmtMoeda(e.valor)}`} min="0.01" step="0.01" max={e.valor}
@@ -3157,7 +3157,7 @@ function EntradaCadernetaRow({ e, hoje, C, inputSt, editandoVencimento, vencimen
             autoFocus
           />
           {parseFloat(abateValor) > 0 && parseFloat(abateValor) < Number(e.valor) && (
-            <span style={{ color: 'rgba(100,0,0,0.70)', fontSize: '0.82rem', whiteSpace: 'nowrap' }}>
+            <span style={{ color: 'rgba(15,0,0,0.70)', fontSize: '0.82rem', whiteSpace: 'nowrap' }}>
               resta {fmtMoeda(Number(e.valor) - parseFloat(abateValor))}
             </span>
           )}
@@ -3616,7 +3616,7 @@ function PaginaEstoque() {
                           </div>
                         )}
                       </td>
-                      <td style={{ padding: '0.6rem 0.875rem', color: 'rgba(50,0,0,0.88)', fontSize: '0.78rem' }}>{item.categoria}</td>
+                      <td style={{ padding: '0.6rem 0.875rem', color: 'rgba(15,0,0,0.80)', fontSize: '0.78rem' }}>{item.categoria}</td>
                       <td style={{ padding: '0.6rem 0.875rem' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                           <button
@@ -3631,8 +3631,8 @@ function PaginaEstoque() {
                         </div>
                       </td>
                       <td style={{ padding: '0.6rem 0.875rem', color: C.gold, fontSize: '0.82rem', fontWeight: 700 }}>{item.preco_custo ? fmtMoeda(item.preco_custo) : '—'}</td>
-                      <td style={{ padding: '0.6rem 0.875rem', color: 'rgba(50,0,0,0.88)', fontSize: '0.78rem' }}>{item.unidade}</td>
-                      <td style={{ padding: '0.6rem 0.875rem', color: 'rgba(50,0,0,0.88)', fontSize: '0.78rem' }}>{item.alerta_minimo}</td>
+                      <td style={{ padding: '0.6rem 0.875rem', color: 'rgba(15,0,0,0.80)', fontSize: '0.78rem' }}>{item.unidade}</td>
+                      <td style={{ padding: '0.6rem 0.875rem', color: 'rgba(15,0,0,0.80)', fontSize: '0.78rem' }}>{item.alerta_minimo}</td>
                       <td style={{ padding: '0.6rem 0.875rem' }}>
                         <span style={{
                           background: statusCor + '20', color: statusCor,
@@ -3988,7 +3988,7 @@ function PaginaRelatorios({ pedidosTodos }) {
             <p style={{ color: C.muted, fontSize: '0.82rem' }}>Sem dados</p>
           ) : topProdutos.map(([nome, qtd]) => (
             <div key={nome} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '6px' }}>
-              <span style={{ color: 'rgba(80,0,0,0.85)', fontSize: '0.82rem', flex: 1 }}>{nome}</span>
+              <span style={{ color: 'rgba(15,0,0,0.75)', fontSize: '0.82rem', flex: 1 }}>{nome}</span>
               <div style={{
                 height: '6px', borderRadius: '3px', background: C.red + '40',
                 flex: 2, overflow: 'hidden',
@@ -4394,7 +4394,7 @@ function PaginaWhatsApp() {
                 <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
                   {['Contato', 'Telefone', 'Estado', 'Modo', 'Última atividade', 'Ações'].map(h => (
                     <th key={h} style={{
-                      padding: '0.55rem 0.75rem', color: 'rgba(100,0,0,0.55)', fontSize: '0.7rem',
+                      padding: '0.55rem 0.75rem', color: 'rgba(15,0,0,0.60)', fontSize: '0.7rem',
                       fontWeight: 700, textTransform: 'uppercase', textAlign: 'left', whiteSpace: 'nowrap',
                       position: 'sticky', top: 0, background: 'rgba(255,240,240,0.95)', zIndex: 1,
                     }}>{h}</th>
@@ -4504,7 +4504,7 @@ function PaginaWhatsApp() {
           ].map((item, i) => (
             <div key={i} style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start', padding: '0.4rem 0' }}>
               <span style={{ fontSize: '1rem', flexShrink: 0 }}>{item.icon}</span>
-              <span style={{ color: 'rgba(80,0,0,0.85)', fontSize: '0.82rem' }}>{item.text}</span>
+              <span style={{ color: 'rgba(15,0,0,0.75)', fontSize: '0.82rem' }}>{item.text}</span>
             </div>
           ))}
         </div>
