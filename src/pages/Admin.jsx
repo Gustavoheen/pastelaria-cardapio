@@ -7119,10 +7119,8 @@ export default function Admin() {
   return (
     <div id="admin-root-wrapper" style={{ minHeight: '100vh', display: 'flex', position: 'relative', background: 'linear-gradient(135deg, rgba(255,220,220,0.98) 0%, rgba(255,235,235,0.99) 50%, rgba(255,225,225,0.98) 100%)' }}>
       <style>{`
-        /* Font scaling: rem sobe junto com viewport em telas pequenas */
-        html:has(#admin-root-wrapper) {
-          font-size: clamp(15px, 1.25vw, 17px);
-        }
+        /* Font scaling agressivo — rem cresce com viewport */
+        html { font-size: clamp(17px, 1.5vw, 20px) !important; }
 
         /* Bold em tudo */
         #admin-root-wrapper, #admin-root-wrapper * {
@@ -7248,7 +7246,7 @@ export default function Admin() {
       <aside style={{
         position: 'fixed', top: 0, left: 0, bottom: 0, zIndex: 160,
         width: larguraSidebar,
-        background: 'rgba(200,0,0,0.28)',
+        background: 'rgba(160,0,0,0.55)',
         backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
         borderRight: '1px solid rgba(150,0,0,0.25)',
         display: 'flex', flexDirection: 'column',
@@ -7265,10 +7263,10 @@ export default function Admin() {
         }}>
           {sidebarAberta && (
             <div>
-              <div style={{ color: '#5C1A00', fontFamily: 'Bebas Neue, sans-serif', fontSize: '1.1rem', letterSpacing: '2px', lineHeight: 1 }}>
+              <div style={{ color: '#fff', fontFamily: 'Bebas Neue, sans-serif', fontSize: '1.1rem', letterSpacing: '2px', lineHeight: 1 }}>
                 Pastel do Carioca
               </div>
-              <div style={{ color: '#5C1A00', fontSize: '0.65rem', marginTop: '2px' }}>Admin v2</div>
+              <div style={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.65rem', marginTop: '2px' }}>Admin v2</div>
             </div>
           )}
           <button
@@ -7310,8 +7308,8 @@ export default function Admin() {
                     ? `3px solid #FF4444`
                     : ativo ? `3px solid ${C.red}` : '3px solid transparent',
                   cursor: 'pointer',
-                  color: '#3D0000',
-                  fontSize: '0.85rem', fontWeight: ativo || temAlerta ? 900 : 700,
+                  color: ativo ? '#fff' : 'rgba(255,255,255,0.92)',
+                  fontSize: '0.9rem', fontWeight: 900,
                   transition: 'all 0.15s',
                   textAlign: 'left', position: 'relative',
                   animation: temAlerta ? 'pulseBorder 1s ease-in-out infinite' : 'none',
@@ -7321,7 +7319,7 @@ export default function Admin() {
               >
                 <item.icon
                   size={18}
-                  color={temAlerta ? '#CC0000' : ativo ? '#8B0000' : '#5C1A00'}
+                  color={temAlerta ? '#FFD0D0' : ativo ? '#fff' : 'rgba(255,255,255,0.80)'}
                   style={{ flexShrink: 0, animation: temAlerta ? 'bellShake 0.6s ease-in-out infinite' : 'none' }}
                 />
                 {sidebarAberta && (
@@ -7375,10 +7373,10 @@ export default function Admin() {
               justifyContent: sidebarAberta ? 'flex-start' : 'center',
               padding: sidebarAberta ? '0.6rem 1rem' : '0.6rem 0',
               background: 'none', border: 'none', cursor: 'pointer',
-              color: '#3D0000', fontSize: '0.82rem',
+              color: 'rgba(255,255,255,0.88)', fontSize: '0.82rem',
             }}
           >
-            <Printer size={16} color={autoprint ? '#166534' : '#5C1A00'} style={{ flexShrink: 0 }} />
+            <Printer size={16} color={autoprint ? '#6aff9e' : 'rgba(255,255,255,0.75)'} style={{ flexShrink: 0 }} />
             {sidebarAberta && <span>Autoprint {autoprint ? 'ON' : 'OFF'}</span>}
           </button>
 
@@ -7392,10 +7390,10 @@ export default function Admin() {
               justifyContent: sidebarAberta ? 'flex-start' : 'center',
               padding: sidebarAberta ? '0.6rem 1rem' : '0.6rem 0',
               background: 'none', border: 'none', cursor: 'pointer',
-              color: '#3D0000', fontSize: '0.82rem',
+              color: 'rgba(255,255,255,0.88)', fontSize: '0.82rem',
             }}
           >
-            <LogOut size={16} color="#5C1A00" style={{ flexShrink: 0 }} />
+            <LogOut size={16} color="rgba(255,255,255,0.75)" style={{ flexShrink: 0 }} />
             {sidebarAberta && <span>Sair</span>}
           </button>
         </div>

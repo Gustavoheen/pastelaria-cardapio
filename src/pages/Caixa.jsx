@@ -1781,9 +1781,7 @@ export default function Caixa() {
   return (
     <div id="caixa-root-wrapper" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'linear-gradient(135deg, rgba(255,220,220,0.98) 0%, rgba(255,235,235,0.99) 50%, rgba(255,225,225,0.98) 100%)' }}>
       <style>{`
-        html:has(#caixa-root-wrapper) {
-          font-size: clamp(15px, 1.25vw, 17px);
-        }
+        html { font-size: clamp(17px, 1.5vw, 20px) !important; }
 
         #caixa-root-wrapper, #caixa-root-wrapper * {
           font-weight: 900 !important;
