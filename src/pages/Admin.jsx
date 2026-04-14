@@ -19,7 +19,8 @@ import { TIPOS_PASTEL, PASTEIS_DOCES, categorias, SABORES_SALGADOS, SABORES_DOCE
 const C = {
   bg:         'rgba(255,235,235,0.88)',
   card:       'rgba(255,255,255,0.82)',
-  cardBorder: 'rgba(180,0,0,0.22)',
+  cardBorder: 'rgba(150,0,0,0.42)',
+  cardShadow: '0 3px 14px rgba(130,0,0,0.14), 0 1px 4px rgba(130,0,0,0.08)',
   red:        '#C62828',
   redDark:    '#8B0000',
   gold:       '#92400E',
@@ -440,9 +441,9 @@ function PaginaDashboard({ pedidos, onVerPedidos, onExcluir, onSalvarPedido, car
   const ultimos5 = [...pedidos].reverse().slice(0, 5)
 
   const cardStyle = {
-    background: C.card, backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
-    border: `1px solid ${C.cardBorder}`, borderRadius: '16px', padding: '1.25rem',
-    boxShadow: '0 4px 20px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)',
+    background: 'rgba(255,248,248,0.92)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
+    border: `1.5px solid ${C.cardBorder}`, borderRadius: '16px', padding: '1.25rem',
+    boxShadow: '0 4px 20px rgba(120,0,0,0.16), 0 1px 4px rgba(120,0,0,0.09)',
   }
 
   // Fluxo de caixa — usa todos os pedidos carregados (já filtrados por data externamente)
@@ -1294,14 +1295,14 @@ function CardPedido({ pedido, expandido, onToggle, onStatus, onImprimir, onExclu
       position: 'relative',
       zIndex: expandido ? 10 : 1,
       background: isNovo
-        ? 'linear-gradient(135deg, rgba(33,150,243,0.25), rgba(33,150,243,0.12))'
-        : `linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04))`,
+        ? 'linear-gradient(135deg, rgba(33,150,243,0.18), rgba(220,240,255,0.92))'
+        : 'rgba(255,255,255,0.92)',
       backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
-      border: expandido ? '2px solid rgba(245,200,0,0.5)' : `1px solid ${isNovo ? '#2196F366' : 'rgba(255,255,255,0.12)'}`,
+      border: expandido ? `2px solid rgba(245,200,0,0.6)` : `1.5px solid ${isNovo ? 'rgba(33,150,243,0.50)' : C.cardBorder}`,
       borderLeft: `4px solid ${corCard}`,
       borderRadius: '14px', overflow: 'hidden',
       animation: isNovo ? 'novoPedidoPulse 1.5s ease-in-out infinite' : 'none',
-      boxShadow: expandido ? '0 4px 24px rgba(0,0,0,0.6)' : (isNovo ? '0 0 16px rgba(33,150,243,0.35)' : '0 2px 12px rgba(0,0,0,0.25)'),
+      boxShadow: expandido ? '0 6px 28px rgba(100,0,0,0.22)' : (isNovo ? '0 0 16px rgba(33,150,243,0.30), 0 2px 8px rgba(0,0,100,0.12)' : '0 2px 10px rgba(120,0,0,0.13), 0 1px 3px rgba(120,0,0,0.07)'),
     }}>
       {/* Linha compacta */}
       <div
@@ -1606,9 +1607,10 @@ function PaginaPedidos({ pedidos, novosIds, onStatus, onImprimir, onExcluir, onA
 
         {/* ── PEDIDOS SITE ── */}
         <div style={{
-          background: 'rgba(255,235,235,0.55)', border: '1px solid rgba(200,150,150,0.3)',
+          background: 'rgba(255,248,248,0.92)', border: `1.5px solid ${C.cardBorder}`,
           borderRadius: '16px', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem',
           height: 'calc(100vh - 210px)', overflowY: 'auto', overflowX: 'hidden',
+          boxShadow: '0 4px 20px rgba(120,0,0,0.16), 0 1px 4px rgba(120,0,0,0.09)',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
             <h3 style={{ margin: 0, color: '#1A0000', fontSize: '1rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -1644,9 +1646,10 @@ function PaginaPedidos({ pedidos, novosIds, onStatus, onImprimir, onExcluir, onA
 
         {/* ── PEDIDOS BALCÃO ── */}
         <div style={{
-          background: 'rgba(255,250,220,0.55)', border: '1px solid rgba(200,180,50,0.25)',
+          background: 'rgba(255,252,230,0.94)', border: '1.5px solid rgba(160,130,0,0.38)',
           borderRadius: '16px', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem',
           height: 'calc(100vh - 210px)', overflowY: 'auto', overflowX: 'hidden',
+          boxShadow: '0 4px 20px rgba(100,80,0,0.14), 0 1px 4px rgba(100,80,0,0.08)',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
             <h3 style={{ margin: 0, color: '#1A0000', fontSize: '1rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -1798,14 +1801,14 @@ function PaginaCardapio({ config, onSalvar }) {
   }
 
   const cardStyle = {
-    background: 'rgba(255,235,235,0.70)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
-    border: '1px solid rgba(255,255,255,0.12)', borderRadius: '16px', padding: '1.25rem',
-    boxShadow: '0 4px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06)',
+    background: 'rgba(255,248,248,0.92)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
+    border: `1.5px solid ${C.cardBorder}`, borderRadius: '16px', padding: '1.25rem',
+    boxShadow: '0 4px 20px rgba(120,0,0,0.16), 0 1px 4px rgba(120,0,0,0.09)',
   }
 
   const inputStyle = {
     width: '100%', padding: '0.55rem 0.875rem', borderRadius: '10px', fontSize: '0.88rem',
-    background: 'rgba(255,235,235,0.70)', border: `1px solid ${C.cardBorder}`,
+    background: 'rgba(255,255,255,0.90)', border: `1.5px solid ${C.cardBorder}`,
     color: C.text, outline: 'none', boxSizing: 'border-box',
   }
 
@@ -1881,8 +1884,9 @@ function PaginaCardapio({ config, onSalvar }) {
               <div key={t.id} style={{
                 display: 'flex', alignItems: 'center', gap: '0.875rem',
                 padding: '0.6rem 0.75rem', borderRadius: '10px',
-                background: ativo ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.2)',
-                border: `1px solid ${ativo ? C.cardBorder : 'rgba(200,0,0,0.2)'}`,
+                background: ativo ? 'rgba(255,255,255,0.88)' : 'rgba(200,0,0,0.07)',
+                border: `1.5px solid ${ativo ? C.cardBorder : 'rgba(180,0,0,0.28)'}`,
+                boxShadow: ativo ? C.cardShadow : 'none',
               }}>
                 <div style={{ flex: 1 }}>
                   <span style={{ color: ativo ? C.text : C.muted, fontSize: '0.84rem', fontWeight: 600 }}>{t.nome}</span>
@@ -1923,8 +1927,9 @@ function PaginaCardapio({ config, onSalvar }) {
               <div key={d.id} style={{
                 display: 'flex', alignItems: 'center', gap: '0.75rem',
                 padding: '0.5rem 0.75rem', borderRadius: '10px',
-                background: ativo ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.2)',
-                border: `1px solid ${ativo ? C.cardBorder : 'rgba(200,0,0,0.2)'}`,
+                background: ativo ? 'rgba(255,255,255,0.88)' : 'rgba(200,0,0,0.07)',
+                border: `1.5px solid ${ativo ? C.cardBorder : 'rgba(180,0,0,0.28)'}`,
+                boxShadow: ativo ? C.cardShadow : 'none',
               }}>
                 <span style={{ flex: 1, color: ativo ? C.text : C.muted, fontSize: '0.82rem' }}>{d.nome}</span>
                 <input
@@ -1962,8 +1967,9 @@ function PaginaCardapio({ config, onSalvar }) {
               <div key={b.id} style={{
                 display: 'flex', alignItems: 'center', gap: '0.75rem',
                 padding: '0.5rem 0.75rem', borderRadius: '10px',
-                background: ativo ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.2)',
-                border: `1px solid ${ativo ? C.cardBorder : 'rgba(200,0,0,0.2)'}`,
+                background: ativo ? 'rgba(255,255,255,0.88)' : 'rgba(200,0,0,0.07)',
+                border: `1.5px solid ${ativo ? C.cardBorder : 'rgba(180,0,0,0.28)'}`,
+                boxShadow: ativo ? C.cardShadow : 'none',
               }}>
                 <span style={{ flex: 1, color: ativo ? C.text : C.muted, fontSize: '0.82rem' }}>{b.nome}</span>
                 <input
@@ -2004,7 +2010,8 @@ function PaginaCardapio({ config, onSalvar }) {
             return (
               <div key={beb.id} style={{
                 padding: '0.75rem', borderRadius: '12px',
-                background: 'rgba(255,235,235,0.55)', border: `1px solid ${C.cardBorder}`,
+                background: 'rgba(255,255,255,0.92)', border: `1.5px solid ${C.cardBorder}`,
+                boxShadow: C.cardShadow,
               }}>
                 <div style={{ color: C.text, fontWeight: 700, fontSize: '0.84rem', marginBottom: '0.5rem' }}>
                   {beb.nome}
@@ -2170,8 +2177,9 @@ function PaginaCardapio({ config, onSalvar }) {
           {form.combos.map((combo, idx) => (
             <div key={combo.id} style={{
               padding: '0.875rem', borderRadius: '12px',
-              background: combo.ativo ? 'rgba(200,0,0,0.06)' : 'rgba(0,0,0,0.2)',
-              border: `1px solid ${combo.ativo ? 'rgba(200,0,0,0.2)' : C.cardBorder}`,
+              background: combo.ativo ? 'rgba(255,255,255,0.92)' : 'rgba(200,0,0,0.07)',
+              border: `1.5px solid ${combo.ativo ? C.cardBorder : 'rgba(180,0,0,0.28)'}`,
+              boxShadow: combo.ativo ? C.cardShadow : 'none',
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
                 <div
@@ -2373,9 +2381,9 @@ function PaginaClientes() {
   }
 
   const cardStyle = {
-    background: 'rgba(255,235,235,0.70)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
-    border: '1px solid rgba(255,255,255,0.12)', borderRadius: '16px', padding: '1.25rem',
-    boxShadow: '0 4px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06)',
+    background: 'rgba(255,248,248,0.92)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
+    border: `1.5px solid ${C.cardBorder}`, borderRadius: '16px', padding: '1.25rem',
+    boxShadow: '0 4px 20px rgba(120,0,0,0.16), 0 1px 4px rgba(120,0,0,0.09)',
   }
 
   return (
@@ -2731,9 +2739,9 @@ function PaginaCaderneta() {
     color: C.text, outline: 'none', boxSizing: 'border-box',
   }
   const cardStyle = {
-    background: 'rgba(255,235,235,0.70)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
-    border: '1px solid rgba(255,255,255,0.12)', borderRadius: '16px', padding: '1.25rem',
-    boxShadow: '0 4px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06)',
+    background: 'rgba(255,248,248,0.92)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
+    border: `1.5px solid ${C.cardBorder}`, borderRadius: '16px', padding: '1.25rem',
+    boxShadow: '0 4px 20px rgba(120,0,0,0.16), 0 1px 4px rgba(120,0,0,0.09)',
   }
 
   return (
@@ -3846,9 +3854,9 @@ function PaginaRelatorios({ pedidosTodos }) {
   ]
 
   const cardStyle = {
-    background: 'rgba(255,235,235,0.70)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
-    border: '1px solid rgba(255,255,255,0.12)', borderRadius: '16px', padding: '1.25rem',
-    boxShadow: '0 4px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06)',
+    background: 'rgba(255,248,248,0.92)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
+    border: `1.5px solid ${C.cardBorder}`, borderRadius: '16px', padding: '1.25rem',
+    boxShadow: '0 4px 20px rgba(120,0,0,0.16), 0 1px 4px rgba(120,0,0,0.09)',
   }
 
   return (
@@ -4064,9 +4072,9 @@ function PaginaWhatsApp() {
   }
 
   const cardStyle = {
-    background: C.card, backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
-    border: `1px solid ${C.cardBorder}`, borderRadius: '16px', padding: '1.25rem',
-    boxShadow: '0 4px 20px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)',
+    background: 'rgba(255,248,248,0.92)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
+    border: `1.5px solid ${C.cardBorder}`, borderRadius: '16px', padding: '1.25rem',
+    boxShadow: '0 4px 20px rgba(120,0,0,0.16), 0 1px 4px rgba(120,0,0,0.09)',
   }
 
   async function carregarStatus(comQR = false) {
@@ -4631,8 +4639,9 @@ function PaginaConfiguracoes({ autoprint, onToggleAutoprint, onTestarImpressao, 
   }
 
   const cardStyle = {
-    background: C.card, backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
-    border: `1px solid ${C.cardBorder}`, borderRadius: '16px', padding: '1.25rem',
+    background: 'rgba(255,248,248,0.92)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
+    border: `1.5px solid ${C.cardBorder}`, borderRadius: '16px', padding: '1.25rem',
+    boxShadow: '0 4px 20px rgba(120,0,0,0.16), 0 1px 4px rgba(120,0,0,0.09)',
     marginBottom: '1rem',
   }
 
@@ -5528,9 +5537,9 @@ function PaginaBalcao({ onPedidoCriado, onCaderneta, mesaAdicionando, onCancelar
   }
 
   const cardStyle = {
-    background: 'rgba(255,235,235,0.70)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
-    border: '1px solid rgba(255,255,255,0.12)', borderRadius: '16px', padding: '1.25rem',
-    boxShadow: '0 4px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06)',
+    background: 'rgba(255,248,248,0.92)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
+    border: `1.5px solid ${C.cardBorder}`, borderRadius: '16px', padding: '1.25rem',
+    boxShadow: '0 4px 20px rgba(120,0,0,0.16), 0 1px 4px rgba(120,0,0,0.09)',
   }
 
   const inputStyle = {
@@ -6430,8 +6439,9 @@ function PaginaMesas({ pedidos, onAtualizar, onAdicionarItens }) {
   }
 
   const cardStyle = {
-    background: C.card, backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
-    border: `1px solid ${C.cardBorder}`, borderRadius: '16px', padding: '1.25rem',
+    background: 'rgba(255,248,248,0.92)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
+    border: `1.5px solid ${C.cardBorder}`, borderRadius: '16px', padding: '1.25rem',
+    boxShadow: '0 4px 20px rgba(120,0,0,0.16), 0 1px 4px rgba(120,0,0,0.09)',
     marginBottom: '1rem',
   }
 

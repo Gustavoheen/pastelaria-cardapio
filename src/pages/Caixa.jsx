@@ -14,7 +14,8 @@ import {
 const C = {
   bg:         'rgba(255,235,235,0.88)',
   card:       'rgba(255,255,255,0.82)',
-  border:     'rgba(180,0,0,0.22)',
+  border:     'rgba(150,0,0,0.42)',
+  cardShadow: '0 3px 14px rgba(130,0,0,0.14), 0 1px 4px rgba(130,0,0,0.08)',
   red:        '#C62828',
   redDark:    '#8B0000',
   gold:       '#92400E',
@@ -787,8 +788,9 @@ function AbaBalcao({ onPedidoCriado, modo, setModo, mesaAdicionando, onCancelarM
 
   const inputStyle = {
     padding: '0.7rem 0.875rem', borderRadius: '12px', fontSize: '0.88rem',
-    background: 'rgba(255,235,235,0.70)', border: `1px solid ${C.border}`,
+    background: 'rgba(255,255,255,0.92)', border: `1.5px solid ${C.border}`,
     color: C.text, outline: 'none', boxSizing: 'border-box',
+    boxShadow: '0 1px 4px rgba(130,0,0,0.08)',
   }
 
   return (
@@ -909,8 +911,8 @@ function AbaBalcao({ onPedidoCriado, modo, setModo, mesaAdicionando, onCancelarM
             <button key={tipo.id} onClick={() => setTipoSabores(tipo)} style={{
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
               padding: '0.875rem 1rem', borderRadius: '14px', cursor: 'pointer', textAlign: 'left',
-              background: 'rgba(255,235,235,0.60)', border: `1px solid ${C.border}`,
-              transition: 'all 0.12s',
+              background: 'rgba(255,255,255,0.92)', border: `1.5px solid ${C.border}`,
+              boxShadow: C.cardShadow, transition: 'all 0.12s',
             }}>
               <div>
                 <div style={{ color: C.text, fontWeight: 700, fontSize: '0.9rem' }}>{tipo.nome}</div>
@@ -943,8 +945,9 @@ function AbaBalcao({ onPedidoCriado, modo, setModo, mesaAdicionando, onCancelarM
               <div key={doce.id} style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                 padding: '0.75rem 1rem', borderRadius: '12px',
-                background: qtd > 0 ? 'rgba(229,57,53,0.1)' : 'rgba(255,235,235,0.55)',
-                border: `1px solid ${qtd > 0 ? 'rgba(229,57,53,0.35)' : C.border}`,
+                background: qtd > 0 ? 'rgba(229,57,53,0.13)' : 'rgba(255,255,255,0.92)',
+                border: `1.5px solid ${qtd > 0 ? 'rgba(200,40,40,0.52)' : C.border}`,
+                boxShadow: C.cardShadow,
               }}>
                 <div>
                   <div style={{ color: C.text, fontWeight: 600, fontSize: '0.88rem' }}>{doce.nome}</div>
@@ -988,7 +991,8 @@ function AbaBalcao({ onPedidoCriado, modo, setModo, mesaAdicionando, onCancelarM
               return (
                 <div key={beb.id} style={{
                   padding: '0.75rem 1rem', borderRadius: '12px',
-                  background: 'rgba(255,235,235,0.55)', border: `1px solid ${C.border}`,
+                  background: 'rgba(255,255,255,0.92)', border: `1.5px solid ${C.border}`,
+                  boxShadow: C.cardShadow,
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
                     <div>
@@ -1004,8 +1008,9 @@ function AbaBalcao({ onPedidoCriado, modo, setModo, mesaAdicionando, onCancelarM
                         <div key={sabor} style={{
                           display: 'flex', alignItems: 'center', gap: '4px',
                           padding: '4px 8px', borderRadius: '8px',
-                          background: qtd > 0 ? 'rgba(229,57,53,0.15)' : 'rgba(255,235,235,0.70)',
-                          border: `1px solid ${qtd > 0 ? 'rgba(229,57,53,0.35)' : 'rgba(255,235,235,0.75)'}`,
+                          background: qtd > 0 ? 'rgba(198,40,40,0.16)' : 'rgba(255,255,255,0.90)',
+                          border: `1.5px solid ${qtd > 0 ? 'rgba(198,40,40,0.55)' : 'rgba(140,0,0,0.38)'}`,
+                          boxShadow: qtd > 0 ? '0 1px 4px rgba(140,0,0,0.18)' : '0 1px 3px rgba(130,0,0,0.10)',
                         }}>
                           <span style={{ color: qtd > 0 ? '#fff' : C.muted, fontSize: '0.72rem', fontWeight: 600 }}>{sabor}</span>
                           {qtd > 0 && (
@@ -1039,8 +1044,9 @@ function AbaBalcao({ onPedidoCriado, modo, setModo, mesaAdicionando, onCancelarM
               <div key={beb.id} style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                 padding: '0.75rem 1rem', borderRadius: '12px',
-                background: qtd > 0 ? 'rgba(229,57,53,0.1)' : 'rgba(255,235,235,0.55)',
-                border: `1px solid ${qtd > 0 ? 'rgba(229,57,53,0.35)' : C.border}`,
+                background: qtd > 0 ? 'rgba(229,57,53,0.13)' : 'rgba(255,255,255,0.92)',
+                border: `1.5px solid ${qtd > 0 ? 'rgba(200,40,40,0.52)' : C.border}`,
+                boxShadow: C.cardShadow,
               }}>
                 <div>
                   <div style={{ color: C.text, fontWeight: 600, fontSize: '0.88rem' }}>{beb.nome}</div>
@@ -1078,9 +1084,10 @@ function AbaBalcao({ onPedidoCriado, modo, setModo, mesaAdicionando, onCancelarM
       {/* Avulso */}
       {secao === 'avulso' && (
         <div style={{
-          background: 'rgba(255,235,235,0.60)', border: `1px solid ${C.border}`,
+          background: 'rgba(255,255,255,0.92)', border: `1.5px solid ${C.border}`,
           borderRadius: '16px', padding: '1.25rem',
           display: 'flex', flexDirection: 'column', gap: '0.75rem',
+          boxShadow: C.cardShadow,
         }}>
           <div style={{ color: C.text, fontWeight: 700, fontSize: '0.9rem' }}>Item Avulso</div>
           <input
