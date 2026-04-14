@@ -19,7 +19,7 @@ const C = {
   redDark:    '#8B0000',
   gold:       '#92400E',
   text:       '#1A0000',
-  muted:      'rgba(15,0,0,0.55)',
+  muted:      'rgba(15,0,0,0.82)',
   success:    '#166534',
   warning:    '#92400E',
   danger:     '#991B1B',
@@ -398,7 +398,7 @@ function SheetSabores({ tipo, onFechar, onAdicionar }) {
                   padding: '8px 14px', borderRadius: '20px', cursor: bloq ? 'default' : 'pointer',
                   fontSize: '0.82rem', fontWeight: sel ? 700 : 500, border: 'none',
                   background: sel ? `linear-gradient(145deg, ${C.red}, ${C.redDark})` : 'rgba(255,235,235,0.75)',
-                  color: sel ? '#fff' : bloq ? 'rgba(15,0,0,0.35)' : C.text,
+                  color: sel ? '#fff' : bloq ? 'rgba(15,0,0,0.75)' : C.text,
                 }}>
                   {s}
                 </button>
@@ -422,7 +422,7 @@ function SheetSabores({ tipo, onFechar, onAdicionar }) {
                     padding: '8px 14px', borderRadius: '20px', cursor: bloq ? 'default' : 'pointer',
                     fontSize: '0.82rem', fontWeight: sel ? 700 : 500, border: 'none',
                     background: sel ? 'rgba(245,200,0,0.25)' : 'rgba(255,235,235,0.75)',
-                    color: sel ? C.gold : bloq ? 'rgba(15,0,0,0.35)' : C.text,
+                    color: sel ? C.gold : bloq ? 'rgba(15,0,0,0.75)' : C.text,
                   }}>
                     {a}
                   </button>
@@ -1912,7 +1912,7 @@ export default function Caixa() {
                 borderTop: ativo ? `2px solid ${C.red}` : '2px solid transparent',
               }}
             >
-              <item.icon size={22} color={ativo ? C.red : 'rgba(15,0,0,0.55)'} />
+              <item.icon size={22} color={ativo ? C.red : 'rgba(15,0,0,0.82)'} />
               <span style={{ fontSize: '0.7rem', fontWeight: ativo ? 800 : 500 }}>{item.label}</span>
               {item.badge > 0 && (
                 <span style={{
