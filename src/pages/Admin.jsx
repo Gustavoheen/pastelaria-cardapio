@@ -7124,18 +7124,9 @@ export default function Admin() {
           font-size: clamp(15px, 1.25vw, 17px);
         }
 
-        /* Bold + contorno sutil em todas as letras */
+        /* Bold em tudo */
         #admin-root-wrapper, #admin-root-wrapper * {
           font-weight: 900 !important;
-          -webkit-text-stroke: 0.35px rgba(20,0,0,0.28);
-        }
-
-        /* Botões com texto branco: contorno claro, não escuro */
-        #admin-root-wrapper button[style*="linear-gradient"],
-        #admin-root-wrapper button[style*="#C62828"],
-        #admin-root-wrapper button[style*="#8B0000"],
-        #admin-root-wrapper button[style*="#166534"] {
-          -webkit-text-stroke: 0.35px rgba(255,255,255,0.3) !important;
         }
 
         #admin-root-wrapper {

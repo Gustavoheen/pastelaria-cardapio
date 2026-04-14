@@ -1787,14 +1787,6 @@ export default function Caixa() {
 
         #caixa-root-wrapper, #caixa-root-wrapper * {
           font-weight: 900 !important;
-          -webkit-text-stroke: 0.35px rgba(20,0,0,0.28);
-        }
-
-        #caixa-root-wrapper button[style*="linear-gradient"],
-        #caixa-root-wrapper button[style*="#C62828"],
-        #caixa-root-wrapper button[style*="#8B0000"],
-        #caixa-root-wrapper button[style*="#166534"] {
-          -webkit-text-stroke: 0.35px rgba(255,255,255,0.3) !important;
         }
 
         #caixa-root-wrapper {
