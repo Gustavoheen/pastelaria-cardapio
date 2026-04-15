@@ -5065,8 +5065,8 @@ function ModalSaboresBalcao({ tipo, onFechar, onAdicionar }) {
 
   const inputStyle = {
     width: '100%', padding: '0.5rem 0.75rem', borderRadius: '10px', fontSize: '0.85rem',
-    background: 'rgba(255,235,235,0.70)', border: `1px solid ${C.cardBorder}`,
-    color: C.text, outline: 'none', boxSizing: 'border-box',
+    background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.15)',
+    color: '#fff', outline: 'none', boxSizing: 'border-box',
   }
 
   return (
@@ -5084,17 +5084,17 @@ function ModalSaboresBalcao({ tipo, onFechar, onAdicionar }) {
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
           <div>
-            <div style={{ color: C.text, fontWeight: 800, fontSize: '1rem' }}>{tipo.nome}</div>
-            <div style={{ color: C.gold, fontWeight: 700, fontSize: '0.88rem' }}>{fmtMoeda(tipo.preco)}</div>
+            <div style={{ color: '#fff', fontWeight: 800, fontSize: '1rem' }}>{tipo.nome}</div>
+            <div style={{ color: '#F5C800', fontWeight: 700, fontSize: '0.88rem' }}>{fmtMoeda(tipo.preco)}</div>
           </div>
-          <button onClick={onFechar} style={{ background: 'none', border: 'none', cursor: 'pointer', color: C.muted }}>
+          <button onClick={onFechar} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.5)' }}>
             <X size={20} />
           </button>
         </div>
 
         {/* Sabores */}
         <div style={{ marginBottom: '1rem' }}>
-          <div style={{ color: C.muted, fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>
+          <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>
             Sabores ({sabores.length}/{tipo.maxSabores})
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
@@ -5109,8 +5109,8 @@ function ModalSaboresBalcao({ tipo, onFechar, onAdicionar }) {
                   style={{
                     padding: '5px 12px', borderRadius: '20px', cursor: bloq ? 'default' : 'pointer',
                     fontSize: '0.78rem', fontWeight: sel ? 700 : 500, border: 'none',
-                    background: sel ? `linear-gradient(145deg, ${C.red}, ${C.redDark})` : 'rgba(255,255,255,0.07)',
-                    color: sel ? '#fff' : bloq ? 'rgba(255,255,255,0.4)' : C.text,
+                    background: sel ? `linear-gradient(145deg, ${C.red}, ${C.redDark})` : 'rgba(255,255,255,0.12)',
+                    color: sel ? '#fff' : bloq ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.88)',
                     transition: 'all 0.12s',
                   }}
                 >
@@ -5124,7 +5124,7 @@ function ModalSaboresBalcao({ tipo, onFechar, onAdicionar }) {
         {/* Adicionais */}
         {maxAd > 0 && (
           <div style={{ marginBottom: '1rem' }}>
-            <div style={{ color: C.muted, fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>
+            <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>
               Adicionais grátis ({adicionais.length}/{maxAd})
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
@@ -5139,8 +5139,8 @@ function ModalSaboresBalcao({ tipo, onFechar, onAdicionar }) {
                     style={{
                       padding: '5px 12px', borderRadius: '20px', cursor: bloq ? 'default' : 'pointer',
                       fontSize: '0.78rem', fontWeight: sel ? 700 : 500, border: 'none',
-                      background: sel ? 'rgba(245,200,0,0.25)' : 'rgba(255,255,255,0.07)',
-                      color: sel ? C.gold : bloq ? 'rgba(255,255,255,0.4)' : C.text,
+                      background: sel ? 'rgba(245,200,0,0.25)' : 'rgba(255,255,255,0.12)',
+                      color: sel ? '#F5C800' : bloq ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.88)',
                       transition: 'all 0.12s',
                     }}
                   >
@@ -5154,7 +5154,7 @@ function ModalSaboresBalcao({ tipo, onFechar, onAdicionar }) {
 
         {/* Observação */}
         <div style={{ marginBottom: '1.25rem' }}>
-          <label style={{ display: 'block', color: C.muted, fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>
+          <label style={{ display: 'block', color: 'rgba(255,255,255,0.6)', fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>
             Observação
           </label>
           <input
@@ -5176,7 +5176,7 @@ function ModalSaboresBalcao({ tipo, onFechar, onAdicionar }) {
             background: sabores.length === 0
               ? 'rgba(255,255,255,0.08)'
               : `linear-gradient(145deg, ${C.red}, ${C.redDark})`,
-            color: sabores.length === 0 ? C.muted : '#fff',
+            color: sabores.length === 0 ? 'rgba(255,255,255,0.4)' : '#fff',
             boxShadow: sabores.length > 0 ? `0 6px 20px rgba(229,57,53,0.4)` : 'none',
           }}
         >
@@ -6317,8 +6317,8 @@ function PaginaBalcao({ onPedidoCriado, onCaderneta, mesaAdicionando, onCancelar
                               }}
                             >
                               <div>
-                                <div style={{ color: C.text, fontWeight: 700, fontSize: '0.85rem' }}>{c.nome}</div>
-                                <div style={{ color: C.muted, fontSize: '0.7rem' }}>{c.cpf ? `CPF ${c.cpf}` : c.telefone}</div>
+                                <div style={{ color: '#fff', fontWeight: 700, fontSize: '0.85rem' }}>{c.nome}</div>
+                                <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.7rem' }}>{c.cpf ? `CPF ${c.cpf}` : c.telefone}</div>
                               </div>
                             </button>
                           ))}
@@ -6340,12 +6340,12 @@ function PaginaBalcao({ onPedidoCriado, onCaderneta, mesaAdicionando, onCancelar
                             }}
                             style={{
                               display: 'block', width: '100%', padding: '0.625rem 0.875rem',
-                              background: 'rgba(179,92,0,0.15)', border: 'none',
+                              background: 'rgba(245,166,35,0.15)', border: 'none',
                               cursor: 'pointer', textAlign: 'left',
                             }}
                           >
-                            <div style={{ color: '#f5a623', fontWeight: 700, fontSize: '0.85rem' }}>+ Criar "{nomeNovo}"</div>
-                            <div style={{ color: 'rgba(245,166,35,0.6)', fontSize: '0.7rem' }}>Novo cliente na caderneta</div>
+                            <div style={{ color: '#F5C800', fontWeight: 700, fontSize: '0.85rem' }}>+ Criar "{nomeNovo}"</div>
+                            <div style={{ color: 'rgba(245,200,0,0.6)', fontSize: '0.7rem' }}>Novo cliente na caderneta</div>
                           </button>
                         </div>
                       )
