@@ -113,6 +113,16 @@ async function salvarBotMsgId(telefone, msgId) {
 }
 
 async function enviarBot(telefone, texto) {
+  // Marcar timestamp ANTES de enviar — protege contra race condition
+  // (o echo fromMe pode chegar antes do msgId ser salvo)
+  const sessao = await buscarSessao(telefone)
+  const ids = (sessao?.bot_msg_ids || []).filter(id => !id.startsWith('__ts:')).slice(-20)
+  ids.push(`__ts:${Date.now()}`)
+  await supabasePublic
+    .from('carioca_whatsapp_sessions')
+    .update({ bot_msg_ids: ids, updated_at: new Date().toISOString() })
+    .eq('telefone', telefone)
+
   const result = await enviarTexto(telefone, texto)
   const msgId = result?.key?.id || result?.messageId || null
   await salvarBotMsgId(telefone, msgId)
@@ -151,21 +161,43 @@ module.exports = async function handler(req, res) {
     const data = body.data
     if (!data?.key?.remoteJid) return res.status(200).json({ ok: true, skip: 'no jid' })
 
-    // Ignorar grupos
-    if (data.key.remoteJid.includes('@g.us')) return res.status(200).json({ ok: true, skip: 'group' })
+    // Ignorar grupos e broadcasts
+    const jid = data.key.remoteJid || ''
+    if (jid.includes('@g.us') || jid.includes('@broadcast') || jid === 'status@broadcast') {
+      return res.status(200).json({ ok: true, skip: 'group_or_broadcast' })
+    }
 
-    const telefone = limparTelefone(data.key.remoteJid)
+    const telefone = limparTelefone(jid)
+    // Ignorar JIDs inválidos (telefone BR tem 12-13 dígitos)
+    if (telefone.length < 10 || telefone.length > 15) {
+      return res.status(200).json({ ok: true, skip: 'invalid_jid' })
+    }
+
     const fromMe = data.key.fromMe === true
     const msgId = data.key.id
     const nomeContato = data.pushName || ''
 
     // ─── DETECÇÃO DE HUMAN TAKEOVER ───
     if (fromMe) {
-      // Verificar se foi o bot que enviou
       const sessao = await buscarSessao(telefone)
       const botIds = sessao?.bot_msg_ids || []
-      if (!botIds.includes(msgId)) {
-        // Mensagem enviada por humano (não pelo bot)
+
+      // Se é um echo do bot (msgId conhecido), ignorar
+      if (botIds.includes(msgId)) {
+        return res.status(200).json({ ok: true, handled: 'bot_echo' })
+      }
+
+      // Grace period: se o bot enviou msg nos últimos 30s, é echo (race condition)
+      const tsMarker = botIds.find(id => id.startsWith('__ts:'))
+      if (tsMarker) {
+        const ts = Number(tsMarker.replace('__ts:', ''))
+        if (Date.now() - ts < 30000) {
+          return res.status(200).json({ ok: true, handled: 'bot_echo_grace' })
+        }
+      }
+
+      // Mensagem enviada por humano (atendente)
+      if (sessao) {
         await upsertSessao(telefone, { humano_ativo: true, estado: 'humano' })
       }
       return res.status(200).json({ ok: true, handled: 'outgoing' })
