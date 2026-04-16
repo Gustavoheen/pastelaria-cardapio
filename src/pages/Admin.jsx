@@ -1344,8 +1344,9 @@ function CardPedido({ pedido, expandido, onToggle, onStatus, onImprimir, onExclu
 
       {/* Detalhe expandido */}
       {expandido && (
-        <div style={{ borderTop: `1px solid ${C.cardBorder}` }}>
-          <div style={{ padding: '0.875rem 1.125rem', display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '40vh', overflowY: 'auto' }}>
+        <div style={{ borderTop: `1px solid ${C.cardBorder}`, display: 'flex', flexDirection: 'column', maxHeight: '60vh' }}>
+          <div style={{ overflowY: 'auto', flexShrink: 1, minHeight: 0 }}>
+          <div style={{ padding: '0.875rem 1.125rem', display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {itens.map((item, i) => (
               <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div>
@@ -1395,8 +1396,9 @@ function CardPedido({ pedido, expandido, onToggle, onStatus, onImprimir, onExclu
               )
             })()}
           </div>
+          </div>
 
-          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', padding: '0.75rem 1.125rem', borderTop: `1px solid ${C.cardBorder}`, background: 'rgba(0,0,0,0.2)' }}>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', padding: '0.75rem 1.125rem', borderTop: `1px solid ${C.cardBorder}`, background: 'rgba(0,0,0,0.2)', flexShrink: 0 }}>
             {info.anterior && (
               <button onClick={() => onStatus(pedido.id, info.anterior)} style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '0.625rem 1rem', borderRadius: '10px', cursor: 'pointer', fontSize: '0.92rem', background: 'rgba(255,235,235,0.70)', border: `1px solid ${C.cardBorder}`, color: C.muted }}>
                 <ChevronLeft size={15} /> Retroceder
