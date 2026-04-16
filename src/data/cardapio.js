@@ -35,6 +35,7 @@ export const PASTEIS_DOCES = [
   { id: 'pd-ferrero',         nome: 'Ferrero Rocher',         preco: 20.00 },
   { id: 'pd-romeu-julieta',   nome: 'Romeu e Julieta',        preco: 16.00 },
   { id: 'pd-banana-canela',   nome: 'Banana c/ Canela',       preco: 16.00 },
+  { id: 'pd-nutella-granulado', nome: 'Nutella c/ Granulado', preco: 18.00 },
 ]
 
 // ── Fotos locais ─────────────────────────────────────────────────
