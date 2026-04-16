@@ -1519,9 +1519,12 @@ function PaginaPedidos({ pedidos, novosIds, onStatus, onImprimir, onExcluir, onA
 
   const totalBalcao = pedidosBalcao.reduce((s, p) => s + (Number(p.total) || 0), 0)
 
+  const totalPedidosSite = pedidos.filter(p => p.origem !== 'balcao').length
+  const totalPedidosBalcao = pedidos.filter(p => p.origem === 'balcao').length
+
   const STATS = [
-    { label: 'Site',     icon: Package,    val: String(pedidosSite.length) },
-    { label: 'Balcão',   icon: Store,      val: String(pedidosBalcao.length) },
+    { label: 'Site',     icon: Package,    val: String(totalPedidosSite) },
+    { label: 'Balcão',   icon: Store,      val: String(totalPedidosBalcao) },
     { label: 'Total',    icon: DollarSign, val: fmtMoeda(totalGeral) },
     { label: 'Pix',      icon: Banknote,   val: fmtMoeda(pagTotais['pix'] || 0) },
     { label: 'Dinheiro', icon: Banknote,   val: fmtMoeda(pagTotais['dinheiro'] || 0) },
