@@ -1345,7 +1345,7 @@ function CardPedido({ pedido, expandido, onToggle, onStatus, onImprimir, onExclu
       {/* Detalhe expandido */}
       {expandido && (
         <div style={{ borderTop: `1px solid ${C.cardBorder}` }}>
-          <div style={{ padding: '0.875rem 1.125rem', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <div style={{ padding: '0.875rem 1.125rem', display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '40vh', overflowY: 'auto' }}>
             {itens.map((item, i) => (
               <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div>
