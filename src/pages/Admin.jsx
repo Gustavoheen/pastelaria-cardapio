@@ -12,6 +12,7 @@ import {
   BookOpen, UserPlus, CreditCard, Percent, Tag,
 } from 'lucide-react'
 import { CONFIG } from '../config.js'
+import { apiFetch } from '../utils/apiFetch.js'
 import { imprimirPedidoQZ, listarImpressoras, buscarImpressora, getNomeImpressoraSalva, salvarNomeImpressora, verificarQZConectado, iniciarKeepAlive, pararKeepAlive } from '../utils/qzPrint.js'
 import { TIPOS_PASTEL, PASTEIS_DOCES, categorias, SABORES_SALGADOS, SABORES_DOCES, ADICIONAIS_LISTA } from '../data/cardapio.js'
 
@@ -509,15 +510,22 @@ function PaginaDashboard({ pedidos, onVerPedidos, onExcluir, onSalvarPedido, car
 
         {/* Resumo por pagamento */}
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
-          {Object.entries(porPag).map(([pag, val]) => (
-            <div key={pag} style={{
-              background: 'rgba(255,235,235,0.70)', border: '1px solid rgba(255,255,255,0.1)',
-              borderRadius: '10px', padding: '0.5rem 0.875rem', textAlign: 'center',
-            }}>
-              <div style={{ color: 'rgba(15,0,0,0.82)', fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase' }}>{pag}</div>
-              <div style={{ color: '#1A0000', fontSize: '1rem', fontWeight: 900 }}>{fmtMoeda(val)}</div>
-            </div>
-          ))}
+          {Object.entries(porPag).map(([pag, val]) => {
+            const isCaderneta = pag === 'caderneta'
+            return (
+              <div key={pag} style={{
+                background: isCaderneta ? 'rgba(245,158,11,0.12)' : 'rgba(255,235,235,0.70)',
+                border: isCaderneta ? '1px solid rgba(245,158,11,0.4)' : '1px solid rgba(255,255,255,0.1)',
+                borderRadius: '10px', padding: '0.5rem 0.875rem', textAlign: 'center',
+              }}>
+                <div style={{ color: isCaderneta ? '#d97706' : 'rgba(15,0,0,0.82)', fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase' }}>
+                  {isCaderneta ? '📒 caderneta' : pag}
+                </div>
+                <div style={{ color: isCaderneta ? '#92400e' : '#1A0000', fontSize: '1rem', fontWeight: 900 }}>{fmtMoeda(val)}</div>
+                {isCaderneta && <div style={{ color: '#d97706', fontSize: '0.58rem', fontWeight: 600 }}>a receber</div>}
+              </div>
+            )
+          })}
         </div>
 
         {/* Tabela de vendas */}
@@ -1522,6 +1530,7 @@ function PaginaPedidos({ pedidos, novosIds, onStatus, onImprimir, onExcluir, onA
   const totalPedidosSite = pedidos.filter(p => p.origem !== 'balcao').length
   const totalPedidosBalcao = pedidos.filter(p => p.origem === 'balcao').length
 
+  const totalCaderneta = pagTotais['caderneta'] || 0
   const STATS = [
     { label: 'Site',     icon: Package,    val: String(totalPedidosSite) },
     { label: 'Balcão',   icon: Store,      val: String(totalPedidosBalcao) },
@@ -1530,6 +1539,7 @@ function PaginaPedidos({ pedidos, novosIds, onStatus, onImprimir, onExcluir, onA
     { label: 'Dinheiro', icon: Banknote,   val: fmtMoeda(pagTotais['dinheiro'] || 0) },
     { label: 'Débito',   icon: Banknote,   val: fmtMoeda(pagTotais['débito'] || pagTotais['debito'] || 0) },
     { label: 'Crédito',  icon: Banknote,   val: fmtMoeda(pagTotais['crédito'] || pagTotais['credito'] || 0) },
+    ...(totalCaderneta > 0 ? [{ label: 'Caderneta', icon: Banknote, val: fmtMoeda(totalCaderneta), sub: 'a receber', corSub: '#f59e0b' }] : []),
   ]
 
   return (
@@ -1713,7 +1723,7 @@ function PaginaCardapio({ config, onSalvar }) {
   const [salvandoSabor, setSalvandoSabor] = useState({})
 
   useEffect(() => {
-    fetch('/api/bebidas-sabores').then(r => r.json()).then(rows => {
+    apiFetch('/api/bebidas-sabores').then(r => r.json()).then(rows => {
       if (!Array.isArray(rows)) return
       const map = {}
       rows.forEach(r => { map[r.bebida_id] = r.sabores })
@@ -1729,7 +1739,7 @@ function PaginaCardapio({ config, onSalvar }) {
   async function salvarSaboresBebida(bebidaId, novosSabores) {
     setSalvandoSabor(s => ({ ...s, [bebidaId]: true }))
     try {
-      const r = await fetch('/api/bebidas-sabores', {
+      const r = await apiFetch('/api/bebidas-sabores', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ bebida_id: bebidaId, sabores: novosSabores }),
@@ -2339,7 +2349,7 @@ function PaginaClientes() {
   const [salvandoCliente, setSalvandoCliente] = useState(false)
 
   useEffect(() => {
-    fetch('/api/clientes').then(r => r.json())
+    apiFetch('/api/clientes').then(r => r.json())
       .then(c => { setClientes(Array.isArray(c) ? c : []); setCarregando(false) })
       .catch(() => setCarregando(false))
   }, [])
@@ -2353,7 +2363,7 @@ function PaginaClientes() {
     const endereco = formRua.trim()
       ? { rua: formRua.trim(), numero: formNumero.trim(), complemento: formComplemento.trim(), bairro: formBairro.trim() }
       : undefined
-    await fetch('/api/clientes', {
+    await apiFetch('/api/clientes', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ nome, cpf: cpf || null, telefone: telefone || '00000000000', manual: true, endereco }),
@@ -2362,7 +2372,7 @@ function PaginaClientes() {
     setFormRua(''); setFormNumero(''); setFormComplemento(''); setFormBairro('')
     setNovoForm(false)
     setSalvandoCliente(false)
-    fetch('/api/clientes').then(r => r.json()).then(c => setClientes(Array.isArray(c) ? c : []))
+    apiFetch('/api/clientes').then(r => r.json()).then(c => setClientes(Array.isArray(c) ? c : []))
   }
 
   async function removerCliente(id) {
@@ -2578,6 +2588,11 @@ function PaginaCaderneta() {
   const [novoLancBusca, setNovoLancBusca] = useState('')
   const [novoLancCliente, setNovoLancCliente] = useState(null)
 
+  // Modal de recebimento de caderneta
+  const [modalPagCaderneta, setModalPagCaderneta] = useState(null) // { entrada, clienteNome }
+  const [formaPagCaderneta, setFormaPagCaderneta] = useState('dinheiro')
+  const [salvandoPagCaderneta, setSalvandoPagCaderneta] = useState(false)
+
   // Lançamento avulso (dentro do card do cliente)
   const [novaEntradaCliente, setNovaEntradaCliente] = useState(null)
   const [entDescricao, setEntDescricao] = useState('')
@@ -2602,9 +2617,9 @@ function PaginaCaderneta() {
   function carregarTudo() {
     setCarregando(true)
     Promise.all([
-      fetch('/api/clientes').then(r => r.json()),
-      fetch('/api/caderneta').then(r => r.json()),
-      fetch('/api/catalogo').then(r => r.json()).catch(() => []),
+      apiFetch('/api/clientes').then(r => r.json()),
+      apiFetch('/api/caderneta').then(r => r.json()),
+      apiFetch('/api/catalogo').then(r => r.json()).catch(() => []),
     ]).then(([c, d, cat]) => {
       setClientes(Array.isArray(c) ? c : [])
       setCaderneta(Array.isArray(d) ? d : [])
@@ -2616,11 +2631,63 @@ function PaginaCaderneta() {
   useEffect(() => { carregarTudo() }, [])
 
   async function marcarPago(entradaId, pago) {
+    if (pago) {
+      // Ao quitar: abrir modal para registrar forma de pagamento no caixa
+      const entrada = caderneta.find(e => e.id === entradaId)
+      const cliente = clientes.find(c => c.id === entrada?.cliente_id)
+      setModalPagCaderneta({ entrada, clienteNome: cliente?.nome || 'Cliente' })
+      setFormaPagCaderneta('dinheiro')
+      return
+    }
+    // Desfazer pagamento: apenas marcar como não pago, sem movimento no caixa
     await fetch(`/api/caderneta?id=${entradaId}`, {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ pago }),
+      body: JSON.stringify({ pago: false }),
     })
-    setCaderneta(prev => prev.map(e => e.id === entradaId ? { ...e, pago } : e))
+    setCaderneta(prev => prev.map(e => e.id === entradaId ? { ...e, pago: false } : e))
+  }
+
+  async function confirmarPagamentoCaderneta() {
+    const { entrada, clienteNome } = modalPagCaderneta
+    setSalvandoPagCaderneta(true)
+    setModalPagCaderneta(null)
+
+    // 1. Marcar entrada como paga na caderneta
+    await fetch(`/api/caderneta?id=${entrada.id}`, {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pago: true }),
+    })
+    setCaderneta(prev => prev.map(e => e.id === entrada.id ? { ...e, pago: true } : e))
+
+    // 2. Registrar recebimento no fluxo de caixa
+    try {
+      const res = await apiFetch('/api/pedido', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nome: clienteNome,
+          telefone: '',
+          pagamento: formaPagCaderneta,
+          itens: [{ nome: `Pgto caderneta — ${clienteNome}`, qtd: 1, preco: Number(entrada.valor) }],
+          subtotal: Number(entrada.valor),
+          total: Number(entrada.valor),
+          origem: 'balcao',
+          observacao: `📒 Pgto caderneta — ${clienteNome} (${entrada.descricao || ''})`,
+          tipo_entrega: 'retirada',
+        }),
+      })
+      if (res.ok) {
+        const pedidoCriado = await res.json()
+        if (pedidoCriado?.id) {
+          await apiFetch('/api/pedido', {
+            method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: pedidoCriado.id, status: 'entregue', force_status: true }),
+          })
+        }
+      }
+    } catch (err) {
+      console.error('[caderneta] Erro ao registrar no caixa:', err)
+    }
+    setSalvandoPagCaderneta(false)
   }
 
   async function removerEntrada(entradaId) {
@@ -2644,7 +2711,7 @@ function PaginaCaderneta() {
       return
     }
     setSalvandoEntrada(true)
-    const res = await fetch('/api/caderneta', {
+    const res = await apiFetch('/api/caderneta', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ cliente_id: cliente.id, descricao: desc, valor: val, data: new Date().toLocaleDateString('pt-BR'), itens: [], vencimento: entVencimento || null }),
     })
@@ -2685,8 +2752,11 @@ function PaginaCaderneta() {
   }
 
   // Abate parcial: marca original como pago, cria novo com saldo restante
-  async function abaterEntrada(entrada, valorPago) {
+  async function abaterEntrada(entrada, valorPago, formaPag) {
     const restante = Number(entrada.valor) - valorPago
+    const cliente = clientes.find(c => c.id === entrada.cliente_id)
+    const clienteNome = cliente?.nome || 'Cliente'
+
     // Marcar original como pago
     await fetch(`/api/caderneta?id=${entrada.id}`, {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
@@ -2694,9 +2764,35 @@ function PaginaCaderneta() {
     })
     setCaderneta(prev => prev.map(e => e.id === entrada.id ? { ...e, pago: true } : e))
 
+    // Registrar pagamento parcial no caixa
+    try {
+      const res = await apiFetch('/api/pedido', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nome: clienteNome,
+          telefone: '',
+          pagamento: formaPag || 'dinheiro',
+          itens: [{ nome: `Pgto parcial caderneta — ${clienteNome}`, qtd: 1, preco: valorPago }],
+          subtotal: valorPago,
+          total: valorPago,
+          origem: 'balcao',
+          observacao: `📒 Pgto parcial caderneta — ${clienteNome} (${entrada.descricao || ''})`,
+          tipo_entrega: 'retirada',
+        }),
+      })
+      if (res.ok) {
+        const p = await res.json()
+        if (p?.id) await apiFetch('/api/pedido', {
+          method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: p.id, status: 'entregue', force_status: true }),
+        })
+      }
+    } catch {}
+
+
     // Se sobrou saldo, criar nova entrada com o restante
     if (restante > 0.01) {
-      const res = await fetch('/api/caderneta', {
+      const res = await apiFetch('/api/caderneta', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           cliente_id: entrada.cliente_id,
@@ -2751,6 +2847,42 @@ function PaginaCaderneta() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+
+      {/* Modal de recebimento de caderneta */}
+      {modalPagCaderneta && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+          <div style={{ background: '#1e1e1e', border: `1px solid ${C.cardBorder}`, borderRadius: '20px', padding: '1.5rem', width: '100%', maxWidth: '360px' }}>
+            <h3 style={{ color: '#f59e0b', fontWeight: 900, fontSize: '1rem', margin: '0 0 0.25rem' }}>📒 Recebimento de Caderneta</h3>
+            <p style={{ color: C.muted, fontSize: '0.8rem', margin: '0 0 1rem' }}>
+              Cliente: <strong style={{ color: C.text }}>{modalPagCaderneta.clienteNome}</strong>
+              {' · '}Valor: <strong style={{ color: C.success }}>{fmtMoeda(Number(modalPagCaderneta.entrada.valor))}</strong>
+            </p>
+            {modalPagCaderneta.entrada.descricao && (
+              <p style={{ color: C.muted, fontSize: '0.75rem', margin: '0 0 1rem', background: 'rgba(255,255,255,0.04)', padding: '0.5rem 0.75rem', borderRadius: '8px' }}>
+                Ref: {modalPagCaderneta.entrada.descricao}
+              </p>
+            )}
+            <p style={{ color: C.text, fontSize: '0.82rem', fontWeight: 700, margin: '0 0 0.5rem' }}>Como o cliente pagou?</p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.5rem', marginBottom: '1.25rem' }}>
+              {[['dinheiro','💵 Dinheiro'],['pix','📱 Pix'],['debito','💳 Débito'],['credito','💳 Crédito']].map(([val, label]) => (
+                <button key={val} onClick={() => setFormaPagCaderneta(val)} style={{
+                  padding: '0.6rem', borderRadius: '10px', border: 'none', cursor: 'pointer', fontSize: '0.82rem', fontWeight: 700,
+                  background: formaPagCaderneta === val ? C.red : 'rgba(255,255,255,0.07)',
+                  color: formaPagCaderneta === val ? '#fff' : C.muted,
+                }}>{label}</button>
+              ))}
+            </div>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button onClick={() => setModalPagCaderneta(null)} style={{ flex: 1, padding: '0.7rem', borderRadius: '10px', border: `1px solid ${C.cardBorder}`, background: 'transparent', color: C.muted, cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600 }}>
+                Cancelar
+              </button>
+              <button onClick={confirmarPagamentoCaderneta} disabled={salvandoPagCaderneta} style={{ flex: 2, padding: '0.7rem', borderRadius: '10px', border: 'none', background: C.success, color: '#000', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 900 }}>
+                ✅ Confirmar recebimento
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '0.75rem' }}>
@@ -3099,13 +3231,15 @@ function EntradaCadernetaRow({ e, hoje, C, inputSt, editandoVencimento, vencimen
   const vencido = !e.pago && e.vencimento && e.vencimento < hoje
   const [modoAbate, setModoAbate] = useState(false)
   const [abateValor, setAbateValor] = useState('')
+  const [abateForma, setAbateForma] = useState('dinheiro')
 
   async function confirmarAbate() {
     const pago = parseFloat(abateValor)
     if (!(pago > 0) || pago > Number(e.valor)) return
-    await abaterEntrada(e, pago)
+    await abaterEntrada(e, pago, abateForma)
     setModoAbate(false)
     setAbateValor('')
+    setAbateForma('dinheiro')
   }
 
   return (
@@ -3161,26 +3295,39 @@ function EntradaCadernetaRow({ e, hoje, C, inputSt, editandoVencimento, vencimen
 
       {/* Abatimento parcial */}
       {modoAbate && (
-        <div style={{ display: 'flex', gap: '6px', alignItems: 'center', background: 'rgba(100,100,255,0.08)', borderRadius: '8px', padding: '0.6rem 0.75rem' }}>
-          <span style={{ color: 'rgba(15,0,0,0.85)', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>Pagou:</span>
-          <input
-            type="number" value={abateValor} onChange={ev => setAbateValor(ev.target.value)}
-            placeholder={`máx ${fmtMoeda(e.valor)}`} min="0.01" step="0.01" max={e.valor}
-            style={{ ...inputSt, flex: 1, minWidth: '80px' }}
-            autoFocus
-          />
-          {parseFloat(abateValor) > 0 && parseFloat(abateValor) < Number(e.valor) && (
-            <span style={{ color: 'rgba(15,0,0,0.82)', fontSize: '0.82rem', whiteSpace: 'nowrap' }}>
-              resta {fmtMoeda(Number(e.valor) - parseFloat(abateValor))}
-            </span>
-          )}
-          <button onClick={confirmarAbate}
-            disabled={!(parseFloat(abateValor) > 0) || parseFloat(abateValor) > Number(e.valor)}
-            style={{ padding: '0.5rem 0.875rem', borderRadius: '8px', cursor: 'pointer', fontWeight: 700, fontSize: '0.88rem', border: 'none', background: `linear-gradient(145deg, ${C.red}, ${C.redDark})`, color: '#fff', whiteSpace: 'nowrap', touchAction: 'manipulation' }}
-          >Abater</button>
-          <button onClick={() => { setModoAbate(false); setAbateValor('') }}
-            style={{ padding: '0.5rem 0.625rem', borderRadius: '8px', cursor: 'pointer', background: 'rgba(255,235,235,0.75)', border: '1px solid rgba(255,255,255,0.15)', color: '#1A0000', fontSize: '0.9rem', touchAction: 'manipulation' }}
-          >✕</button>
+        <div style={{ background: 'rgba(100,100,255,0.08)', borderRadius: '10px', padding: '0.75rem', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+            <span style={{ color: 'rgba(15,0,0,0.85)', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>Valor pago:</span>
+            <input
+              type="number" value={abateValor} onChange={ev => setAbateValor(ev.target.value)}
+              placeholder={`máx ${fmtMoeda(e.valor)}`} min="0.01" step="0.01" max={e.valor}
+              style={{ ...inputSt, flex: 1, minWidth: '80px' }}
+              autoFocus
+            />
+            {parseFloat(abateValor) > 0 && parseFloat(abateValor) < Number(e.valor) && (
+              <span style={{ color: 'rgba(15,0,0,0.82)', fontSize: '0.82rem', whiteSpace: 'nowrap' }}>
+                resta {fmtMoeda(Number(e.valor) - parseFloat(abateValor))}
+              </span>
+            )}
+          </div>
+          <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+            {[['dinheiro','💵'],['pix','📱 Pix'],['debito','Débito'],['credito','Crédito']].map(([val, label]) => (
+              <button key={val} onClick={() => setAbateForma(val)} style={{
+                padding: '0.3rem 0.6rem', borderRadius: '8px', border: 'none', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 700,
+                background: abateForma === val ? C.red : 'rgba(255,235,235,0.78)',
+                color: abateForma === val ? '#fff' : 'rgba(15,0,0,0.7)',
+              }}>{label}</button>
+            ))}
+          </div>
+          <div style={{ display: 'flex', gap: '6px' }}>
+            <button onClick={confirmarAbate}
+              disabled={!(parseFloat(abateValor) > 0) || parseFloat(abateValor) > Number(e.valor)}
+              style={{ flex: 1, padding: '0.5rem', borderRadius: '8px', cursor: 'pointer', fontWeight: 700, fontSize: '0.88rem', border: 'none', background: `linear-gradient(145deg, ${C.red}, ${C.redDark})`, color: '#fff', touchAction: 'manipulation' }}
+            >✅ Abater</button>
+            <button onClick={() => { setModoAbate(false); setAbateValor(''); setAbateForma('dinheiro') }}
+              style={{ padding: '0.5rem 0.75rem', borderRadius: '8px', cursor: 'pointer', background: 'rgba(255,235,235,0.75)', border: '1px solid rgba(255,255,255,0.15)', color: '#1A0000', fontSize: '0.9rem', touchAction: 'manipulation' }}
+            >✕</button>
+          </div>
         </div>
       )}
 
@@ -3207,7 +3354,7 @@ function PaginaCatalogo() {
   const [editPreco, setEditPreco] = useState('')
 
   useEffect(() => {
-    fetch('/api/catalogo')
+    apiFetch('/api/catalogo')
       .then(r => r.json())
       .then(data => { setItens(Array.isArray(data) ? data : []); setCarregando(false) })
       .catch(() => setCarregando(false))
@@ -3218,7 +3365,7 @@ function PaginaCatalogo() {
     const p = parseFloat(preco)
     if (!n || !(p > 0)) return
     setSalvando(true)
-    const res = await fetch('/api/catalogo', {
+    const res = await apiFetch('/api/catalogo', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ nome: n, preco: p }),
@@ -3398,7 +3545,7 @@ function PaginaEstoque() {
 
   async function carregar() {
     try {
-      const res = await fetch('/api/estoque')
+      const res = await apiFetch('/api/estoque')
       if (res.ok) setItens(await res.json())
     } catch (_) {}
     setCarregando(false)
@@ -3411,7 +3558,7 @@ function PaginaEstoque() {
     if (!item) return
     const nova = Math.max(0, (item.quantidade || 0) + delta)
     try {
-      await fetch('/api/estoque', {
+      await apiFetch('/api/estoque', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, quantidade: nova }),
@@ -3423,7 +3570,7 @@ function PaginaEstoque() {
   async function excluir(id) {
     if (!window.confirm('Remover este item do estoque?')) return
     try {
-      await fetch('/api/estoque', {
+      await apiFetch('/api/estoque', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, ativo: false }),
@@ -3435,7 +3582,7 @@ function PaginaEstoque() {
   async function salvarItem() {
     try {
       if (editando) {
-        const res = await fetch('/api/estoque', {
+        const res = await apiFetch('/api/estoque', {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ id: editando, ...form }),
@@ -3444,7 +3591,7 @@ function PaginaEstoque() {
           setItens(prev => prev.map(i => i.id === editando ? { ...i, ...form } : i))
         }
       } else {
-        const res = await fetch('/api/estoque', {
+        const res = await apiFetch('/api/estoque', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(form),
@@ -3510,7 +3657,7 @@ function PaginaEstoque() {
     let criados = 0
     for (const item of novos) {
       try {
-        const res = await fetch('/api/estoque', {
+        const res = await apiFetch('/api/estoque', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(item),
@@ -4055,7 +4202,7 @@ function PaginaWhatsApp() {
 
   // Carregar estado do bot + config da loja
   useEffect(() => {
-    fetch('/api/cardapio-state').then(r => r.json()).then(data => {
+    apiFetch('/api/cardapio-state').then(r => r.json()).then(data => {
       if (data) {
         setConfigLoja(data)
         if (data.bot_ativo) setModoBot(data.bot_ativo)
@@ -4066,7 +4213,7 @@ function PaginaWhatsApp() {
   async function mudarModoBot(novo) {
     setSalvandoBot(true)
     try {
-      await fetch('/api/cardapio-state', {
+      await apiFetch('/api/cardapio-state', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ bot_ativo: novo }),
@@ -4097,7 +4244,7 @@ function PaginaWhatsApp() {
 
   async function carregarSessoes() {
     try {
-      const res = await fetch('/api/whatsapp/sessoes')
+      const res = await apiFetch('/api/whatsapp/sessoes')
       const data = await res.json()
       if (Array.isArray(data)) setSessoes(data)
     } catch {}
@@ -4106,7 +4253,7 @@ function PaginaWhatsApp() {
   async function criarInstancia() {
     setCriando(true)
     try {
-      const res = await fetch('/api/whatsapp/instance', { method: 'POST' })
+      const res = await apiFetch('/api/whatsapp/instance', { method: 'POST' })
       const data = await res.json()
       setStatus(prev => ({ ...prev, ...data, exists: true, connected: false }))
       // Buscar QR code imediatamente
@@ -4118,12 +4265,12 @@ function PaginaWhatsApp() {
 
   async function desconectar() {
     if (!window.confirm('Desconectar o WhatsApp?')) return
-    await fetch('/api/whatsapp/instance?action=logout', { method: 'DELETE' })
+    await apiFetch('/api/whatsapp/instance?action=logout', { method: 'DELETE' })
     await carregarStatus(false)
   }
 
   async function toggleHumano(telefone, ativar) {
-    await fetch('/api/whatsapp/sessoes', {
+    await apiFetch('/api/whatsapp/sessoes', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ telefone, humano_ativo: ativar }),
@@ -4140,7 +4287,7 @@ function PaginaWhatsApp() {
   async function enviarMsgManual() {
     if (!msgTelefone || !msgTexto) return
     setEnviando(true)
-    await fetch('/api/whatsapp/sessoes', {
+    await apiFetch('/api/whatsapp/sessoes', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ telefone: msgTelefone, mensagem: msgTexto }),
@@ -4591,7 +4738,7 @@ function PaginaConfiguracoes({ autoprint, onToggleAutoprint, onTestarImpressao, 
     dias_funcionamento: config?.dias_funcionamento || [0, 1, 2, 3, 4, 5, 6],
     entrega_ativa: config?.entrega_ativa ?? false,
     taxa_entrega: config?.taxa_entrega ?? 0,
-    senha_desconto: config?.senha_desconto || '1234',
+    senha_desconto: config?.senha_desconto || '',
   })
 
   useEffect(() => {
@@ -5224,19 +5371,19 @@ function PaginaBalcao({ onPedidoCriado, onCaderneta, mesaAdicionando, onCancelar
   const [cardapioStateBalcao, setCardapioStateBalcao] = useState(null)
 
   useEffect(() => {
-    fetch('/api/catalogo').then(r => r.json()).then(data => {
+    apiFetch('/api/catalogo').then(r => r.json()).then(data => {
       if (Array.isArray(data)) setCatalogo(data)
     }).catch(() => {})
-    fetch('/api/bebidas-sabores').then(r => r.json()).then(rows => {
+    apiFetch('/api/bebidas-sabores').then(r => r.json()).then(rows => {
       if (!Array.isArray(rows)) return
       const map = {}
       rows.forEach(r => { map[r.bebida_id] = r.sabores })
       setBebidaSaboresMapBalcao(map)
     }).catch(() => {})
-    fetch('/api/clientes').then(r => r.json()).then(data => {
+    apiFetch('/api/clientes').then(r => r.json()).then(data => {
       if (Array.isArray(data)) setClientesCaderneta(data)
     }).catch(() => {})
-    fetch('/api/cardapio-state').then(r => r.json()).then(cfg => {
+    apiFetch('/api/cardapio-state').then(r => r.json()).then(cfg => {
       if (cfg && typeof cfg === 'object') setCardapioStateBalcao(cfg)
     }).catch(() => {})
   }, [])
@@ -5335,7 +5482,7 @@ function PaginaBalcao({ onPedidoCriado, onCaderneta, mesaAdicionando, onCancelar
     const nome = novoItemNome.trim()
     const preco = parseFloat(String(novoItemPreco).replace(',', '.'))
     if (!nome || !preco || preco <= 0) return
-    const res = await fetch('/api/catalogo', {
+    const res = await apiFetch('/api/catalogo', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ nome, preco }),
@@ -5396,7 +5543,7 @@ function PaginaBalcao({ onPedidoCriado, onCaderneta, mesaAdicionando, onCancelar
       if (pagamento === 'caderneta') {
         const cliente = clienteSelecionadoCaderneta
         const descricao = cart.map(i => `${i.qtd}x ${i.nome}`).join(', ')
-        const res = await fetch('/api/caderneta', {
+        const res = await apiFetch('/api/caderneta', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -5410,7 +5557,7 @@ function PaginaBalcao({ onPedidoCriado, onCaderneta, mesaAdicionando, onCancelar
         if (res.ok) {
           // Registrar no fluxo de caixa como venda fiado
           try {
-            const pedidoRes = await fetch('/api/pedido', {
+            const pedidoRes = await apiFetch('/api/pedido', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
@@ -5427,7 +5574,7 @@ function PaginaBalcao({ onPedidoCriado, onCaderneta, mesaAdicionando, onCancelar
             })
             if (pedidoRes.ok) {
               const pedido = await pedidoRes.json()
-              await fetch('/api/pedido', {
+              await apiFetch('/api/pedido', {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ id: pedido.id, status: 'entregue' }),
@@ -5461,7 +5608,7 @@ function PaginaBalcao({ onPedidoCriado, onCaderneta, mesaAdicionando, onCancelar
         }))
         const todosItens = [...itensExistentes, ...novosItens]
         const novoTotal = somarCart(todosItens)
-        const r = await fetch('/api/pedido', {
+        const r = await apiFetch('/api/pedido', {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ id: mesaAdicionando.id, itens: todosItens, total: novoTotal, subtotal: novoTotal }),
@@ -5501,7 +5648,7 @@ function PaginaBalcao({ onPedidoCriado, onCaderneta, mesaAdicionando, onCancelar
         observacao: obsPrefix,
         tipo_entrega: isLocal ? 'local' : 'levar',
       }
-      const res = await fetch('/api/pedido', {
+      const res = await apiFetch('/api/pedido', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -5509,13 +5656,13 @@ function PaginaBalcao({ onPedidoCriado, onCaderneta, mesaAdicionando, onCancelar
       if (res.ok) {
         const pedido = await res.json()
         if (!isLocal) {
-          await fetch('/api/pedido', {
+          await apiFetch('/api/pedido', {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ id: pedido.id, status: 'entregue' }),
           })
         } else {
-          await fetch('/api/pedido', {
+          await apiFetch('/api/pedido', {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ id: pedido.id, status: 'preparando' }),
@@ -5523,7 +5670,7 @@ function PaginaBalcao({ onPedidoCriado, onCaderneta, mesaAdicionando, onCancelar
         }
         // Auto-criar cliente se nome foi informado
         if (nomeCliente.trim()) {
-          fetch('/api/clientes', {
+          apiFetch('/api/clientes', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ nome: nomeCliente.trim(), manual: true }),
@@ -6330,7 +6477,7 @@ function PaginaBalcao({ onPedidoCriado, onCaderneta, mesaAdicionando, onCancelar
                           {/* Criar novo cliente */}
                           <button
                             onClick={async () => {
-                              const res = await fetch('/api/clientes', {
+                              const res = await apiFetch('/api/clientes', {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({ nome: nomeNovo, manual: true }),
@@ -6432,7 +6579,7 @@ function PaginaMesas({ pedidos, onAtualizar, onAdicionarItens }) {
   async function fecharConta(pedidoId) {
     setEnviando(true)
     try {
-      await fetch('/api/pedido', {
+      await apiFetch('/api/pedido', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: pedidoId, status: 'entregue' }),
@@ -6633,7 +6780,8 @@ export function ModalCheckout({ pedido, onFechar, onConfirmar, enviando, senhaAd
     setSenhaInput(''); setDescontoAutorizado(false); setErroSenha('')
   }
   function validarSenha() {
-    if (senhaInput === (senhaAdmin || '1234')) { setDescontoAutorizado(true); setErroSenha('') }
+    if (!senhaAdmin) { setErroSenha('Senha de desconto nao configurada'); setTimeout(() => setErroSenha(''), 2500); return }
+    if (senhaInput === senhaAdmin) { setDescontoAutorizado(true); setErroSenha('') }
     else { setErroSenha('Senha incorreta'); setTimeout(() => setErroSenha(''), 2500) }
   }
 
@@ -6887,7 +7035,7 @@ export default function Admin() {
 
   async function carregarConfig() {
     try {
-      const res = await fetch('/api/cardapio-state')
+      const res = await apiFetch('/api/cardapio-state')
       if (res.ok) setConfigLoja(await res.json())
     } catch (_) {}
   }
@@ -6905,13 +7053,21 @@ export default function Admin() {
     return () => { clearInterval(iv); pararKeepAlive() }
   }, [logado, carregarPedidos])
 
-  // Auth
-  function login() {
-    if (senha === CONFIG.senhaAdmin) {
-      setLogado(true)
-      sessionStorage.setItem('carioca_admin', '1')
-      setErrLogin('')
-    } else setErrLogin('Senha incorreta.')
+  // Auth — validates password against server-side store_state config
+  // TODO: Replace with proper server-side auth (JWT/session tokens). Client-side password check is not secure.
+  async function login() {
+    try {
+      const res = await apiFetch('/api/cardapio-state')
+      if (!res.ok) { setErrLogin('Erro ao validar. Tente novamente.'); return }
+      const cfg = await res.json()
+      const senhaServidor = cfg?.senha_admin
+      if (!senhaServidor) { setErrLogin('Senha admin não configurada no servidor.'); return }
+      if (senha === senhaServidor) {
+        setLogado(true)
+        sessionStorage.setItem('carioca_admin', '1')
+        setErrLogin('')
+      } else setErrLogin('Senha incorreta.')
+    } catch { setErrLogin('Erro de conexão.') }
   }
 
   function adicionarItensMesaAdmin(pedido) {
@@ -6922,7 +7078,7 @@ export default function Admin() {
   // Acoes pedido
   async function atualizarStatus(id, novoStatus) {
     try {
-      await fetch('/api/pedido', {
+      await apiFetch('/api/pedido', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, status: novoStatus }),
@@ -6930,7 +7086,7 @@ export default function Admin() {
       carregarPedidos(true)
 
       // Notificar cliente via WhatsApp (fire-and-forget)
-      fetch('/api/whatsapp/notificar', {
+      apiFetch('/api/whatsapp/notificar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ pedidoId: id, novoStatus }),
@@ -6958,7 +7114,7 @@ export default function Admin() {
         patchBody.desconto_pct = desconto.pct || null
         patchBody.desconto_obs = desconto.obs || ''
       }
-      await fetch('/api/pedido', {
+      await apiFetch('/api/pedido', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(patchBody),
@@ -6981,7 +7137,7 @@ export default function Admin() {
 
   async function salvarPedido(id, updates) {
     try {
-      await fetch('/api/pedido', {
+      await apiFetch('/api/pedido', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, ...updates }),
@@ -7008,7 +7164,7 @@ export default function Admin() {
   }
 
   async function salvarConfig(form) {
-    const res = await fetch('/api/cardapio-state', {
+    const res = await apiFetch('/api/cardapio-state', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(form),
