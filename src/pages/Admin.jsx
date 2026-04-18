@@ -235,7 +235,7 @@ function PrintArea({ pedido }) {
 }
 
 // ── KPI Card ──────────────────────────────────────────────────
-function KpiCard({ icon: Icon, label, valor, sub, corSub }) {
+function KpiCard({ icon: Icon, label, valor, sub, corSub, corVal }) {
   return (
     <div style={{
       background: 'rgba(255,235,235,0.70)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
@@ -253,7 +253,7 @@ function KpiCard({ icon: Icon, label, valor, sub, corSub }) {
         </div>
         <span style={{ color: 'rgba(15,0,0,0.85)', fontSize: '0.73rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{label}</span>
       </div>
-      <div style={{ color: '#1A0000', fontFamily: 'Bebas Neue, sans-serif', fontSize: '1.85rem', letterSpacing: '1px', lineHeight: 1 }}>
+      <div style={{ color: corVal || '#1A0000', fontFamily: 'Bebas Neue, sans-serif', fontSize: '1.85rem', letterSpacing: '1px', lineHeight: 1 }}>
         {valor}
       </div>
       {sub && <div style={{ color: corSub || C.muted, fontSize: '0.73rem', fontWeight: 600 }}>{sub}</div>}
@@ -1542,7 +1542,7 @@ function PaginaPedidos({ pedidos, novosIds, onStatus, onImprimir, onExcluir, onA
     { label: 'Dinheiro', icon: Banknote,   val: fmtMoeda(pagTotais['dinheiro'] || 0) },
     { label: 'Débito',   icon: Banknote,   val: fmtMoeda(pagTotais['débito'] || pagTotais['debito'] || 0) },
     { label: 'Crédito',  icon: Banknote,   val: fmtMoeda(pagTotais['crédito'] || pagTotais['credito'] || 0) },
-    ...(totalCaderneta > 0 ? [{ label: 'Caderneta', icon: Banknote, val: fmtMoeda(totalCaderneta), sub: 'a receber', corSub: '#f59e0b' }] : []),
+    ...(totalCaderneta > 0 ? [{ label: 'Caderneta', icon: Banknote, val: `-${fmtMoeda(totalCaderneta)}`, corVal: '#ef4444', sub: 'a receber', corSub: '#ef4444' }] : []),
   ]
 
   return (
@@ -1551,7 +1551,7 @@ function PaginaPedidos({ pedidos, novosIds, onStatus, onImprimir, onExcluir, onA
       {/* Stats cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '0.75rem' }}>
         {STATS.map(s => (
-          <KpiCard key={s.label} icon={s.icon} label={s.label} valor={s.val} />
+          <KpiCard key={s.label} icon={s.icon} label={s.label} valor={s.val} sub={s.sub} corSub={s.corSub} corVal={s.corVal} />
         ))}
       </div>
 
