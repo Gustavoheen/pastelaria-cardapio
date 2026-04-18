@@ -7056,20 +7056,22 @@ export default function Admin() {
     return () => { clearInterval(iv); pararKeepAlive() }
   }, [logado, carregarPedidos])
 
-  // Auth — validates password against server-side store_state config
-  // TODO: Replace with proper server-side auth (JWT/session tokens). Client-side password check is not secure.
   async function login() {
     try {
-      const res = await apiFetch('/api/cardapio-state')
-      if (!res.ok) { setErrLogin('Erro ao validar. Tente novamente.'); return }
-      const cfg = await res.json()
-      const senhaServidor = cfg?.senha_admin
-      if (!senhaServidor) { setErrLogin('Senha admin não configurada no servidor.'); return }
-      if (senha === senhaServidor) {
+      const res = await apiFetch('/api/admin-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ senha }),
+      })
+      const json = await res.json()
+      if (res.ok && json.ok) {
+        if (json.token) sessionStorage.setItem('carioca_admin_token', json.token)
         setLogado(true)
         sessionStorage.setItem('carioca_admin', '1')
         setErrLogin('')
-      } else setErrLogin('Senha incorreta.')
+      } else {
+        setErrLogin(json.erro || 'Senha incorreta.')
+      }
     } catch { setErrLogin('Erro de conexão.') }
   }
 
