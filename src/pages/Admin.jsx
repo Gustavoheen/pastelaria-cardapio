@@ -451,9 +451,10 @@ function PaginaDashboard({ pedidos, onVerPedidos, onExcluir, onSalvarPedido, car
   const vendasDia = pedidos
     .filter(p => p.status === 'entregue')
     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-  const totalSite = vendasDia.filter(v => v.origem !== 'balcao').reduce((s, p) => s + Number(p.total || 0), 0)
-  const totalBalcao = vendasDia.filter(v => v.origem === 'balcao').reduce((s, p) => s + Number(p.total || 0), 0)
-  const totalDia = vendasDia.reduce((s, p) => s + Number(p.total || 0), 0)
+  const totalSite = vendasDia.filter(v => v.origem !== 'balcao' && v.pagamento !== 'caderneta').reduce((s, p) => s + Number(p.total || 0), 0)
+  const totalBalcao = vendasDia.filter(v => v.origem === 'balcao' && v.pagamento !== 'caderneta').reduce((s, p) => s + Number(p.total || 0), 0)
+  const totalCadernetaDia = vendasDia.filter(p => p.pagamento === 'caderneta').reduce((s, p) => s + Number(p.total || 0), 0)
+  const totalDia = vendasDia.reduce((s, p) => s + Number(p.total || 0), 0) - totalCadernetaDia * 2
 
   const porPag = {}
   vendasDia.forEach(p => {
@@ -514,15 +515,17 @@ function PaginaDashboard({ pedidos, onVerPedidos, onExcluir, onSalvarPedido, car
             const isCaderneta = pag === 'caderneta'
             return (
               <div key={pag} style={{
-                background: isCaderneta ? 'rgba(245,158,11,0.12)' : 'rgba(255,235,235,0.70)',
-                border: isCaderneta ? '1px solid rgba(245,158,11,0.4)' : '1px solid rgba(255,255,255,0.1)',
+                background: isCaderneta ? 'rgba(239,68,68,0.10)' : 'rgba(255,235,235,0.70)',
+                border: isCaderneta ? '1px solid rgba(239,68,68,0.35)' : '1px solid rgba(255,255,255,0.1)',
                 borderRadius: '10px', padding: '0.5rem 0.875rem', textAlign: 'center',
               }}>
-                <div style={{ color: isCaderneta ? '#d97706' : 'rgba(15,0,0,0.82)', fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase' }}>
+                <div style={{ color: isCaderneta ? '#ef4444' : 'rgba(15,0,0,0.82)', fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase' }}>
                   {isCaderneta ? '📒 caderneta' : pag}
                 </div>
-                <div style={{ color: isCaderneta ? '#92400e' : '#1A0000', fontSize: '1rem', fontWeight: 900 }}>{fmtMoeda(val)}</div>
-                {isCaderneta && <div style={{ color: '#d97706', fontSize: '0.58rem', fontWeight: 600 }}>a receber</div>}
+                <div style={{ color: isCaderneta ? '#dc2626' : '#1A0000', fontSize: '1rem', fontWeight: 900 }}>
+                  {isCaderneta ? `-${fmtMoeda(val)}` : fmtMoeda(val)}
+                </div>
+                {isCaderneta && <div style={{ color: '#ef4444', fontSize: '0.58rem', fontWeight: 600 }}>a receber</div>}
               </div>
             )
           })}
@@ -577,8 +580,8 @@ function PaginaDashboard({ pedidos, onVerPedidos, onExcluir, onSalvarPedido, car
                         <td style={{ padding: '0.5rem 0.75rem' }}>
                           <BadgePagamento pag={v.pagamento} />
                         </td>
-                        <td style={{ padding: '0.5rem 0.75rem', color: C.success, fontSize: '0.88rem', fontWeight: 900, whiteSpace: 'nowrap' }}>
-                          {fmtMoeda(v.total)}
+                        <td style={{ padding: '0.5rem 0.75rem', color: v.pagamento === 'caderneta' ? '#ef4444' : C.success, fontSize: '0.88rem', fontWeight: 900, whiteSpace: 'nowrap' }}>
+                          {v.pagamento === 'caderneta' ? `-${fmtMoeda(v.total)}` : fmtMoeda(v.total)}
                         </td>
                         <td style={{ padding: '0.5rem 0.75rem', fontSize: '0.75rem', whiteSpace: 'nowrap' }}>
                           {Number(v.desconto_valor) > 0 ? (
@@ -1534,7 +1537,7 @@ function PaginaPedidos({ pedidos, novosIds, onStatus, onImprimir, onExcluir, onA
   const STATS = [
     { label: 'Site',     icon: Package,    val: String(totalPedidosSite) },
     { label: 'Balcão',   icon: Store,      val: String(totalPedidosBalcao) },
-    { label: 'Total',    icon: DollarSign, val: fmtMoeda(totalGeral) },
+    { label: 'Total',    icon: DollarSign, val: fmtMoeda(totalGeral - totalCaderneta), sub: totalCaderneta > 0 ? `- ${fmtMoeda(totalCaderneta)} caderneta` : undefined, corSub: totalCaderneta > 0 ? '#ef4444' : undefined },
     { label: 'Pix',      icon: Banknote,   val: fmtMoeda(pagTotais['pix'] || 0) },
     { label: 'Dinheiro', icon: Banknote,   val: fmtMoeda(pagTotais['dinheiro'] || 0) },
     { label: 'Débito',   icon: Banknote,   val: fmtMoeda(pagTotais['débito'] || pagTotais['debito'] || 0) },
