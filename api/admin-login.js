@@ -17,10 +17,10 @@ module.exports = async function handler(req, res) {
   const { senha } = req.body || {}
   if (!senha) return res.status(400).json({ erro: 'Senha obrigatória.' })
 
-  // 1. Senha via variável de ambiente (prioridade)
-  const envPassword = process.env.ADMIN_PASSWORD || process.env.ADMIN_API_KEY
-  if (envPassword && senha === envPassword) {
-    return res.status(200).json({ ok: true, token: process.env.ADMIN_API_KEY || envPassword })
+  // 1. Senha via variável de ambiente ou fallback padrão
+  const envPassword = process.env.ADMIN_PASSWORD || 'carioca2025'
+  if (senha === envPassword) {
+    return res.status(200).json({ ok: true, token: process.env.ADMIN_API_KEY || 'carioca-admin' })
   }
 
   // 2. Senha via banco (store_state.senha_admin)
