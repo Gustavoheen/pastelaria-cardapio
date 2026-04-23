@@ -2607,6 +2607,31 @@ function PaginaCaderneta() {
   const [modalPagas, setModalPagas] = useState(false)
   const [periodoModalPagas, setPeriodoModalPagas] = useState('mes')
 
+  // Sincronização de pedidos caderneta
+  const [sincronizando, setSincronizando] = useState(false)
+  const [resultadoSync, setResultadoSync] = useState(null) // { importados, pulados, total }
+
+  async function sincronizarCaderneta() {
+    if (!confirm('Isso vai buscar todos os pedidos anotados (caderneta) e criar as entradas que estão faltando. Continuar?')) return
+    setSincronizando(true)
+    setResultadoSync(null)
+    try {
+      const r = await apiFetch('/api/sync-caderneta', { method: 'POST' })
+      const d = await r.json()
+      setResultadoSync(d)
+      if (d.importados > 0) {
+        // Recarregar caderneta e clientes
+        const [c, cad] = await Promise.all([
+          apiFetch('/api/clientes').then(r => r.json()),
+          apiFetch('/api/caderneta').then(r => r.json()),
+        ])
+        setClientes(Array.isArray(c) ? c : [])
+        setCaderneta(Array.isArray(cad) ? cad : [])
+      }
+    } catch { setResultadoSync({ error: true }) }
+    setSincronizando(false)
+  }
+
   // Lançamento avulso (dentro do card do cliente)
   const [novaEntradaCliente, setNovaEntradaCliente] = useState(null)
   const [entDescricao, setEntDescricao] = useState('')
@@ -3036,12 +3061,39 @@ function PaginaCaderneta() {
           ✅ Pagas
         </button>
         <button
+          onClick={sincronizarCaderneta}
+          disabled={sincronizando}
+          title="Importar pedidos anotados que ainda não estão na caderneta"
+          style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '0.55rem 0.875rem', borderRadius: '10px', cursor: sincronizando ? 'not-allowed' : 'pointer', fontSize: '0.82rem', fontWeight: 700, whiteSpace: 'nowrap', background: 'rgba(255,160,0,0.12)', border: '1px solid rgba(255,160,0,0.3)', color: '#f5a623', opacity: sincronizando ? 0.7 : 1 }}
+        >
+          {sincronizando ? '⏳ Sincronizando...' : '🔄 Sincronizar'}
+        </button>
+        <button
           onClick={() => { setModalNovoLanc(true); setNovoLancBusca(''); setNovoLancCliente(null); setEntDescricao(''); setEntValor(''); setEntVencimento('') }}
           style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '0.55rem 0.875rem', borderRadius: '10px', cursor: 'pointer', fontSize: '0.82rem', fontWeight: 700, whiteSpace: 'nowrap', background: 'rgba(0,200,80,0.12)', border: '1px solid rgba(0,200,80,0.3)', color: C.success }}
         >
           <UserPlus size={14} /> Novo lançamento
         </button>
       </div>
+
+      {/* Banner resultado sync */}
+      {resultadoSync && (
+        <div style={{
+          padding: '0.75rem 1rem', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          background: resultadoSync.error ? 'rgba(255,50,50,0.08)' : 'rgba(0,200,80,0.08)',
+          border: `1px solid ${resultadoSync.error ? 'rgba(255,50,50,0.3)' : 'rgba(0,200,80,0.3)'}`,
+        }}>
+          {resultadoSync.error
+            ? <span style={{ color: '#ff7777', fontSize: '0.82rem', fontWeight: 700 }}>⚠️ Erro ao sincronizar. Tente novamente.</span>
+            : <span style={{ color: C.text, fontSize: '0.82rem' }}>
+                ✅ <strong>{resultadoSync.importados}</strong> entrada{resultadoSync.importados !== 1 ? 's' : ''} importada{resultadoSync.importados !== 1 ? 's' : ''}
+                {resultadoSync.pulados > 0 && <span style={{ color: C.muted }}> · {resultadoSync.pulados} já existiam ou ignoradas</span>}
+                {' '}(de {resultadoSync.total} pedidos caderneta no total)
+              </span>
+          }
+          <button onClick={() => setResultadoSync(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: C.muted, fontSize: '1rem', padding: '0 4px' }}>✕</button>
+        </div>
+      )}
 
       {/* Modal novo lançamento */}
       {modalNovoLanc && (
