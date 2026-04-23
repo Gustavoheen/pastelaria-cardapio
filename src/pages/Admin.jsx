@@ -2375,7 +2375,7 @@ function PaginaClientes() {
     await apiFetch('/api/clientes', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ nome, cpf: cpf || null, telefone: telefone || '00000000000', manual: true, endereco }),
+      body: JSON.stringify({ nome, cpf: cpf || null, telefone: telefone || null, manual: true, endereco }),
     })
     setFormNome(''); setFormCpf(''); setFormTel('')
     setFormRua(''); setFormNumero(''); setFormComplemento(''); setFormBairro('')
@@ -2516,7 +2516,10 @@ function PaginaClientes() {
           </div>
           {filtrados.map(c => {
             const aberto = expandido === c.id
-            const tel = (c.telefone || '').replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3')
+            const telRaw = c.telefone || ''
+            const isFakePhone = !telRaw || telRaw.startsWith('x') || telRaw === '00000000000'
+            const tel = isFakePhone ? '' : telRaw.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3')
+            const subInfo = [tel, c.cpf ? `CPF ${c.cpf}` : null].filter(Boolean).join(' · ')
             return (
               <div key={c.id} style={{ ...cardStyle, padding: 0, overflow: 'hidden' }}>
                 <div
@@ -2534,9 +2537,7 @@ function PaginaClientes() {
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ color: C.text, fontWeight: 700, fontSize: '0.88rem' }}>{c.nome}</div>
-                    <div style={{ color: C.muted, fontSize: '0.72rem' }}>
-                      {tel}{c.cpf ? ` · CPF ${c.cpf}` : ''}
-                    </div>
+                    {subInfo && <div style={{ color: C.muted, fontSize: '0.72rem' }}>{subInfo}</div>}
                   </div>
                   <div style={{ color: C.muted, fontSize: '0.72rem', flexShrink: 0 }}>
                     {c.total_pedidos || 0} pedido{(c.total_pedidos || 0) !== 1 ? 's' : ''}
@@ -2832,9 +2833,22 @@ function PaginaCaderneta() {
   const vencidosGlobal = caderneta.filter(e => !e.pago && e.vencimento && e.vencimento < hoje)
   const totalVencido = vencidosGlobal.reduce((s, e) => s + Number(e.valor), 0)
 
-  // Clientes que têm alguma entrada na caderneta
-  const clientesComEntrada = clientes.filter(c =>
-    caderneta.some(e => e.cliente_id === c.id)
+  // Clientes com entradas na caderneta — inclui registros "órfãos" (de clientes duplicados/deletados)
+  // usando dados embutidos nas entradas da caderneta, sem depender da lista de clientes
+  const clientesComEntrada = Object.values(
+    caderneta.reduce((acc, e) => {
+      if (!e.cliente_id) return acc
+      if (!acc[e.cliente_id]) {
+        const full = clientes.find(c => c.id === e.cliente_id)
+        acc[e.cliente_id] = full || {
+          id: e.cliente_id,
+          nome: e.nome || 'Cliente',
+          cpf: e.cpf || null,
+          telefone: e.telefone || null,
+        }
+      }
+      return acc
+    }, {})
   )
   const filtrados = busca.trim()
     ? clientesComEntrada.filter(c =>
@@ -3051,8 +3065,11 @@ function PaginaCaderneta() {
                         {vencidosCliente.length > 0 && <span style={{ marginLeft: 6, color: '#ff8080', fontSize: '0.82rem', fontWeight: 800 }}>⚠️ {vencidosCliente.length} vencido{vencidosCliente.length > 1 ? 's' : ''}</span>}
                       </div>
                       <div style={{ color: 'rgba(15,0,0,0.82)', fontSize: '0.82rem', marginTop: '2px' }}>
-                        {(c.telefone || '').replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3')}
-                        {c.cpf ? ` · CPF ${c.cpf}` : ''}
+                        {(() => {
+                          const t = c.telefone || ''
+                          const tel = (!t || t.startsWith('x') || t === '00000000000') ? '' : t.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3')
+                          return [tel, c.cpf ? `CPF ${c.cpf}` : null].filter(Boolean).join(' · ')
+                        })()}
                       </div>
                     </div>
                     <div style={{ textAlign: 'right', flexShrink: 0 }}>

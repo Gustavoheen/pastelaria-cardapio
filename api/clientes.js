@@ -47,14 +47,20 @@ module.exports = async function handler(req, res) {
 
     const cpfNormalizado = cpf ? String(cpf).trim() || null : null
 
-    // busca existente (só busca por telefone real, não por placeholder manual)
-    const { data: existente } = tel ? await supabase
-      .from('customers')
-      .select('*')
-      .eq('telefone', tel)
-      .maybeSingle() : { data: null }
+    // busca existente por telefone (se tiver) ou por nome normalizado (clientes manuais sem telefone)
+    let existente = null
+    if (tel) {
+      const { data } = await supabase.from('customers').select('*').eq('telefone', tel).maybeSingle()
+      existente = data
+    } else if (manual) {
+      const { data } = await supabase.from('customers').select('*').ilike('nome', nome.trim()).maybeSingle()
+      existente = data
+    }
 
     if (existente) {
+      // Se achou por nome, retorna sem alterar (evita sobrescrever dados do cliente)
+      if (!tel && manual) return res.status(200).json(existente)
+
       const updates = {
         nome: nome.trim(),
         updated_at: new Date().toISOString(),
