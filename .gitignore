@@ -1,14 +1,21 @@
 node_modules
 dist
+.vercel
+
+# Environment files — NEVER commit secrets
 .env
+.env.*
 .env.local
 .env.vercel
 .env.vercel.*
-.vercel
 .env*.local
+*.env
 
 # Certificados e chaves privadas
-certs/private-key.pem
-certs/*.pem
+certs/
+*.pem
+*.key
+*.p12
+*.pfx
 public/digital-certificate.pem
 supabase/.temp/

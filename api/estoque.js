@@ -6,10 +6,10 @@ const supabase = createClient(
   { db: { schema: 'pastel' } }
 )
 
+const { checkAdminAuth, setCorsHeaders } = require('./_lib/auth')
+
 module.exports = async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PATCH,DELETE,OPTIONS')
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+  setCorsHeaders(req, res)
   if (req.method === 'OPTIONS') return res.status(200).end()
 
   /* ── GET ── */
@@ -19,12 +19,13 @@ module.exports = async function handler(req, res) {
       .select('*')
       .eq('ativo', true)
       .order('nome', { ascending: true })
-    if (error) return res.status(500).json({ error: error.message })
+    if (error) { console.error('[estoque]', error.message); return res.status(500).json({ error: 'Erro interno.' }) }
     return res.status(200).json(data)
   }
 
   /* ── POST ── */
   if (req.method === 'POST') {
+    if (!checkAdminAuth(req, res)) return
     const { nome, categoria, quantidade, unidade, preco_custo, alerta_minimo, produto_id } = req.body
     if (!nome) return res.status(400).json({ error: 'nome obrigatório.' })
 
@@ -42,12 +43,13 @@ module.exports = async function handler(req, res) {
       })
       .select()
       .single()
-    if (error) return res.status(500).json({ error: error.message })
+    if (error) { console.error('[estoque]', error.message); return res.status(500).json({ error: 'Erro interno.' }) }
     return res.status(201).json(data)
   }
 
   /* ── PATCH ── */
   if (req.method === 'PATCH') {
+    if (!checkAdminAuth(req, res)) return
     const { id, ...updates } = req.body
     if (!id) return res.status(400).json({ error: 'id obrigatório.' })
 
@@ -67,16 +69,17 @@ module.exports = async function handler(req, res) {
       .eq('id', id)
       .select()
       .single()
-    if (error) return res.status(500).json({ error: error.message })
+    if (error) { console.error('[estoque]', error.message); return res.status(500).json({ error: 'Erro interno.' }) }
     return res.status(200).json(data)
   }
 
   /* ── DELETE ── */
   if (req.method === 'DELETE') {
+    if (!checkAdminAuth(req, res)) return
     const { id } = req.query
     if (!id) return res.status(400).json({ error: 'id obrigatório.' })
     const { error } = await supabase.from('estoque').update({ ativo: false }).eq('id', id)
-    if (error) return res.status(500).json({ error: error.message })
+    if (error) { console.error('[estoque]', error.message); return res.status(500).json({ error: 'Erro interno.' }) }
     return res.status(200).json({ ok: true })
   }
 

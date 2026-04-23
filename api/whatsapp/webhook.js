@@ -144,11 +144,24 @@ async function buscarPedidoAtivo(telefone) {
 // ─── Main handler ──────────────────────────────────────────
 
 module.exports = async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*')
+  // Webhook receives calls from Evolution API server — restrict CORS
+  const allowedOrigin = process.env.EVOLUTION_API_URL ? new URL(process.env.EVOLUTION_API_URL).origin : '*'
+  res.setHeader('Access-Control-Allow-Origin', allowedOrigin)
   res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS')
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+  res.setHeader('Vary', 'Origin')
   if (req.method === 'OPTIONS') return res.status(200).end()
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' })
+
+  // TODO: Add webhook signature validation (HMAC) when Evolution API supports it
+  // For now, validate shared secret via query param or header
+  const webhookSecret = process.env.WEBHOOK_SECRET
+  if (webhookSecret) {
+    const provided = req.query.secret || req.headers['x-webhook-secret']
+    if (provided !== webhookSecret) {
+      return res.status(401).json({ error: 'Nao autorizado.' })
+    }
+  }
 
   try {
     const body = req.body
@@ -362,6 +375,7 @@ module.exports = async function handler(req, res) {
     }
   } catch (err) {
     console.error('[WhatsApp Webhook]', err)
-    return res.status(200).json({ ok: false, error: err.message })
+    console.error('[WhatsApp Webhook]', err.message)
+    return res.status(200).json({ ok: false, error: 'Erro interno.' })
   }
 }

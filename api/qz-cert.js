@@ -20,8 +20,10 @@ zlWVR4CmVPgM/B2ESFNJRZeQdDLetWceh9AeDiWPpDMZndVf0sTH/8inb74FYbxa
 RhUkFfixwELqxksoeqhEMb8=
 -----END CERTIFICATE-----`
 
+const { setCorsHeaders } = require('./_lib/auth')
+
 module.exports = async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*')
+  setCorsHeaders(req, res)
   res.setHeader('Content-Type', 'text/plain')
   return res.status(200).send(CERT)
 }

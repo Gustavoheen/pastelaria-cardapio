@@ -6,10 +6,10 @@ const supabase = createClient(
   { db: { schema: 'pastel' } }
 )
 
+const { checkAdminAuth, setCorsHeaders } = require('./_lib/auth')
+
 module.exports = async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+  setCorsHeaders(req, res)
   if (req.method === 'OPTIONS') return res.status(200).end()
 
   /* ── GET ── */
@@ -19,13 +19,14 @@ module.exports = async function handler(req, res) {
       .select('*')
       .eq('id', 1)
       .maybeSingle()
-    if (error) return res.status(500).json({ error: error.message })
+    if (error) { console.error('[cardapio-state GET]', error.message); return res.status(500).json({ error: 'Erro ao buscar configuracao.' }) }
     if (!data) return res.status(200).json(null)
     return res.status(200).json(data)
   }
 
   /* ── POST (upsert) ── */
   if (req.method === 'POST') {
+    if (!checkAdminAuth(req, res)) return
     const body = req.body
     if (typeof body !== 'object') return res.status(400).json({ error: 'Body inválido.' })
 
@@ -46,7 +47,7 @@ module.exports = async function handler(req, res) {
       'especial_ativo', 'especial_nome', 'especial_descricao', 'especial_preco',
       'pix_chave', 'pix_tipo', 'pix_nome', 'endereco_loja', 'combos',
       'dias_funcionamento', 'taxa_entrega', 'entrega_ativa', 'bot_ativo',
-      'senha_desconto',
+      'senha_desconto', 'senha_admin',
     ]
     campos.forEach(c => { if (body[c] !== undefined) payload[c] = body[c] })
 
@@ -58,7 +59,7 @@ module.exports = async function handler(req, res) {
       .select()
       .single()
 
-    if (error) return res.status(500).json({ error: error.message })
+    if (error) { console.error('[cardapio-state POST]', error.message); return res.status(500).json({ error: 'Erro ao salvar configuracao.' }) }
     return res.status(200).json(data)
   }
 

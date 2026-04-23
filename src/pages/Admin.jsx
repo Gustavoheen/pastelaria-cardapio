@@ -299,9 +299,15 @@ function PaginaDashboard({ pedidos, onVerPedidos, onExcluir, onSalvarPedido, car
 
   function mudarPeriodoFluxo(p) {
     setPeriodoFluxo(p)
-    if (p === 'hoje') carregarPedidos(false, getDataStr(0))
+    const hoje = getDataStr(0)
+    if (p === 'hoje') carregarPedidos(false, hoje)
     else if (p === 'ontem') carregarPedidos(false, getDataStr(-1))
-    else if (p === 'semana') carregarPedidos(false, getDataStr(-7))
+    else if (p === 'semana') carregarPedidos(false, getDataStr(-6), hoje)
+    else if (p === 'mes') {
+      const d = new Date()
+      const ini = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-01`
+      carregarPedidos(false, ini, hoje)
+    }
   }
 
   function mudarDataCustomFluxo(val) {
@@ -484,7 +490,7 @@ function PaginaDashboard({ pedidos, onVerPedidos, onExcluir, onSalvarPedido, car
 
         {/* Filtro de período */}
         <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '1rem', alignItems: 'center' }}>
-          {[['hoje','Hoje'],['ontem','Ontem'],['semana','7 dias']].map(([p, label]) => (
+          {[['hoje','Hoje'],['ontem','Ontem'],['semana','7 dias'],['mes','Este Mês']].map(([p, label]) => (
             <button
               key={p}
               onClick={() => mudarPeriodoFluxo(p)}
@@ -3255,13 +3261,13 @@ function EntradaCadernetaRow({ e, hoje, C, inputSt, editandoVencimento, vencimen
     }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ color: e.pago ? 'rgba(255,255,255,0.5)' : '#fff', fontSize: '0.95rem', fontWeight: 700, textDecoration: e.pago ? 'line-through' : 'none', lineHeight: 1.3 }}>
+          <div style={{ color: e.pago ? 'rgba(15,0,0,0.4)' : '#1A0000', fontSize: '0.95rem', fontWeight: 700, textDecoration: e.pago ? 'line-through' : 'none', lineHeight: 1.3 }}>
             {e.descricao || 'Lançamento'}
           </div>
           <div style={{ color: 'rgba(15,0,0,0.82)', fontSize: '0.82rem', display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '3px' }}>
             <span>{e.data || new Date(e.created_at).toLocaleDateString('pt-BR')}</span>
             {e.vencimento
-              ? <span style={{ color: vencido ? '#ff8080' : 'rgba(255,255,255,0.55)' }}>📅 vence {new Date(e.vencimento + 'T12:00:00').toLocaleDateString('pt-BR')}</span>
+              ? <span style={{ color: vencido ? '#cc2200' : 'rgba(15,0,0,0.6)' }}>📅 vence {new Date(e.vencimento + 'T12:00:00').toLocaleDateString('pt-BR')}</span>
               : !e.pago && (
                   <button onClick={() => { setEditandoVencimento(e.id); setVencimentoInput('') }}
                     style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(15,0,0,0.85)', fontSize: '0.82rem', padding: 0, textDecoration: 'underline', touchAction: 'manipulation' }}>+ vencimento</button>
@@ -3916,37 +3922,49 @@ function PaginaEstoque() {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // PAGINA 5: RELATORIOS
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function PaginaRelatorios({ pedidosTodos }) {
-  const [periodo, setPeriodo] = useState('hoje')
-  const [dataInicio, setDataInicio] = useState(new Date().toISOString().slice(0, 10))
-  const [dataFim, setDataFim] = useState(new Date().toISOString().slice(0, 10))
+function PaginaRelatorios() {
+  const hoje = new Date()
+  const hStr = hoje.toISOString().slice(0, 10)
+  const mesIni = `${hoje.getFullYear()}-${String(hoje.getMonth()+1).padStart(2,'0')}-01`
 
-  function filtrarPorPeriodo(lista) {
-    const hoje = new Date()
-    const hStr = hoje.toISOString().slice(0, 10)
-    if (periodo === 'hoje') return lista.filter(p => p.created_at?.slice(0, 10) === hStr)
+  const [periodo, setPeriodo] = useState('mes')
+  const [dataInicio, setDataInicio] = useState(mesIni)
+  const [dataFim, setDataFim] = useState(hStr)
+  const [pedidos, setPedidos] = useState([])
+  const [carregando, setCarregando] = useState(false)
+
+  function getRange() {
+    const agora = new Date()
+    const h = agora.toISOString().slice(0, 10)
+    if (periodo === 'hoje') return { ini: h, fim: h }
     if (periodo === 'ontem') {
-      const on = new Date(hoje); on.setDate(on.getDate() - 1)
-      return lista.filter(p => p.created_at?.slice(0, 10) === on.toISOString().slice(0, 10))
+      const on = new Date(agora); on.setDate(on.getDate() - 1)
+      const s = on.toISOString().slice(0, 10)
+      return { ini: s, fim: s }
     }
     if (periodo === 'semana') {
-      const ini = new Date(hoje); ini.setDate(ini.getDate() - 6)
-      return lista.filter(p => new Date(p.created_at) >= ini)
+      const ini = new Date(agora); ini.setDate(ini.getDate() - 6)
+      return { ini: ini.toISOString().slice(0, 10), fim: h }
     }
     if (periodo === 'mes') {
-      const ini = new Date(hoje.getFullYear(), hoje.getMonth(), 1)
-      return lista.filter(p => new Date(p.created_at) >= ini)
+      const ini = `${agora.getFullYear()}-${String(agora.getMonth()+1).padStart(2,'0')}-01`
+      return { ini, fim: h }
     }
-    if (periodo === 'custom') {
-      return lista.filter(p => {
-        const d = p.created_at?.slice(0, 10)
-        return d >= dataInicio && d <= dataFim
-      })
-    }
-    return lista
+    return { ini: dataInicio, fim: dataFim }
   }
 
-  const pedidos = filtrarPorPeriodo(pedidosTodos)
+  useEffect(() => {
+    if (periodo === 'custom' && (!dataInicio || !dataFim)) return
+    const { ini, fim } = getRange()
+    setCarregando(true)
+    const url = ini === fim
+      ? `/api/pedido?data=${ini}&tz=-3`
+      : `/api/pedido?dataInicio=${ini}&dataFim=${fim}&tz=-3`
+    apiFetch(url).then(r => r.json()).then(d => {
+      setPedidos(Array.isArray(d) ? d : [])
+      setCarregando(false)
+    }).catch(() => setCarregando(false))
+  }, [periodo, dataInicio, dataFim])
   const total = pedidos.reduce((s, p) => s + (Number(p.total) || 0), 0)
   const ticket = pedidos.length > 0 ? total / pedidos.length : 0
 
@@ -4014,6 +4032,9 @@ function PaginaRelatorios({ pedidosTodos }) {
     boxShadow: '0 4px 20px rgba(120,0,0,0.16), 0 1px 4px rgba(120,0,0,0.09)',
   }
 
+  const pedidosCaderneta = pedidos.filter(p => p.pagamento === 'caderneta')
+  const totalCaderneta = pedidosCaderneta.reduce((s, p) => s + Number(p.total || 0), 0)
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
 
@@ -4033,6 +4054,7 @@ function PaginaRelatorios({ pedidosTodos }) {
             {p.label}
           </button>
         ))}
+        {carregando && <span style={{ color: C.muted, fontSize: '0.78rem', marginLeft: '4px' }}>carregando...</span>}
         <button
           onClick={exportarExcel}
           style={{
@@ -4182,6 +4204,60 @@ function PaginaRelatorios({ pedidosTodos }) {
             </div>
           ))}
         </div>
+      </div>
+
+      {/* Relatório Caderneta */}
+      <div style={cardStyle}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+          <h3 style={{ color: C.text, fontWeight: 800, fontSize: '0.88rem', margin: 0, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+            📒 Pedidos Anotados (Caderneta)
+          </h3>
+          {pedidosCaderneta.length > 0 && (
+            <span style={{ color: '#ef4444', fontWeight: 800, fontSize: '0.9rem' }}>
+              {pedidosCaderneta.length} pedido{pedidosCaderneta.length !== 1 ? 's' : ''} · {fmtMoeda(totalCaderneta)} a receber
+            </span>
+          )}
+        </div>
+        {pedidosCaderneta.length === 0 ? (
+          <p style={{ color: C.muted, fontSize: '0.82rem' }}>Nenhum pedido anotado no período.</p>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            {pedidosCaderneta.map(p => {
+              const itens = parseItens(p.itens)
+              return (
+                <div key={p.id} style={{
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
+                  padding: '0.625rem 0.875rem', borderRadius: '10px', gap: '0.5rem',
+                  background: 'rgba(239,68,68,0.05)', border: '1px solid rgba(239,68,68,0.2)',
+                  flexWrap: 'wrap',
+                }}>
+                  <div style={{ flex: 1, minWidth: '160px' }}>
+                    <div style={{ color: C.text, fontWeight: 700, fontSize: '0.85rem' }}>
+                      #{p.numero} — {p.nome}
+                    </div>
+                    <div style={{ color: C.muted, fontSize: '0.72rem', marginTop: '2px' }}>
+                      {fmtHora(p.created_at)}
+                      {p.telefone ? ` · ${p.telefone}` : ''}
+                    </div>
+                    {itens.length > 0 && (
+                      <div style={{ color: 'rgba(15,0,0,0.6)', fontSize: '0.72rem', marginTop: '3px' }}>
+                        {itens.map(i => `${i.qtd || 1}x ${i.nome}`).join(' · ')}
+                      </div>
+                    )}
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ color: '#ef4444', fontWeight: 800, fontSize: '0.95rem' }}>
+                      {fmtMoeda(Number(p.total))}
+                    </div>
+                    <div style={{ color: C.muted, fontSize: '0.7rem', marginTop: '2px', textTransform: 'capitalize' }}>
+                      {p.status}
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
       </div>
     </div>
   )
@@ -6986,8 +7062,9 @@ export default function Admin() {
 
   // Polling
   const dataFiltroRef = useRef(null)
+  const dataFimFiltroRef = useRef(null)
 
-  const carregarPedidos = useCallback(async (silencioso = false, dataOverride = null) => {
+  const carregarPedidos = useCallback(async (silencioso = false, dataOverride = null, dataFimOverride = null) => {
     try {
       const dataParam = dataOverride || dataFiltroRef.current || (() => {
         const agora = new Date()
@@ -6995,9 +7072,14 @@ export default function Admin() {
       })()
       if (dataOverride) {
         dataFiltroRef.current = dataOverride
+        dataFimFiltroRef.current = dataFimOverride || null
         idsConhecidosRef.current = null // reset: não tratar pedidos existentes como novos ao trocar de data
       }
-      const res = await fetch(`/api/pedido?data=${dataParam}&tz=-3`)
+      const dataFimParam = dataFimFiltroRef.current
+      const url = dataFimParam
+        ? `/api/pedido?dataInicio=${dataParam}&dataFim=${dataFimParam}&tz=-3`
+        : `/api/pedido?data=${dataParam}&tz=-3`
+      const res = await fetch(url)
       if (res.ok) {
         const data = await res.json()
         const lista = Array.isArray(data) ? data : []
@@ -7677,7 +7759,7 @@ export default function Admin() {
           {paginaAtiva === 'estoque' && <PaginaEstoque />}
           {paginaAtiva === 'clientes' && <PaginaClientes />}
           {paginaAtiva === 'caderneta' && <PaginaCaderneta key={cadernetaKey} />}
-          {paginaAtiva === 'relatorios' && <PaginaRelatorios pedidosTodos={pedidos} />}
+          {paginaAtiva === 'relatorios' && <PaginaRelatorios />}
           {paginaAtiva === 'whatsapp' && <PaginaWhatsApp />}
           {paginaAtiva === 'config' && (
             <PaginaConfiguracoes

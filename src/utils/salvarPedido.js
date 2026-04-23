@@ -1,10 +1,11 @@
 import { CONFIG } from '../config.js'
+import { apiFetch } from './apiFetch.js'
 
 /**
  * Salva o pedido via API e retorna o objeto criado.
  */
 export async function salvarPedido(payload) {
-  const res = await fetch('/api/pedido', {
+  const res = await apiFetch('/api/pedido', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -87,7 +88,7 @@ export function enviarWhatsApp(mensagem) {
  * Busca configurações da loja.
  */
 export async function buscarConfiguracaoLoja() {
-  const res = await fetch('/api/cardapio-state')
+  const res = await apiFetch('/api/cardapio-state')
   if (!res.ok) return null
   return res.json()
 }
@@ -96,7 +97,7 @@ export async function buscarConfiguracaoLoja() {
  * Salva configurações da loja.
  */
 export async function salvarConfiguracaoLoja(config) {
-  const res = await fetch('/api/cardapio-state', {
+  const res = await apiFetch('/api/cardapio-state', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(config),

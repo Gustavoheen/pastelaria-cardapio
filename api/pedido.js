@@ -40,21 +40,21 @@ async function gerarNumeroSequencial() {
   return String(seq)
 }
 
+const { checkAdminAuth, setCorsHeaders } = require('./_lib/auth')
+
 module.exports = async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PATCH,DELETE,OPTIONS')
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+  setCorsHeaders(req, res)
   res.setHeader('Content-Type', 'application/json; charset=utf-8')
   if (req.method === 'OPTIONS') return res.status(200).end()
 
   /* ── GET ── */
   if (req.method === 'GET') {
-    const { telefone, data, id } = req.query
+    const { telefone, data, id, dataInicio, dataFim } = req.query
 
     if (id) {
       const { data: pedido, error } = await supabase
         .from('orders').select('*').eq('id', id).single()
-      if (error) return res.status(404).json({ error: error.message })
+      if (error) { console.error('[pedido GET id]', error.message); return res.status(404).json({ error: 'Pedido nao encontrado.' }) }
       return res.status(200).json(pedido)
     }
 
@@ -66,20 +66,24 @@ module.exports = async function handler(req, res) {
         .ilike('telefone', `%${tel}%`)
         .order('created_at', { ascending: false })
         .limit(20)
-      if (error) return res.status(500).json({ error: error.message })
+      if (error) { console.error('[pedido GET tel]', error.message); return res.status(500).json({ error: 'Erro ao buscar pedidos.' }) }
       return res.status(200).json(pedidos)
     }
 
     let query = supabase.from('orders').select('*').order('created_at', { ascending: false })
-    if (data) {
+    if (data || (dataInicio && dataFim)) {
       const tz = parseInt(req.query.tz || '0', 10)
       const offsetH = String(Math.abs(tz)).padStart(2, '0')
       const sign = tz <= 0 ? '-' : '+'
       const tzStr = `${sign}${offsetH}:00`
-      query = query.gte('created_at', `${data}T00:00:00${tzStr}`).lte('created_at', `${data}T23:59:59${tzStr}`)
+      if (data) {
+        query = query.gte('created_at', `${data}T00:00:00${tzStr}`).lte('created_at', `${data}T23:59:59${tzStr}`)
+      } else {
+        query = query.gte('created_at', `${dataInicio}T00:00:00${tzStr}`).lte('created_at', `${dataFim}T23:59:59${tzStr}`)
+      }
     }
     const { data: pedidos, error } = await query
-    if (error) return res.status(500).json({ error: error.message })
+    if (error) { console.error('[pedido GET list]', error.message); return res.status(500).json({ error: 'Erro ao buscar pedidos.' }) }
     return res.status(200).json(pedidos)
   }
 
@@ -178,12 +182,13 @@ module.exports = async function handler(req, res) {
       .select()
       .single()
 
-    if (error) return res.status(500).json({ error: error.message })
+    if (error) { console.error('[pedido POST]', error.message); return res.status(500).json({ error: 'Erro ao criar pedido.' }) }
     return res.status(201).json(pedido)
   }
 
   /* ── PATCH ── */
   if (req.method === 'PATCH') {
+    if (!checkAdminAuth(req, res)) return
     const { id, status, itens, total, subtotal, pagamento, nome, observacao } = req.body
     if (!id) return res.status(400).json({ error: 'id obrigatório.' })
 
@@ -228,16 +233,17 @@ module.exports = async function handler(req, res) {
       .select()
       .single()
 
-    if (error) return res.status(500).json({ error: error.message })
+    if (error) { console.error('[pedido PATCH]', error.message); return res.status(500).json({ error: 'Erro ao atualizar pedido.' }) }
     return res.status(200).json(pedido)
   }
 
   /* ── DELETE ── */
   if (req.method === 'DELETE') {
+    if (!checkAdminAuth(req, res)) return
     const { id } = req.query
     if (!id) return res.status(400).json({ error: 'id obrigatório.' })
     const { error } = await supabase.from('orders').delete().eq('id', id)
-    if (error) return res.status(500).json({ error: error.message })
+    if (error) { console.error('[pedido DELETE]', error.message); return res.status(500).json({ error: 'Erro ao excluir pedido.' }) }
     return res.status(200).json({ ok: true })
   }
 

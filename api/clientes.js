@@ -6,10 +6,10 @@ const supabase = createClient(
   { db: { schema: 'pastel' } }
 )
 
+const { checkAdminAuth, setCorsHeaders } = require('./_lib/auth')
+
 module.exports = async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PATCH,DELETE,OPTIONS')
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+  setCorsHeaders(req, res)
   if (req.method === 'OPTIONS') return res.status(200).end()
 
   /* ── GET ?telefone=XX ── busca cliente por telefone */
@@ -22,7 +22,7 @@ module.exports = async function handler(req, res) {
         .select('*')
         .order('updated_at', { ascending: false })
         .limit(200)
-      if (error) return res.status(500).json({ error: error.message })
+      if (error) { console.error('[clientes]', error.message); return res.status(500).json({ error: 'Erro interno.' }) }
       return res.status(200).json(data)
     }
 
@@ -32,7 +32,7 @@ module.exports = async function handler(req, res) {
       .select('*')
       .eq('telefone', tel)
       .maybeSingle()
-    if (error) return res.status(500).json({ error: error.message })
+    if (error) { console.error('[clientes]', error.message); return res.status(500).json({ error: 'Erro interno.' }) }
     return res.status(200).json(data) // null se não encontrou
   }
 
@@ -87,7 +87,7 @@ module.exports = async function handler(req, res) {
         .eq('id', existente.id)
         .select()
         .single()
-      if (error) return res.status(500).json({ error: error.message })
+      if (error) { console.error('[clientes]', error.message); return res.status(500).json({ error: 'Erro interno.' }) }
       return res.status(200).json(data)
     }
 
@@ -105,12 +105,13 @@ module.exports = async function handler(req, res) {
       .insert(novo)
       .select()
       .single()
-    if (error) return res.status(500).json({ error: error.message })
+    if (error) { console.error('[clientes]', error.message); return res.status(500).json({ error: 'Erro interno.' }) }
     return res.status(201).json(data)
   }
 
   /* ── PATCH ?id=X ── atualiza limite_credito (ou outros campos admin) */
   if (req.method === 'PATCH') {
+    if (!checkAdminAuth(req, res)) return
     const { id } = req.query
     if (!id) return res.status(400).json({ error: 'id é obrigatório.' })
 
@@ -124,16 +125,17 @@ module.exports = async function handler(req, res) {
       .eq('id', id)
       .select()
       .single()
-    if (error) return res.status(500).json({ error: error.message })
+    if (error) { console.error('[clientes]', error.message); return res.status(500).json({ error: 'Erro interno.' }) }
     return res.status(200).json(data)
   }
 
   /* ── DELETE ?id=X ── remove cliente */
   if (req.method === 'DELETE') {
+    if (!checkAdminAuth(req, res)) return
     const { id } = req.query
     if (!id) return res.status(400).json({ error: 'id é obrigatório.' })
     const { error } = await supabase.from('customers').delete().eq('id', id)
-    if (error) return res.status(500).json({ error: error.message })
+    if (error) { console.error('[clientes]', error.message); return res.status(500).json({ error: 'Erro interno.' }) }
     return res.status(204).end()
   }
 

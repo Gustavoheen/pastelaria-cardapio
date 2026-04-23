@@ -5,6 +5,7 @@ import {
   Store, ClipboardList, Trash2, UtensilsCrossed, Coffee,
 } from 'lucide-react'
 import { CONFIG } from '../config.js'
+import { apiFetch } from '../utils/apiFetch.js'
 import {
   TIPOS_PASTEL, PASTEIS_DOCES, categorias,
   SABORES_SALGADOS, SABORES_DOCES, ADICIONAIS_LISTA,
@@ -617,14 +618,14 @@ function AbaBalcao({ onPedidoCriado, modo, setModo, mesaAdicionando, onCancelarM
   const [cardapioState, setCardapioState] = useState(null)
 
   useEffect(() => {
-    fetch('/api/bebidas-sabores').then(r => r.json()).then(rows => {
+    apiFetch('/api/bebidas-sabores').then(r => r.json()).then(rows => {
       if (!Array.isArray(rows)) return
       const map = {}
       rows.forEach(r => { map[r.bebida_id] = r.sabores })
       setBebidaSaboresMap(map)
     }).catch(() => {})
     // Buscar preços e itens desativados do admin
-    fetch('/api/cardapio-state').then(r => r.json()).then(cfg => {
+    apiFetch('/api/cardapio-state').then(r => r.json()).then(cfg => {
       if (cfg && typeof cfg === 'object') setCardapioState(cfg)
     }).catch(() => {})
   }, [])
@@ -732,7 +733,7 @@ function AbaBalcao({ onPedidoCriado, modo, setModo, mesaAdicionando, onCancelarM
         const todosItens = [...itensExistentes, ...novosItens]
         const novoTotal = somarCart(todosItens)
 
-        const res = await fetch('/api/pedido', {
+        const res = await apiFetch('/api/pedido', {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -767,7 +768,7 @@ function AbaBalcao({ onPedidoCriado, modo, setModo, mesaAdicionando, onCancelarM
         observacao: obsPrefix,
         tipo_entrega: isLocal ? 'local' : 'levar',
       }
-      const res = await fetch('/api/pedido', {
+      const res = await apiFetch('/api/pedido', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -1351,8 +1352,8 @@ function SheetFecharConta({ pedido, onFechar, onConfirmar, enviando, senhaAdmin 
   }
 
   function validarSenhaDesconto() {
-    const senhaCorreta = senhaAdmin || '1234'
-    if (senhaDesconto === senhaCorreta) {
+    if (!senhaAdmin) { setErroSenha('Senha de desconto nao configurada'); setTimeout(() => setErroSenha(''), 2500); return }
+    if (senhaDesconto === senhaAdmin) {
       setDescontoAutorizado(true); setErroSenha('')
     } else {
       setErroSenha('Senha incorreta'); setTimeout(() => setErroSenha(''), 2500)
@@ -1632,7 +1633,7 @@ export default function Caixa() {
 
   useEffect(() => {
     if (!logado) return
-    fetch('/api/clientes').then(r => r.json()).then(data => {
+    apiFetch('/api/clientes').then(r => r.json()).then(data => {
       if (Array.isArray(data)) setClientesCaderneta(data)
     }).catch(() => {})
   }, [logado])
@@ -1672,7 +1673,7 @@ export default function Caixa() {
 
   async function atualizarStatus(id, novoStatus) {
     try {
-      await fetch('/api/pedido', {
+      await apiFetch('/api/pedido', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, status: novoStatus }),
@@ -1701,7 +1702,7 @@ export default function Caixa() {
         patchBody.desconto_pct = desconto.pct || null
         patchBody.desconto_obs = desconto.obs || ''
       }
-      await fetch('/api/pedido', {
+      await apiFetch('/api/pedido', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(patchBody),
@@ -1722,9 +1723,17 @@ export default function Caixa() {
     setTimeout(() => setToast(null), 5000)
   }
 
-  function login() {
-    if (senha === CONFIG.senhaAdmin) { setLogado(true); setErrLogin('') }
-    else setErrLogin('Senha incorreta.')
+  // TODO: Replace with proper server-side auth (JWT/session tokens). Client-side password check is not secure.
+  async function login() {
+    try {
+      const res = await apiFetch('/api/cardapio-state')
+      if (!res.ok) { setErrLogin('Erro ao validar. Tente novamente.'); return }
+      const cfg = await res.json()
+      const senhaServidor = cfg?.senha_admin
+      if (!senhaServidor) { setErrLogin('Senha admin não configurada no servidor.'); return }
+      if (senha === senhaServidor) { setLogado(true); setErrLogin('') }
+      else setErrLogin('Senha incorreta.')
+    } catch { setErrLogin('Erro de conexao.') }
   }
 
   // Todos os pedidos ativos (site + balcao) para aba Pedidos

@@ -1,9 +1,9 @@
 const crypto = require('crypto')
 
+const { setCorsHeaders } = require('./_lib/auth')
+
 module.exports = async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+  setCorsHeaders(req, res)
   if (req.method === 'OPTIONS') return res.status(200).end()
 
   // Aceita GET (igual Scooby) e POST (compatibilidade)
@@ -20,6 +20,6 @@ module.exports = async function handler(req, res) {
     // Retorna texto puro (igual Scooby)
     res.status(200).send(signature)
   } catch (e) {
-    res.status(500).json({ error: e.message })
+    console.error('[qz-sign]', e.message); res.status(500).json({ error: 'Erro ao assinar.' })
   }
 }

@@ -6,10 +6,10 @@ const supabase = createClient(
   { db: { schema: 'pastel' } }
 )
 
+const { checkAdminAuth, setCorsHeaders } = require('./_lib/auth')
+
 module.exports = async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PATCH,DELETE,OPTIONS')
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+  setCorsHeaders(req, res)
   if (req.method === 'OPTIONS') return res.status(200).end()
 
   if (req.method === 'GET') {
@@ -18,11 +18,12 @@ module.exports = async function handler(req, res) {
       .select('*')
       .eq('ativo', true)
       .order('created_at', { ascending: true })
-    if (error) return res.status(500).json({ error: error.message })
+    if (error) { console.error('[catalogo GET]', error.message); return res.status(500).json({ error: 'Erro interno.' }) }
     return res.status(200).json(data)
   }
 
   if (req.method === 'POST') {
+    if (!checkAdminAuth(req, res)) return
     const { nome, preco } = req.body
     if (!nome || !preco) return res.status(400).json({ error: 'nome e preco obrigatórios' })
     const { data, error } = await supabase
@@ -30,11 +31,12 @@ module.exports = async function handler(req, res) {
       .insert({ nome: nome.trim(), preco: parseFloat(preco) })
       .select()
       .single()
-    if (error) return res.status(500).json({ error: error.message })
+    if (error) { console.error('[catalogo POST]', error.message); return res.status(500).json({ error: 'Erro interno.' }) }
     return res.status(201).json(data)
   }
 
   if (req.method === 'PATCH') {
+    if (!checkAdminAuth(req, res)) return
     const { id } = req.query
     const { nome, preco } = req.body
     if (!id) return res.status(400).json({ error: 'id obrigatório' })
@@ -48,18 +50,19 @@ module.exports = async function handler(req, res) {
       .eq('id', id)
       .select()
       .single()
-    if (error) return res.status(500).json({ error: error.message })
+    if (error) { console.error('[catalogo PATCH]', error.message); return res.status(500).json({ error: 'Erro interno.' }) }
     return res.status(200).json(data)
   }
 
   if (req.method === 'DELETE') {
+    if (!checkAdminAuth(req, res)) return
     const { id } = req.query
     if (!id) return res.status(400).json({ error: 'id obrigatório' })
     const { error } = await supabase
       .from('catalogo')
       .update({ ativo: false })
       .eq('id', id)
-    if (error) return res.status(500).json({ error: error.message })
+    if (error) { console.error('[catalogo DELETE]', error.message); return res.status(500).json({ error: 'Erro interno.' }) }
     return res.status(200).json({ ok: true })
   }
 

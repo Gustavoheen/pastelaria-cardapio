@@ -6,10 +6,10 @@ const supabase = createClient(
   { db: { schema: 'pastel' } }
 )
 
+const { checkAdminAuth, setCorsHeaders } = require('./_lib/auth')
+
 module.exports = async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Access-Control-Allow-Methods', 'GET,PATCH,OPTIONS')
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+  setCorsHeaders(req, res)
   if (req.method === 'OPTIONS') return res.status(200).end()
 
   // GET — retorna todas as sobrescritas de sabor
@@ -17,13 +17,14 @@ module.exports = async function handler(req, res) {
     const { data, error } = await supabase
       .from('bebidas_sabores')
       .select('*')
-    if (error) return res.status(500).json({ error: error.message })
+    if (error) { console.error('[bebidas-sabores]', error.message); return res.status(500).json({ error: 'Erro interno.' }) }
     return res.status(200).json(data)
   }
 
   // PATCH — upsert sabores de uma bebida
   // body: { bebida_id, sabores: ['Sabor1', 'Sabor2', ...] }
   if (req.method === 'PATCH') {
+    if (!checkAdminAuth(req, res)) return
     const { bebida_id, sabores } = req.body
     if (!bebida_id || !Array.isArray(sabores))
       return res.status(400).json({ error: 'bebida_id e sabores[] obrigatórios' })
@@ -33,7 +34,7 @@ module.exports = async function handler(req, res) {
       .upsert({ bebida_id, sabores }, { onConflict: 'bebida_id' })
       .select()
       .single()
-    if (error) return res.status(500).json({ error: error.message })
+    if (error) { console.error('[bebidas-sabores]', error.message); return res.status(500).json({ error: 'Erro interno.' }) }
     return res.status(200).json(data)
   }
 

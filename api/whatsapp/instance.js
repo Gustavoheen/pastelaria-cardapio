@@ -40,11 +40,13 @@ async function evoDel(path) {
   return evoFetch(path, { method: 'DELETE' })
 }
 
+const { checkAdminAuth, setCorsHeaders } = require('../_lib/auth')
+
 module.exports = async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,DELETE,OPTIONS')
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+  setCorsHeaders(req, res)
   if (req.method === 'OPTIONS') return res.status(200).end()
+  // All instance management operations are admin-only
+  if (!checkAdminAuth(req, res)) return
 
   const instance = EVO_INST()
   const webhookUrl = 'https://pasteldocariocavrb.com.br/api/whatsapp/webhook'
@@ -181,6 +183,6 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' })
   } catch (err) {
     console.error('[Instance]', err)
-    return res.status(500).json({ error: err.message })
+    console.error('[Instance]', err.message); return res.status(500).json({ error: 'Erro interno.' })
   }
 }

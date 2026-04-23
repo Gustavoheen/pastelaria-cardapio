@@ -13,11 +13,13 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_KEY
 )
 
+const { checkAdminAuth, setCorsHeaders } = require('../_lib/auth')
+
 module.exports = async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Access-Control-Allow-Methods', 'GET,PATCH,DELETE,OPTIONS')
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+  setCorsHeaders(req, res)
   if (req.method === 'OPTIONS') return res.status(200).end()
+  // All session operations are admin-only
+  if (!checkAdminAuth(req, res)) return
 
   try {
     /* ── GET → listar sessões ── */
@@ -28,7 +30,7 @@ module.exports = async function handler(req, res) {
         .order('updated_at', { ascending: false })
         .limit(50)
 
-      if (error) return res.status(500).json({ error: error.message })
+      if (error) { console.error('[sessoes GET]', error.message); return res.status(500).json({ error: 'Erro interno.' }) }
       return res.status(200).json(data || [])
     }
 
@@ -93,6 +95,6 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' })
   } catch (err) {
     console.error('[Sessões]', err)
-    return res.status(500).json({ error: err.message })
+    console.error('[sessoes]', err.message); return res.status(500).json({ error: 'Erro interno.' })
   }
 }

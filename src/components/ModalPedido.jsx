@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { CONFIG } from '../config.js'
+import { apiFetch } from '../utils/apiFetch.js'
 import { salvarPedido, formatarMensagemWhatsApp, enviarWhatsApp } from '../utils/salvarPedido.js'
 
 const STEPS = ['Dados', 'Pagamento', 'Resumo']
@@ -317,7 +318,7 @@ export default function ModalPedido({ aberto, onFechar, itens, subtotal, onLimpa
           bairro: endBairro.trim(), complemento: endComplemento.trim(),
         }
       }
-      fetch('/api/clientes', {
+      apiFetch('/api/clientes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(clientePayload),
@@ -348,7 +349,7 @@ export default function ModalPedido({ aberto, onFechar, itens, subtotal, onLimpa
       })
       enviarWhatsApp(msg)
 
-      fetch('/api/whatsapp/enviar-confirmacao', {
+      apiFetch('/api/whatsapp/enviar-confirmacao', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

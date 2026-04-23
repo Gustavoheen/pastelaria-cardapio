@@ -6,11 +6,13 @@ const supabase = createClient(
   { db: { schema: 'pastel' } }
 )
 
+const { checkAdminAuth, setCorsHeaders } = require('./_lib/auth')
+
 module.exports = async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PATCH,DELETE,OPTIONS')
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+  setCorsHeaders(req, res)
   if (req.method === 'OPTIONS') return res.status(200).end()
+  // All caderneta operations require admin auth
+  if (!checkAdminAuth(req, res)) return
 
   /* ── GET ── lista entradas com dados do cliente */
   if (req.method === 'GET') {
@@ -25,7 +27,7 @@ module.exports = async function handler(req, res) {
     if (cliente_id) query = query.eq('cliente_id', cliente_id)
 
     const { data: entradas, error } = await query
-    if (error) return res.status(500).json({ error: error.message })
+    if (error) { console.error('[caderneta]', error.message); return res.status(500).json({ error: 'Erro interno.' }) }
 
     if (!entradas || entradas.length === 0) return res.status(200).json([])
 
@@ -71,7 +73,7 @@ module.exports = async function handler(req, res) {
       .select()
       .single()
 
-    if (error) return res.status(500).json({ error: error.message })
+    if (error) { console.error('[caderneta]', error.message); return res.status(500).json({ error: 'Erro interno.' }) }
     return res.status(201).json(inserted)
   }
 
@@ -94,7 +96,7 @@ module.exports = async function handler(req, res) {
       .select()
       .single()
 
-    if (error) return res.status(500).json({ error: error.message })
+    if (error) { console.error('[caderneta]', error.message); return res.status(500).json({ error: 'Erro interno.' }) }
     return res.status(200).json(data)
   }
 
@@ -108,7 +110,7 @@ module.exports = async function handler(req, res) {
       .delete()
       .eq('id', id)
 
-    if (error) return res.status(500).json({ error: error.message })
+    if (error) { console.error('[caderneta]', error.message); return res.status(500).json({ error: 'Erro interno.' }) }
     return res.status(204).end()
   }
 
