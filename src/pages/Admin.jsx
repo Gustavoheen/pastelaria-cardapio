@@ -2561,7 +2561,7 @@ function PaginaClientes() {
                         </div>
                       )}
                       <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                        {c.telefone && c.telefone !== '00000000000' && (
+                        {c.telefone && c.telefone !== '00000000000' && !c.telefone.startsWith('x') && (
                           <a href={`https://wa.me/55${c.telefone}`} target="_blank" rel="noopener noreferrer"
                             style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '0.4rem 0.75rem', borderRadius: '8px', background: 'rgba(0,200,80,0.12)', border: '1px solid rgba(0,200,80,0.3)', color: '#6aff9e', fontSize: '0.75rem', fontWeight: 700, textDecoration: 'none' }}
                           >💬 WhatsApp</a>
@@ -3134,7 +3134,12 @@ function PaginaCaderneta() {
                         >
                           <div>
                             <div style={{ color: C.text, fontWeight: 700, fontSize: '0.85rem' }}>{c.nome}</div>
-                            <div style={{ color: C.muted, fontSize: '0.7rem' }}>{c.cpf ? `CPF ${c.cpf}` : (c.telefone !== '00000000000' ? c.telefone : '')}</div>
+                            {(() => {
+                              const t = c.telefone || ''
+                              const fake = !t || t.startsWith('x') || t === '00000000000'
+                              const sub = c.cpf ? `CPF ${c.cpf}` : (fake ? '' : t)
+                              return sub ? <div style={{ color: C.muted, fontSize: '0.7rem' }}>{sub}</div> : null
+                            })()}
                           </div>
                           {(saldoPorCliente[c.id] || 0) > 0 && (
                             <span style={{ color: '#ff9944', fontSize: '0.75rem', fontWeight: 800, flexShrink: 0 }}>
@@ -6730,7 +6735,12 @@ function PaginaBalcao({ onPedidoCriado, onCaderneta, mesaAdicionando, onCancelar
                             >
                               <div>
                                 <div style={{ color: '#fff', fontWeight: 700, fontSize: '0.85rem' }}>{c.nome}</div>
-                                <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.7rem' }}>{c.cpf ? `CPF ${c.cpf}` : c.telefone}</div>
+                                {(() => {
+                                  const t = c.telefone || ''
+                                  const fake = !t || t.startsWith('x') || t === '00000000000'
+                                  const sub = c.cpf ? `CPF ${c.cpf}` : (fake ? '' : t)
+                                  return sub ? <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.7rem' }}>{sub}</div> : null
+                                })()}
                               </div>
                             </button>
                           ))}
