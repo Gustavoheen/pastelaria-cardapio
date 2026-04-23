@@ -2357,6 +2357,25 @@ function PaginaClientes() {
   const [formBairro, setFormBairro] = useState('')
   const [salvandoCliente, setSalvandoCliente] = useState(false)
 
+  // Merge de duplicatas
+  const [merging, setMerging] = useState(false)
+  const [resultadoMerge, setResultadoMerge] = useState(null)
+
+  async function unificarDuplicatas() {
+    if (!confirm('Isso vai unificar clientes com nomes iguais (ignorando acentos/caixa) e normalizar todos os nomes. Continuar?')) return
+    setMerging(true)
+    setResultadoMerge(null)
+    try {
+      const r = await apiFetch('/api/merge-clientes', { method: 'POST' })
+      const d = await r.json()
+      setResultadoMerge(d)
+      // Recarregar lista
+      const c = await apiFetch('/api/clientes').then(r => r.json())
+      setClientes(Array.isArray(c) ? c : [])
+    } catch { setResultadoMerge({ error: true }) }
+    setMerging(false)
+  }
+
   useEffect(() => {
     apiFetch('/api/clientes').then(r => r.json())
       .then(c => { setClientes(Array.isArray(c) ? c : []); setCarregando(false) })
@@ -2390,9 +2409,12 @@ function PaginaClientes() {
     setClientes(prev => prev.filter(c => c.id !== id))
   }
 
-  const filtrados = busca.trim()
+  // Busca ignora acentos/cedilha/caixa
+  const normalizarBusca = (s) => (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
+  const buscaNorm = normalizarBusca(busca.trim())
+  const filtrados = buscaNorm
     ? clientes.filter(c =>
-        c.nome?.toLowerCase().includes(busca.toLowerCase()) ||
+        normalizarBusca(c.nome || '').includes(buscaNorm) ||
         (c.cpf || '').includes(busca.replace(/\D/g, '')) ||
         (c.telefone || '').includes(busca.replace(/\D/g, ''))
       )
@@ -2428,6 +2450,20 @@ function PaginaClientes() {
           style={{ flex: 1, padding: '0.55rem 0.875rem', borderRadius: '10px', fontSize: '0.88rem', background: 'rgba(255,235,235,0.70)', border: `1px solid ${C.cardBorder}`, color: C.text, outline: 'none' }}
         />
         <button
+          onClick={unificarDuplicatas}
+          disabled={merging}
+          title="Unifica clientes com nomes iguais (ignorando acentos/caixa) e normaliza todos os nomes"
+          style={{
+            display: 'flex', alignItems: 'center', gap: '5px',
+            padding: '0.55rem 0.875rem', borderRadius: '10px', cursor: merging ? 'not-allowed' : 'pointer',
+            fontSize: '0.82rem', fontWeight: 700, whiteSpace: 'nowrap',
+            background: 'rgba(255,160,0,0.12)', border: '1px solid rgba(255,160,0,0.3)',
+            color: '#f5a623', opacity: merging ? 0.7 : 1,
+          }}
+        >
+          {merging ? '⏳ Unificando...' : '🔀 Unificar duplicatas'}
+        </button>
+        <button
           onClick={() => setNovoForm(v => !v)}
           style={{
             display: 'flex', alignItems: 'center', gap: '5px',
@@ -2441,6 +2477,25 @@ function PaginaClientes() {
           <UserPlus size={14} /> {novoForm ? 'Cancelar' : 'Novo cliente'}
         </button>
       </div>
+
+      {/* Banner resultado merge */}
+      {resultadoMerge && (
+        <div style={{
+          padding: '0.75rem 1rem', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          background: resultadoMerge.error ? 'rgba(255,50,50,0.08)' : 'rgba(0,200,80,0.08)',
+          border: `1px solid ${resultadoMerge.error ? 'rgba(255,50,50,0.3)' : 'rgba(0,200,80,0.3)'}`,
+        }}>
+          {resultadoMerge.error
+            ? <span style={{ color: '#ff7777', fontSize: '0.82rem', fontWeight: 700 }}>⚠️ Erro ao unificar.</span>
+            : <span style={{ color: C.text, fontSize: '0.82rem' }}>
+                ✅ <strong>{resultadoMerge.grupos || 0}</strong> grupos unificados
+                · <strong>{resultadoMerge.duplicatasRemovidas || 0}</strong> duplicatas removidas
+                · <strong>{resultadoMerge.nomesAtualizados || 0}</strong> nomes normalizados
+              </span>
+          }
+          <button onClick={() => setResultadoMerge(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: C.muted, fontSize: '1rem', padding: '0 4px' }}>✕</button>
+        </div>
+      )}
 
       {/* Form novo cliente */}
       {novoForm && (

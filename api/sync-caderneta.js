@@ -1,5 +1,6 @@
 const { createClient } = require('@supabase/supabase-js')
 const { checkAdminAuth, setCorsHeaders } = require('./_lib/auth')
+const { formatarNome, chaveNome } = require('./_lib/nome')
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -47,13 +48,13 @@ module.exports = async function handler(req, res) {
       (entradasExistentes || []).map(e => `${e.cliente_id}|${Number(e.valor).toFixed(2)}|${e.data}`)
     )
 
-    // 3. Buscar todos os clientes para cache de nome→id
+    // 3. Buscar todos os clientes para cache de nome->id (usa chave normalizada sem acentos)
     const { data: clientes } = await supabase
       .from('customers')
       .select('id, nome, telefone')
     const clienteCache = {}
     ;(clientes || []).forEach(c => {
-      clienteCache[c.nome?.toLowerCase().trim()] = c
+      clienteCache[chaveNome(c.nome)] = c
     })
 
     let importados = 0
@@ -67,30 +68,21 @@ module.exports = async function handler(req, res) {
       const valor = Number(pedido.total || pedido.subtotal || 0)
       if (valor <= 0) { pulados++; continue }
 
-      // Encontrar ou criar cliente pelo nome
-      let cliente = clienteCache[nomeRaw.toLowerCase()]
+      // Encontrar ou criar cliente pelo nome normalizado (ignora acentos/caixa)
+      const nomeFormatado = formatarNome(nomeRaw)
+      const chave = chaveNome(nomeFormatado)
+      let cliente = clienteCache[chave]
       if (!cliente) {
-        // Busca case-insensitive no banco
-        const { data: found } = await supabase
+        // Criar cliente novo com nome bem formatado
+        const telFinal = 'xsync_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5)
+        const { data: novo } = await supabase
           .from('customers')
-          .select('id, nome, telefone')
-          .ilike('nome', nomeRaw)
-          .maybeSingle()
-        if (found) {
-          cliente = found
-          clienteCache[nomeRaw.toLowerCase()] = found
-        } else {
-          // Criar cliente novo
-          const telFinal = 'xsync_' + Date.now().toString(36)
-          const { data: novo } = await supabase
-            .from('customers')
-            .insert({ nome: nomeRaw, telefone: telFinal, total_pedidos: 0, enderecos: [] })
-            .select()
-            .single()
-          if (novo) {
-            cliente = novo
-            clienteCache[nomeRaw.toLowerCase()] = novo
-          }
+          .insert({ nome: nomeFormatado, telefone: telFinal, total_pedidos: 0, enderecos: [] })
+          .select()
+          .single()
+        if (novo) {
+          cliente = novo
+          clienteCache[chave] = novo
         }
       }
       if (!cliente) { pulados++; continue }

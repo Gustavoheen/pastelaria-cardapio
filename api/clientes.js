@@ -7,6 +7,7 @@ const supabase = createClient(
 )
 
 const { checkAdminAuth, setCorsHeaders } = require('./_lib/auth')
+const { formatarNome, chaveNome } = require('./_lib/nome')
 
 module.exports = async function handler(req, res) {
   setCorsHeaders(req, res)
@@ -46,15 +47,18 @@ module.exports = async function handler(req, res) {
     const telFinal = tel || ('x' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5))
 
     const cpfNormalizado = cpf ? String(cpf).trim() || null : null
+    const nomeFormatado = formatarNome(nome)
+    const chave = chaveNome(nomeFormatado)
 
-    // busca existente por telefone (se tiver) ou por nome normalizado (clientes manuais sem telefone)
+    // busca existente por telefone (se tiver) ou por nome normalizado sem acentos (clientes manuais sem telefone)
     let existente = null
     if (tel) {
       const { data } = await supabase.from('customers').select('*').eq('telefone', tel).maybeSingle()
       existente = data
     } else if (manual) {
-      const { data } = await supabase.from('customers').select('*').ilike('nome', nome.trim()).maybeSingle()
-      existente = data
+      // Busca case/acento-insensitive: carrega candidatos e filtra por chaveNome
+      const { data: candidatos } = await supabase.from('customers').select('*')
+      existente = (candidatos || []).find(c => chaveNome(c.nome) === chave) || null
     }
 
     if (existente) {
@@ -62,7 +66,7 @@ module.exports = async function handler(req, res) {
       if (!tel && manual) return res.status(200).json(existente)
 
       const updates = {
-        nome: nome.trim(),
+        nome: nomeFormatado,
         updated_at: new Date().toISOString(),
       }
 
@@ -100,7 +104,7 @@ module.exports = async function handler(req, res) {
     // novo cliente
     const novo = {
       telefone: telFinal,
-      nome: nome.trim(),
+      nome: nomeFormatado,
       total_pedidos: manual ? 0 : 1,
       enderecos: endereco && endereco.rua ? [endereco] : [],
     }
