@@ -2603,6 +2603,10 @@ function PaginaCaderneta() {
   const [formaPagCaderneta, setFormaPagCaderneta] = useState('dinheiro')
   const [salvandoPagCaderneta, setSalvandoPagCaderneta] = useState(false)
 
+  // Modal histórico de pagas
+  const [modalPagas, setModalPagas] = useState(false)
+  const [periodoModalPagas, setPeriodoModalPagas] = useState('mes')
+
   // Lançamento avulso (dentro do card do cliente)
   const [novaEntradaCliente, setNovaEntradaCliente] = useState(null)
   const [entDescricao, setEntDescricao] = useState('')
@@ -2907,6 +2911,108 @@ function PaginaCaderneta() {
         </div>
       )}
 
+      {/* Modal Pagas */}
+      {modalPagas && (() => {
+        const agora = new Date()
+        const hStr = agora.toISOString().slice(0, 10)
+        const mesIniStr = `${agora.getFullYear()}-${String(agora.getMonth()+1).padStart(2,'0')}-01`
+        const mesPassadoIni = new Date(agora.getFullYear(), agora.getMonth()-1, 1).toISOString().slice(0, 10)
+        const mesPassadoFim = new Date(agora.getFullYear(), agora.getMonth(), 0).toISOString().slice(0, 10)
+
+        const pagas = caderneta.filter(e => {
+          if (!e.pago) return false
+          const dt = (e.updated_at || e.created_at || '').slice(0, 10)
+          if (periodoModalPagas === 'mes') return dt >= mesIniStr && dt <= hStr
+          if (periodoModalPagas === 'mespassado') return dt >= mesPassadoIni && dt <= mesPassadoFim
+          return true // 'tudo'
+        })
+
+        // agrupar por cliente
+        const porCliente = {}
+        pagas.forEach(e => {
+          const key = e.cliente_id || 'sem-id'
+          if (!porCliente[key]) {
+            const full = clientes.find(c => c.id === e.cliente_id)
+            porCliente[key] = { nome: full?.nome || e.nome || 'Cliente', entradas: [], total: 0 }
+          }
+          porCliente[key].entradas.push(e)
+          porCliente[key].total += Number(e.valor || 0)
+        })
+        const grupos = Object.values(porCliente).sort((a, b) => b.total - a.total)
+        const totalGeral = pagas.reduce((s, e) => s + Number(e.valor || 0), 0)
+
+        const PERIODOS_PAGAS = [['mes','Este Mês'],['mespassado','Mês Passado'],['tudo','Tudo']]
+
+        return (
+          <div style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(0,0,0,0.65)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '1rem', overflowY: 'auto' }}>
+            <div style={{ background: 'rgba(255,248,248,0.98)', borderRadius: '20px', width: '100%', maxWidth: '480px', padding: '1.5rem', marginTop: '2rem', boxShadow: '0 8px 40px rgba(0,0,0,0.35)' }}>
+
+              {/* Header */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                <div>
+                  <h3 style={{ color: '#1A0000', fontWeight: 900, fontSize: '1.05rem', margin: 0 }}>✅ Contas Recebidas</h3>
+                  <div style={{ color: 'rgba(15,0,0,0.55)', fontSize: '0.75rem', marginTop: '2px' }}>{pagas.length} entrada{pagas.length !== 1 ? 's' : ''} · {fmtMoeda(totalGeral)} recebido</div>
+                </div>
+                <button onClick={() => setModalPagas(false)} style={{ background: 'rgba(200,0,0,0.1)', border: '1px solid rgba(200,0,0,0.2)', borderRadius: '8px', color: '#cc2200', fontWeight: 700, fontSize: '0.85rem', padding: '0.3rem 0.75rem', cursor: 'pointer' }}>✕ Fechar</button>
+              </div>
+
+              {/* Filtro período */}
+              <div style={{ display: 'flex', gap: '6px', marginBottom: '1rem' }}>
+                {PERIODOS_PAGAS.map(([val, label]) => (
+                  <button key={val} onClick={() => setPeriodoModalPagas(val)} style={{
+                    padding: '0.35rem 0.75rem', borderRadius: '20px', cursor: 'pointer', fontSize: '0.78rem', fontWeight: 700, border: 'none',
+                    background: periodoModalPagas === val ? '#cc2200' : 'rgba(200,0,0,0.08)',
+                    color: periodoModalPagas === val ? '#fff' : 'rgba(15,0,0,0.7)',
+                  }}>{label}</button>
+                ))}
+              </div>
+
+              {/* Lista */}
+              {grupos.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '2rem', color: 'rgba(15,0,0,0.45)', fontSize: '0.85rem' }}>
+                  Nenhuma conta recebida no período.
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  {grupos.map((g, gi) => (
+                    <div key={gi} style={{ borderRadius: '12px', border: '1px solid rgba(0,180,255,0.25)', background: 'rgba(0,180,255,0.04)', overflow: 'hidden' }}>
+                      {/* cabeçalho cliente */}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.625rem 0.875rem', background: 'rgba(0,180,255,0.08)' }}>
+                        <span style={{ color: '#1A0000', fontWeight: 800, fontSize: '0.88rem' }}>{g.nome}</span>
+                        <span style={{ color: '#007acc', fontWeight: 800, fontSize: '0.92rem' }}>{fmtMoeda(g.total)}</span>
+                      </div>
+                      {/* entradas */}
+                      {g.entradas.map(e => (
+                        <div key={e.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.4rem 0.875rem', borderTop: '1px solid rgba(0,180,255,0.12)', gap: '0.5rem' }}>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ color: 'rgba(15,0,0,0.75)', fontSize: '0.8rem', fontWeight: 600, textDecoration: 'line-through', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              {e.descricao || 'Lançamento'}
+                            </div>
+                            <div style={{ color: 'rgba(15,0,0,0.45)', fontSize: '0.7rem' }}>
+                              {e.data || (e.created_at ? new Date(e.created_at).toLocaleDateString('pt-BR') : '')}
+                              {e.updated_at ? ` · pago em ${new Date(e.updated_at).toLocaleDateString('pt-BR')}` : ''}
+                            </div>
+                          </div>
+                          <span style={{ color: '#007acc', fontWeight: 700, fontSize: '0.85rem', flexShrink: 0 }}>
+                            {fmtMoeda(Number(e.valor))}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+
+                  {/* Total geral */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 0.875rem', borderRadius: '12px', background: 'rgba(0,200,80,0.08)', border: '1px solid rgba(0,200,80,0.25)', marginTop: '4px' }}>
+                    <span style={{ color: '#1A0000', fontWeight: 800, fontSize: '0.88rem' }}>Total recebido</span>
+                    <span style={{ color: '#00c853', fontWeight: 900, fontSize: '1.05rem' }}>{fmtMoeda(totalGeral)}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )
+      })()}
+
       {/* Stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '0.75rem' }}>
         <KpiCard icon={BookOpen} label="Em aberto" valor={fmtMoeda(totalAberto)} />
@@ -2923,6 +3029,12 @@ function PaginaCaderneta() {
           placeholder="Buscar cliente na caderneta..."
           style={{ flex: 1, padding: '0.55rem 0.875rem', borderRadius: '10px', fontSize: '0.88rem', background: 'rgba(255,235,235,0.70)', border: `1px solid ${C.cardBorder}`, color: C.text, outline: 'none' }}
         />
+        <button
+          onClick={() => setModalPagas(true)}
+          style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '0.55rem 0.875rem', borderRadius: '10px', cursor: 'pointer', fontSize: '0.82rem', fontWeight: 700, whiteSpace: 'nowrap', background: 'rgba(0,180,255,0.10)', border: '1px solid rgba(0,180,255,0.3)', color: '#4db8ff' }}
+        >
+          ✅ Pagas
+        </button>
         <button
           onClick={() => { setModalNovoLanc(true); setNovoLancBusca(''); setNovoLancCliente(null); setEntDescricao(''); setEntValor(''); setEntVencimento('') }}
           style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '0.55rem 0.875rem', borderRadius: '10px', cursor: 'pointer', fontSize: '0.82rem', fontWeight: 700, whiteSpace: 'nowrap', background: 'rgba(0,200,80,0.12)', border: '1px solid rgba(0,200,80,0.3)', color: C.success }}
