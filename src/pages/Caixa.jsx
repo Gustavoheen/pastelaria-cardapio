@@ -1185,7 +1185,7 @@ function AbaMesas({ pedidos, onAtualizar, carregando, onAdicionarItens, onFechar
   const mesasAbertas = pedidos.filter(p =>
     p.origem === 'balcao' &&
     (p.observacao || '').includes('COMER NO LOCAL') &&
-    p.status === 'preparando'
+    (p.status === 'preparando' || p.status === 'recebido')
   )
 
   return (
@@ -1741,7 +1741,7 @@ export default function Caixa() {
   const mesasAbertas = pedidos.filter(p =>
     p.origem === 'balcao' &&
     (p.observacao || '').includes('COMER NO LOCAL') &&
-    p.status === 'preparando'
+    (p.status === 'preparando' || p.status === 'recebido')
   )
   const mesasIds = new Set(mesasAbertas.map(p => p.id))
   const pedidosTodos = pedidos.filter(p => !mesasIds.has(p.id))

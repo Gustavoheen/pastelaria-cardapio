@@ -6945,7 +6945,7 @@ function PaginaMesas({ pedidos, onAtualizar, onAdicionarItens }) {
   const mesasAbertas = (pedidos || []).filter(p =>
     p.origem === 'balcao' &&
     (p.observacao || '').includes('COMER NO LOCAL') &&
-    p.status === 'preparando'
+    (p.status === 'preparando' || p.status === 'recebido')
   )
 
   async function fecharConta(pedidoId) {
