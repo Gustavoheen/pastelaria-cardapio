@@ -5677,6 +5677,7 @@ function PaginaBalcao({ onPedidoCriado, onCaderneta, mesaAdicionando, onCancelar
   const [cart, setCart] = useState(carregarCartSalvo)
   const [tipoModal, setTipoModal] = useState(null)
   const [modo, setModo] = useState('levar')
+  const [modalCartAberto, setModalCartAberto] = useState(false)
 
   // Checkout
   const [nomeCliente, setNomeCliente] = useState('')
@@ -6537,7 +6538,7 @@ function PaginaBalcao({ onPedidoCriado, onCaderneta, mesaAdicionando, onCancelar
       </div>
 
       {/* ── COLUNA DIREITA: CARRINHO + CHECKOUT ── */}
-      <div className="scroll-visivel" style={{ position: 'sticky', top: '1rem', maxHeight: 'calc(100vh - 2rem)', overflowY: 'auto', paddingRight: '6px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
 
         {/* Banner: Adicionando itens a mesa */}
         {mesaAdicionando && (
@@ -6596,12 +6597,20 @@ function PaginaBalcao({ onPedidoCriado, onCaderneta, mesaAdicionando, onCancelar
               )}
             </div>
             {cart.length > 0 && (
-              <button
-                onClick={() => setCart([])}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,100,100,0.6)', fontSize: '0.72rem' }}
-              >
-                Limpar
-              </button>
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <button
+                  onClick={() => setModalCartAberto(true)}
+                  style={{ background: 'rgba(204,0,0,0.1)', border: '1px solid rgba(204,0,0,0.3)', borderRadius: '8px', padding: '4px 10px', cursor: 'pointer', color: C.red, fontSize: '0.72rem', fontWeight: 700 }}
+                >
+                  🔍 Ver tudo
+                </button>
+                <button
+                  onClick={() => setCart([])}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,100,100,0.6)', fontSize: '0.72rem' }}
+                >
+                  Limpar
+                </button>
+              </div>
             )}
           </div>
 
@@ -6612,7 +6621,7 @@ function PaginaBalcao({ onPedidoCriado, onCaderneta, mesaAdicionando, onCancelar
               <p style={{ margin: 0, fontSize: '0.82rem' }}>Nenhum item</p>
             </div>
           ) : (
-            <div className="scroll-visivel" style={{ padding: '0.75rem 1rem 2.5rem 1rem', display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '420px', overflowY: 'scroll', scrollPaddingBottom: '2rem' }}>
+            <div style={{ padding: '0.75rem 1rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
               {cart.map(item => (
                 <div
                   key={item.chave}
@@ -6929,6 +6938,70 @@ function PaginaBalcao({ onPedidoCriado, onCaderneta, mesaAdicionando, onCancelar
           onFechar={() => setTipoModal(null)}
           onAdicionar={item => { adicionarPastel(item); setTipoModal(null) }}
         />
+      )}
+
+      {/* Modal Carrinho Completo */}
+      {modalCartAberto && (
+        <div
+          onClick={() => setModalCartAberto(false)}
+          style={{ position: 'fixed', inset: 0, zIndex: 60, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{ background: '#fff8f8', borderRadius: '16px', width: '100%', maxWidth: '540px', maxHeight: '90vh', display: 'flex', flexDirection: 'column', boxShadow: '0 20px 60px rgba(0,0,0,0.4)' }}
+          >
+            {/* Header fixo */}
+            <div style={{ padding: '1rem 1.25rem', borderBottom: `1px solid ${C.cardBorder}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <ShoppingCart size={18} color={C.red} />
+                <span style={{ color: C.text, fontWeight: 800, fontSize: '1rem' }}>Carrinho completo</span>
+                <span style={{ background: C.red, color: '#fff', borderRadius: '999px', fontSize: '0.72rem', fontWeight: 900, padding: '2px 8px' }}>
+                  {cart.reduce((s, i) => s + i.qtd, 0)}
+                </span>
+              </div>
+              <button onClick={() => setModalCartAberto(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: C.muted, fontSize: '1.4rem', fontWeight: 700, lineHeight: 1 }}>✕</button>
+            </div>
+
+            {/* Lista scrollavel */}
+            <div style={{ flex: 1, overflowY: 'auto', padding: '0.75rem 1rem', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {cart.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '2rem', color: C.muted }}>Nenhum item</div>
+              ) : cart.map(item => (
+                <div key={item.chave} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', padding: '10px', borderRadius: '10px', background: 'rgba(255,235,235,0.5)', border: `1px solid ${C.cardBorder}` }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ color: C.text, fontSize: '0.92rem', fontWeight: 700 }}>
+                      {item.qtd > 1 ? `${item.qtd}x ` : ''}{item.nome}
+                    </div>
+                    {item.sabores?.length > 0 && (
+                      <div style={{ color: C.muted, fontSize: '0.78rem', marginTop: '2px' }}>{item.sabores.join(', ')}</div>
+                    )}
+                    {item.adicionais?.length > 0 && (
+                      <div style={{ color: '#b35c00', fontSize: '0.78rem' }}>+ {item.adicionais.join(', ')}</div>
+                    )}
+                    {item.observacao && (
+                      <div style={{ color: C.muted, fontSize: '0.75rem', fontStyle: 'italic' }}>{item.observacao}</div>
+                    )}
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px', flexShrink: 0 }}>
+                    <div style={{ color: C.gold, fontWeight: 700, fontSize: '0.92rem' }}>{fmtMoeda(item.preco * item.qtd)}</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <button onClick={() => alterarQtdCart(item.chave, -1)} style={{ width: '28px', height: '28px', background: 'rgba(200,0,0,0.18)', border: '1px solid rgba(200,0,0,0.3)', borderRadius: '8px', cursor: 'pointer', color: '#c00', fontSize: '1rem', fontWeight: 900, lineHeight: 1 }}>−</button>
+                      <span style={{ minWidth: '24px', textAlign: 'center', color: C.text, fontWeight: 800, fontSize: '0.95rem' }}>{item.qtd}</span>
+                      <button onClick={() => alterarQtdCart(item.chave, 1)} style={{ width: '28px', height: '28px', background: 'rgba(0,160,60,0.18)', border: '1px solid rgba(0,160,60,0.3)', borderRadius: '8px', cursor: 'pointer', color: '#1b7a3e', fontSize: '1rem', fontWeight: 900, lineHeight: 1 }}>+</button>
+                    </div>
+                    <button onClick={() => removerItem(item.chave)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(200,0,0,0.7)', padding: 0, fontSize: '0.75rem' }}>remover</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Footer fixo */}
+            <div style={{ padding: '1rem 1.25rem', borderTop: `1px solid ${C.cardBorder}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,248,248,0.98)', borderRadius: '0 0 16px 16px' }}>
+              <span style={{ color: C.muted, fontSize: '0.85rem', fontWeight: 600 }}>Total</span>
+              <span style={{ color: C.gold, fontFamily: 'Bebas Neue, sans-serif', fontSize: '1.8rem', letterSpacing: '1px' }}>{fmtMoeda(subtotal)}</span>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )
