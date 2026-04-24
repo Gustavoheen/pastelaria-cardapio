@@ -36,18 +36,23 @@ body {
    SCROLLBAR VISÍVEL — coluna direita do caixa
 ───────────────────────────────────────────── */
 .scroll-visivel {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(204,0,0,0.55) rgba(255,235,235,0.2);
+  scrollbar-width: auto;
+  scrollbar-color: #CC0000 rgba(255,235,235,0.4);
 }
-.scroll-visivel::-webkit-scrollbar { width: 10px; }
-.scroll-visivel::-webkit-scrollbar-track { background: rgba(255,235,235,0.2); border-radius: 8px; }
-.scroll-visivel::-webkit-scrollbar-thumb {
-  background: rgba(204,0,0,0.55);
+.scroll-visivel::-webkit-scrollbar { width: 12px; height: 12px; }
+.scroll-visivel::-webkit-scrollbar-track {
+  background: rgba(255,235,235,0.5);
   border-radius: 8px;
-  border: 2px solid transparent;
-  background-clip: padding-box;
 }
-.scroll-visivel::-webkit-scrollbar-thumb:hover { background: rgba(204,0,0,0.8); background-clip: padding-box; }
+.scroll-visivel::-webkit-scrollbar-thumb {
+  background: #CC0000;
+  border-radius: 8px;
+  border: 2px solid rgba(255,235,235,0.5);
+  background-clip: padding-box;
+  min-height: 40px;
+}
+.scroll-visivel::-webkit-scrollbar-thumb:hover { background: #6b0000; background-clip: padding-box; }
+.scroll-visivel::-webkit-scrollbar-corner { background: transparent; }
 
 /* ─────────────────────────────────────────────
    GLASSMORPHISM
