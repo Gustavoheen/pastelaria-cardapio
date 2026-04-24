@@ -88,8 +88,8 @@ module.exports = async function handler(req, res) {
       if (!cliente) { pulados++; continue }
 
       // Verificar se já existe entrada igual (mesmo cliente + mesmo valor + mesma data)
-      const chave = `${cliente.id}|${valor.toFixed(2)}|${dataBR}`
-      if (existSet.has(chave)) { pulados++; continue }
+      const chaveDup = `${cliente.id}|${valor.toFixed(2)}|${dataBR}`
+      if (existSet.has(chaveDup)) { pulados++; continue }
 
       // Montar descrição a partir dos itens
       const itens = parseItens(pedido.itens)
@@ -110,7 +110,7 @@ module.exports = async function handler(req, res) {
         })
 
       if (!errIns) {
-        existSet.add(chave) // evita duplicata dentro do mesmo loop
+        existSet.add(chaveDup) // evita duplicata dentro do mesmo loop
         importados++
       } else {
         console.error('[sync-caderneta] erro ao inserir:', errIns.message, { pedido: pedido.id })
