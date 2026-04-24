@@ -5802,6 +5802,15 @@ function PaginaBalcao({ onPedidoCriado, onCaderneta, mesaAdicionando, onCancelar
     setCart(prev => prev.filter(i => i.chave !== chave))
   }
 
+  function alterarQtdCart(chave, delta) {
+    setCart(prev => prev.flatMap(i => {
+      if (i.chave !== chave) return [i]
+      const nova = (i.qtd || 1) + delta
+      if (nova <= 0) return []
+      return [{ ...i, qtd: nova }]
+    }))
+  }
+
   async function salvarItemCatalogo() {
     const nome = novoItemNome.trim()
     const preco = parseFloat(String(novoItemPreco).replace(',', '.'))
@@ -6510,7 +6519,7 @@ function PaginaBalcao({ onPedidoCriado, onCaderneta, mesaAdicionando, onCancelar
       </div>
 
       {/* ── COLUNA DIREITA: CARRINHO + CHECKOUT ── */}
-      <div style={{ position: 'sticky', top: '1rem', maxHeight: 'calc(100vh - 5rem)', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <div className="scroll-visivel" style={{ position: 'sticky', top: '1rem', maxHeight: 'calc(100vh - 2rem)', overflowY: 'auto', paddingRight: '6px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
 
         {/* Banner: Adicionando itens a mesa */}
         {mesaAdicionando && (
@@ -6585,7 +6594,7 @@ function PaginaBalcao({ onPedidoCriado, onCaderneta, mesaAdicionando, onCancelar
               <p style={{ margin: 0, fontSize: '0.82rem' }}>Nenhum item</p>
             </div>
           ) : (
-            <div style={{ padding: '0.75rem 1rem', display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '280px', overflowY: 'auto' }}>
+            <div style={{ padding: '0.75rem 1rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
               {cart.map(item => (
                 <div
                   key={item.chave}
@@ -6614,13 +6623,26 @@ function PaginaBalcao({ onPedidoCriado, onCaderneta, mesaAdicionando, onCancelar
                       <div style={{ color: C.muted, fontSize: '0.67rem', fontStyle: 'italic' }}>{item.observacao}</div>
                     )}
                   </div>
-                  <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px', flexShrink: 0 }}>
                     <div style={{ color: C.gold, fontWeight: 700, fontSize: '0.82rem' }}>
                       {fmtMoeda(item.preco * item.qtd)}
                     </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <button
+                        onClick={() => alterarQtdCart(item.chave, -1)}
+                        title="Diminuir"
+                        style={{ width: '24px', height: '24px', background: 'rgba(200,0,0,0.18)', border: '1px solid rgba(200,0,0,0.3)', borderRadius: '6px', cursor: 'pointer', color: '#c00', fontSize: '0.9rem', fontWeight: 900, lineHeight: 1 }}
+                      >−</button>
+                      <span style={{ minWidth: '22px', textAlign: 'center', color: C.text, fontWeight: 800, fontSize: '0.85rem' }}>{item.qtd}</span>
+                      <button
+                        onClick={() => alterarQtdCart(item.chave, 1)}
+                        title="Aumentar"
+                        style={{ width: '24px', height: '24px', background: 'rgba(0,160,60,0.18)', border: '1px solid rgba(0,160,60,0.3)', borderRadius: '6px', cursor: 'pointer', color: '#1b7a3e', fontSize: '0.9rem', fontWeight: 900, lineHeight: 1 }}
+                      >+</button>
+                    </div>
                     <button
                       onClick={() => removerItem(item.chave)}
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,100,100,0.5)', padding: '0', marginTop: '2px', fontSize: '0.7rem' }}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,100,100,0.55)', padding: '0', fontSize: '0.68rem' }}
                     >
                       remover
                     </button>
