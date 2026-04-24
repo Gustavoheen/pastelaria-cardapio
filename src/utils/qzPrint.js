@@ -67,10 +67,10 @@ export async function buscarImpressora(nome) {
 }
 
 // Nome padrão da impressora do cliente
-const IMPRESSORA_PADRAO = 'IMPRESSORA PEDIDOS'
+const IMPRESSORA_PADRAO = 'POS80 Printer'
 
-// ── Helpers para gerar bytes ESC/POS (58mm = 32 colunas) ──
-const COLS = 32
+// ── Helpers para gerar bytes ESC/POS (80mm = 48 colunas) ──
+const COLS = 48
 
 function encode(str) {
   const ascii = str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\x00-\x7F]/g, '?')
