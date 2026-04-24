@@ -22,7 +22,7 @@ module.exports = async function handler(req, res) {
         .from('customers')
         .select('*')
         .order('updated_at', { ascending: false })
-        .limit(200)
+        .limit(5000)
       if (error) { console.error('[clientes]', error.message); return res.status(500).json({ error: 'Erro interno.' }) }
       return res.status(200).json(data)
     }

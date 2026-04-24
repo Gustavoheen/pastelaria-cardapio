@@ -6764,9 +6764,12 @@ function PaginaBalcao({ onPedidoCriado, onCaderneta, mesaAdicionando, onCancelar
                       style={{ ...inputStyle, width: '100%' }}
                     />
                     {buscaClienteCaderneta.trim().length >= 2 && (() => {
-                      const q = buscaClienteCaderneta.trim().toLowerCase()
+                      const norm = (s) => (s || '').normalize('NFD').replace(/\p{M}/gu, '').toLowerCase()
+                      const q = norm(buscaClienteCaderneta.trim())
+                      const qDigitos = buscaClienteCaderneta.replace(/\D/g, '')
                       const matches = clientesCaderneta.filter(c =>
-                        c.nome?.toLowerCase().includes(q) || (c.cpf || '').includes(buscaClienteCaderneta.replace(/\D/g, ''))
+                        norm(c.nome).includes(q) ||
+                        (qDigitos.length > 0 && (c.cpf || '').includes(qDigitos))
                       ).slice(0, 6)
                       const nomeNovo = buscaClienteCaderneta.trim()
                       return (
