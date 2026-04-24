@@ -5678,6 +5678,12 @@ function PaginaBalcao({ onPedidoCriado, onCaderneta, mesaAdicionando, onCancelar
   const [tipoModal, setTipoModal] = useState(null)
   const [modo, setModo] = useState('levar')
   const [modalCartAberto, setModalCartAberto] = useState(false)
+  const [telaEstreita, setTelaEstreita] = useState(() => typeof window !== 'undefined' && window.innerWidth < 1100)
+  useEffect(() => {
+    const h = () => setTelaEstreita(window.innerWidth < 1100)
+    window.addEventListener('resize', h)
+    return () => window.removeEventListener('resize', h)
+  }, [])
 
   // Checkout
   const [nomeCliente, setNomeCliente] = useState('')
@@ -6061,7 +6067,7 @@ function PaginaBalcao({ onPedidoCriado, onCaderneta, mesaAdicionando, onCancelar
   ]
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 340px', gap: '1.5rem', alignItems: 'start' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: telaEstreita ? 'minmax(0,1fr)' : 'minmax(0,1fr) 340px', gap: '1.5rem', alignItems: 'start', paddingBottom: telaEstreita && cart.length > 0 ? '5rem' : 0 }}>
 
       {/* ── COLUNA ESQUERDA: PRODUTOS ── */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
@@ -6938,6 +6944,26 @@ function PaginaBalcao({ onPedidoCriado, onCaderneta, mesaAdicionando, onCancelar
           onFechar={() => setTipoModal(null)}
           onAdicionar={item => { adicionarPastel(item); setTipoModal(null) }}
         />
+      )}
+
+      {/* FAB Carrinho - apenas em tela estreita */}
+      {telaEstreita && cart.length > 0 && !modalCartAberto && (
+        <button
+          onClick={() => setModalCartAberto(true)}
+          style={{
+            position: 'fixed', bottom: '1rem', right: '1rem', zIndex: 40,
+            background: `linear-gradient(145deg, ${C.red}, ${C.redDark})`,
+            color: '#fff', border: 'none', borderRadius: '999px',
+            padding: '0.875rem 1.25rem', cursor: 'pointer',
+            fontSize: '0.95rem', fontWeight: 800,
+            display: 'flex', alignItems: 'center', gap: '10px',
+            boxShadow: '0 8px 24px rgba(204,0,0,0.5)',
+            touchAction: 'manipulation',
+          }}
+        >
+          <ShoppingCart size={18} />
+          <span>{cart.reduce((s, i) => s + i.qtd, 0)} — {fmtMoeda(subtotal)}</span>
+        </button>
       )}
 
       {/* Modal Carrinho Completo */}
