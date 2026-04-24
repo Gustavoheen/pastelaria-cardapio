@@ -6612,7 +6612,7 @@ function PaginaBalcao({ onPedidoCriado, onCaderneta, mesaAdicionando, onCancelar
               <p style={{ margin: 0, fontSize: '0.82rem' }}>Nenhum item</p>
             </div>
           ) : (
-            <div className="scroll-visivel" style={{ padding: '0.75rem 1rem 1.25rem 1rem', display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '360px', overflowY: 'scroll' }}>
+            <div className="scroll-visivel" style={{ padding: '0.75rem 1rem 2.5rem 1rem', display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '420px', overflowY: 'scroll', scrollPaddingBottom: '2rem' }}>
               {cart.map(item => (
                 <div
                   key={item.chave}
