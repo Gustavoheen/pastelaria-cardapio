@@ -5663,8 +5663,18 @@ function ModalSaboresBalcao({ tipo, onFechar, onAdicionar }) {
   )
 }
 
+const CART_STORAGE_KEY = 'balcao_cart_v1'
+function carregarCartSalvo() {
+  try {
+    const raw = localStorage.getItem(CART_STORAGE_KEY)
+    if (!raw) return []
+    const parsed = JSON.parse(raw)
+    return Array.isArray(parsed) ? parsed : []
+  } catch { return [] }
+}
+
 function PaginaBalcao({ onPedidoCriado, onCaderneta, mesaAdicionando, onCancelarMesa }) {
-  const [cart, setCart] = useState([])
+  const [cart, setCart] = useState(carregarCartSalvo)
   const [tipoModal, setTipoModal] = useState(null)
   const [modo, setModo] = useState('levar')
 
@@ -5711,6 +5721,14 @@ function PaginaBalcao({ onPedidoCriado, onCaderneta, mesaAdicionando, onCancelar
       if (cfg && typeof cfg === 'object') setCardapioStateBalcao(cfg)
     }).catch(() => {})
   }, [])
+
+  // Persistir carrinho no localStorage (sobrevive a trocar de aba/pagina)
+  useEffect(() => {
+    try {
+      if (cart.length === 0) localStorage.removeItem(CART_STORAGE_KEY)
+      else localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart))
+    } catch {}
+  }, [cart])
 
   // Precos e desativados do admin
   const precosAdm = cardapioStateBalcao?.precos || {}
