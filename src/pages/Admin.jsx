@@ -2412,11 +2412,14 @@ function PaginaClientes() {
   // Busca ignora acentos/cedilha/caixa
   const normalizarBusca = (s) => (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
   const buscaNorm = normalizarBusca(busca.trim())
+  const buscaDigitos = busca.replace(/\D/g, '')
   const filtrados = buscaNorm
     ? clientes.filter(c =>
         normalizarBusca(c.nome || '').includes(buscaNorm) ||
-        (c.cpf || '').includes(busca.replace(/\D/g, '')) ||
-        (c.telefone || '').includes(busca.replace(/\D/g, ''))
+        (buscaDigitos.length > 0 && (
+          (c.cpf || '').includes(buscaDigitos) ||
+          (c.telefone || '').includes(buscaDigitos)
+        ))
       )
     : clientes
 
@@ -2934,10 +2937,11 @@ function PaginaCaderneta() {
       return acc
     }, {})
   )
+  const buscaDigitosCad = busca.replace(/\D/g, '')
   const filtrados = busca.trim()
     ? clientesComEntrada.filter(c =>
         c.nome?.toLowerCase().includes(busca.toLowerCase()) ||
-        (c.cpf || '').includes(busca.replace(/\D/g, ''))
+        (buscaDigitosCad.length > 0 && (c.cpf || '').includes(buscaDigitosCad))
       )
     : clientesComEntrada
 
