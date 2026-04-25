@@ -234,6 +234,157 @@ function parseItens(raw) {
   return Array.isArray(raw) ? raw : []
 }
 
+function fmtPrecoStr(v) {
+  return 'R$ ' + Number(v || 0).toFixed(2).replace('.', ',')
+}
+
+function padCols(left, right, total = COLS) {
+  const l = String(left)
+  const r = String(right)
+  const space = Math.max(1, total - l.length - r.length)
+  return l + ' '.repeat(space) + r
+}
+
+function gerarESCPOSFechamento(relatorio) {
+  const bytes = []
+  const push  = (...b) => bytes.push(...b)
+  const txt   = (s) => bytes.push(...encode(String(s)))
+  const nl    = (n = 1) => { for (let i = 0; i < n; i++) push(0x0A) }
+  const centro = () => push(0x1B, 0x61, 0x01)
+  const esq    = () => push(0x1B, 0x61, 0x00)
+  const bold   = (on) => push(0x1B, 0x45, on ? 1 : 0)
+  const altoLargo = () => push(0x1D, 0x21, 0x11)
+  const alto      = () => push(0x1D, 0x21, 0x01)
+  const normal    = () => push(0x1D, 0x21, 0x00)
+
+  const linha  = '-'.repeat(COLS)
+  const linhaD = '='.repeat(COLS)
+
+  const ini = Number(relatorio.valorInicial || 0)
+  const fin = relatorio.valorFinal == null ? null : Number(relatorio.valorFinal)
+  const vendDinheiro = Number(relatorio.porPagamento?.dinheiro || 0)
+  const esperado = ini + vendDinheiro
+  const diferenca = relatorio.diferenca == null ? null : Number(relatorio.diferenca)
+
+  // Init
+  push(0x1B, 0x40)
+
+  // Cabeçalho
+  centro(); bold(true)
+  txt('PASTEL DO CARIOCA'); nl()
+  altoLargo()
+  txt('FECHAMENTO DE CAIXA'); nl()
+  normal(); bold(false); nl()
+
+  // Data/Hora
+  centro(); bold(true); alto()
+  txt(`${relatorio.data || ''}  ${relatorio.hora || ''}`); nl()
+  normal(); bold(false)
+  esq(); txt(linha); nl()
+
+  // Conferência de dinheiro
+  bold(true); txt('CONFERENCIA DO CAIXA'); bold(false); nl()
+  txt(padCols('Troco inicial:', fmtPrecoStr(ini))); nl()
+  txt(padCols('Vendas em dinheiro:', fmtPrecoStr(vendDinheiro))); nl()
+  bold(true)
+  txt(padCols('Esperado no caixa:', fmtPrecoStr(esperado))); nl()
+  bold(false)
+
+  if (fin != null) {
+    txt(padCols('Valor contado:', fmtPrecoStr(fin))); nl()
+    nl()
+    const sobrou = diferenca > 0
+    const zerou  = diferenca === 0
+    const label  = zerou ? 'CAIXA OK' : sobrou ? 'SOBROU' : 'FALTOU'
+    const sinal  = zerou ? '' : (sobrou ? '+ ' : '- ')
+    bold(true); alto()
+    txt(padCols('DIFERENCA:', `${sinal}${fmtPrecoStr(Math.abs(diferenca))}`, COLS / 2 | 0)); nl()
+    txt(`>> ${label}`); nl()
+    normal(); bold(false)
+  } else {
+    nl(); txt('  (valor final nao informado)'); nl()
+  }
+
+  txt(linha); nl()
+
+  // Vendas por pagamento
+  centro(); bold(true); alto()
+  txt('--- POR PAGAMENTO ---'); nl()
+  normal(); bold(false); esq()
+
+  const pags = relatorio.porPagamento || {}
+  const entries = Object.entries(pags)
+  if (entries.length === 0) {
+    txt('  Nenhuma venda registrada.'); nl()
+  } else {
+    for (const [pag, val] of entries) {
+      const nome = String(pag).toUpperCase()
+      txt(padCols(nome, fmtPrecoStr(val))); nl()
+    }
+  }
+
+  txt(linha); nl()
+
+  // Totais por origem
+  bold(true); txt('TOTAIS POR ORIGEM'); bold(false); nl()
+  txt(padCols('Balcao:', fmtPrecoStr(relatorio.totalBalcao))); nl()
+  txt(padCols('Site / App:', fmtPrecoStr(relatorio.totalSite))); nl()
+
+  txt(linhaD); nl()
+
+  // Total geral
+  centro(); bold(true); altoLargo()
+  txt('TOTAL DO DIA'); nl()
+  txt(fmtPrecoStr(relatorio.totalDia)); nl()
+  normal(); bold(false)
+  txt(`${relatorio.qtdVendas || 0} vendas`); nl()
+  esq()
+
+  txt(linhaD); nl(2)
+
+  // Assinaturas
+  centro()
+  txt('Operador: ___________________'); nl(2)
+  txt('Conferido: __________________'); nl(2)
+  esq()
+
+  nl(3)
+
+  // Corte parcial
+  push(0x1D, 0x56, 0x41, 0x10)
+
+  return new Uint8Array(bytes)
+}
+
+export async function imprimirFechamentoQZ(relatorio, nomeImpressora) {
+  if (!qz.websocket.isActive()) {
+    await conectarQZ()
+  }
+
+  const bytesArr = gerarESCPOSFechamento(relatorio)
+
+  const printer = nomeImpressora || getNomeImpressoraSalva()
+  if (!printer) throw new Error('Nenhuma impressora configurada')
+
+  let impressoraFinal = printer
+  try {
+    await qz.printers.find(printer)
+  } catch {
+    impressoraFinal = await qz.printers.getDefault()
+  }
+
+  const config = qz.configs.create(impressoraFinal)
+
+  let bin = ''
+  for (let i = 0; i < bytesArr.length; i++) bin += String.fromCharCode(bytesArr[i])
+
+  await qz.print(config, [{
+    type: 'raw',
+    format: 'base64',
+    data: btoa(bin),
+  }])
+}
+
 export async function imprimirPedidoQZ(pedido, nomeImpressora) {
   // Reconecta se caiu
   if (!qz.websocket.isActive()) {

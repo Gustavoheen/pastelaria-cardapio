@@ -13,7 +13,7 @@ import {
 } from 'lucide-react'
 import { CONFIG } from '../config.js'
 import { apiFetch } from '../utils/apiFetch.js'
-import { imprimirPedidoQZ, listarImpressoras, buscarImpressora, getNomeImpressoraSalva, salvarNomeImpressora, verificarQZConectado, iniciarKeepAlive, pararKeepAlive } from '../utils/qzPrint.js'
+import { imprimirPedidoQZ, imprimirFechamentoQZ, listarImpressoras, buscarImpressora, getNomeImpressoraSalva, salvarNomeImpressora, verificarQZConectado, iniciarKeepAlive, pararKeepAlive } from '../utils/qzPrint.js'
 import { TIPOS_PASTEL, PASTEIS_DOCES, categorias, SABORES_SALGADOS, SABORES_DOCES, ADICIONAIS_LISTA } from '../data/cardapio.js'
 
 // ── Paleta ────────────────────────────────────────────────────
@@ -356,6 +356,20 @@ function PaginaDashboard({ pedidos, onVerPedidos, onExcluir, onSalvarPedido, car
     }
     setCaixaFechado(relatorio)
     localStorage.setItem(keyFechado, JSON.stringify(relatorio))
+
+    imprimirFechamentoQZ(relatorio).catch(err => {
+      console.error('Erro ao imprimir fechamento:', err)
+      alert('Caixa fechado, mas falhou ao imprimir: ' + (err?.message || err) + '\nUse o botão "Imprimir Fechamento" para tentar de novo.')
+    })
+  }
+
+  async function reimprimirFechamento() {
+    if (!caixaFechado) return
+    try {
+      await imprimirFechamentoQZ(caixaFechado)
+    } catch (err) {
+      alert('Falha ao imprimir: ' + (err?.message || err))
+    }
   }
 
   function reabrirCaixa() {
@@ -914,12 +928,20 @@ function PaginaDashboard({ pedidos, onVerPedidos, onExcluir, onSalvarPedido, car
 
             {/* Botão fechar / reabrir */}
             {caixaFechado ? (
-              <button
-                onClick={reabrirCaixa}
-                style={{ padding: '0.7rem', borderRadius: 10, border: '1px solid rgba(255,82,82,0.3)', background: 'rgba(255,82,82,0.1)', color: '#FF5252', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer' }}
-              >
-                Reabrir Caixa
-              </button>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                <button
+                  onClick={reimprimirFechamento}
+                  style={{ padding: '0.7rem', borderRadius: 10, border: '1px solid rgba(245,200,0,0.4)', background: 'rgba(245,200,0,0.12)', color: C.gold, fontWeight: 800, fontSize: '0.85rem', cursor: 'pointer' }}
+                >
+                  🖨️ Imprimir Fechamento
+                </button>
+                <button
+                  onClick={reabrirCaixa}
+                  style={{ padding: '0.7rem', borderRadius: 10, border: '1px solid rgba(255,82,82,0.3)', background: 'rgba(255,82,82,0.1)', color: '#FF5252', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer' }}
+                >
+                  Reabrir Caixa
+                </button>
+              </div>
             ) : (
               <button
                 onClick={fecharCaixa}
